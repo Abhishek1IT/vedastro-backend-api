@@ -35,26 +35,22 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
 
-      // Postman / server requests
       if (!origin) {
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        origin.endsWith(".vercel.app") ||
+        origin === "http://localhost:3000"
+      ) {
         return callback(null, true);
       }
 
-      console.log(
-        "Blocked CORS:",
-        origin
-      );
+      console.log("Blocked CORS:", origin);
 
-      return callback(
-        new Error("Not allowed by CORS")
-      );
-
+      return callback(null, false);
     },
 
     credentials: true,
@@ -72,7 +68,6 @@ app.use(
       "Content-Type",
       "Authorization"
     ]
-
   })
 );
 
