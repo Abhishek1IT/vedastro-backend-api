@@ -69,7 +69,7 @@ export const authService = {
       withCredentials: true,
     });
 
-    return response.data.data;
+    return response.data.data.user;
   },
 
   // Current User
