@@ -60,16 +60,19 @@ class AuthService {
     }
 
     user.isVerified = true;
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+
     await user.save();
-
     await AuthRepository.clearOtp(user._id);
-
-    const token = generateAccessToken(user);
 
     return {
       message: "OTP verified successfully",
-      token,
-      accessToken: token,
+      accessToken,
+      refreshToken,
       user: {
         _id: user._id,
         id: user._id,
@@ -80,7 +83,7 @@ class AuthService {
       },
     };
   }
-
+  
   async logout(userId) {
     await AuthRepository.clearRefreshToken(userId);
   }

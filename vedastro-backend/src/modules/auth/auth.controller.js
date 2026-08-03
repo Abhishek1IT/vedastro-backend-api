@@ -65,28 +65,33 @@ class AuthController {
 
       const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
       };
-      return res
-        .cookie(
-          "accessToken",
-          result.token,
-          cookieOptions
+
+      res.cookie("accessToken", result.accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000,
+      });
+
+      res.cookie("refreshToken", result.refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          {
+            user: result.user,
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+          },
+          "OTP Verified Successfully"
         )
-        .status(200)
-        .json(
-          new ApiResponse(
-            200,
-            result,
-            "OTP Verified Successfully"
-          )
-        );
-
+      );
     } catch (error) {
-
       next(error);
     }
   }
