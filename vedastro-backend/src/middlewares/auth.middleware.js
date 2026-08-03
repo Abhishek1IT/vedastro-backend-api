@@ -1,127 +1,45 @@
 import User from "../models/User.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 
-
 const authMiddleware = async (req, res, next) => {
-
   try {
+    console.log("AUTH");
+    console.log("Cookies:", req.cookies);
+    console.log("AccessToken:", req.cookies?.accessToken);
+    console.log("Headers Cookie:", req.headers.cookie);
 
-
-    // Get token from HTTP Only Cookie
     const token = req.cookies?.accessToken;
 
-
-
-    if (
-      !token ||
-      token === "undefined" ||
-      token === "null"
-    ) {
+    if (!token || token === "undefined" || token === "null") {
+      console.log("Token Missing");
 
       return res.status(401).json({
-
         success: false,
-
         message: "Unauthorized: Token missing",
-
       });
-
     }
 
+    const decoded = verifyAccessToken(token);
 
+    console.log("Decoded Token:", decoded);
 
-    const decoded =
-      verifyAccessToken(token);
+    const userId = decoded.id || decoded._id;
 
+    const user = await User.findById(userId);
 
-
-    const userId =
-      decoded?.id ||
-      decoded?._id;
-
-
-
-    if (!userId) {
-
-      return res.status(401).json({
-
-        success: false,
-
-        message: "Invalid token payload",
-
-      });
-
-    }
-
-
-
-    const user =
-      await User
-        .findById(userId)
-        .select("-password");
-
-
-
-    if (!user) {
-
-      return res.status(401).json({
-
-        success: false,
-
-        message: "User not found",
-
-      });
-
-    }
-
-
-
-    // Session version check
-    if (
-      decoded.version !== user.sessionVersion
-    ) {
-
-      return res.status(401).json({
-
-        success: false,
-
-        message: "Session expired",
-
-      });
-
-    }
-
-
+    console.log("User:", user);
 
     req.user = user;
 
-
     next();
-
-
-
   } catch (error) {
-
-
-    console.error(
-      "Auth Middleware Error:",
-      error.message
-    );
-
+    console.log(error);
 
     return res.status(401).json({
-
       success: false,
-
       message: "Invalid or expired Token",
-
     });
-
-
   }
-
 };
-
-
 
 export default authMiddleware;
