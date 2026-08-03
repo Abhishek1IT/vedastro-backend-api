@@ -1,0 +1,120 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "../../constants/routes";
+import DesktopMenu from "./DesktopMenu";
+import MobileMenu from "./MobileMenu";
+import ProfileMenu from "./ProfileMenu";
+
+import { useAuthStore } from "../../store/authStore";
+import Button from "../../components/common/Button";
+import SearchBar from "../../components/common/SearchBar";
+
+export default function Navbar() {
+  const router = useRouter();
+
+  const { isAuthenticated, user } = useAuthStore();
+
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 40) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleSearchDispatch = (query: string) => {
+    if (query.trim()) {
+      router.push(
+        `/consultations/astrologers?search=${encodeURIComponent(query)}`,
+      );
+    }
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full flex justify-center transition-all duration-300 pt-0 sm:pt-2">
+      <nav
+        className={`w-full transition-all duration-300 ease-in-out select-none ${
+          isScrolled
+            ? "max-w-6xl rounded-full border border-slate-800 bg-slate-950/90 shadow-2xl backdrop-blur-md px-6 py-1 mx-4"
+            : "max-w-7xl border-b border-slate-900 bg-slate-950/80 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-2"
+        }`}
+      >
+        <div className="flex h-14 items-center justify-between gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-6 shrink-0">
+              <span className="text-amber-500 text-2xl transform group-hover:scale-110 transition duration-150">
+                ✨
+              </span>
+              <span>
+                <h1>Ved<span className="text-amber-500">Astro</span></h1>
+              </span>
+
+            {/* Desktop Menu */}
+            <div className="hidden md:block">
+              <DesktopMenu />
+            </div>
+          </div>
+
+          <SearchBar
+            onSearch={handleSearchDispatch}
+            className="hidden md:block flex-1 max-w-xs"
+          />
+
+          {/* Desktop Right Actions */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* <Button
+              variant="themeToggle"
+              size="sm"
+              aria-label="Toggle workspace look"
+            /> */}
+
+            {isAuthenticated ? (
+              <ProfileMenu user={user} />
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => router.push(ROUTES.LOGIN)}
+              >
+                Login
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile Right Actions */}
+          <div className="flex md:hidden items-center gap-3">
+            {/* <Button
+              variant="themeToggle"
+              size="sm"
+              aria-label="Toggle theme map"
+            /> */}
+
+            {isAuthenticated ? (
+              <ProfileMenu user={user} />
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => router.push(ROUTES.LOGIN)}
+              >
+                Login
+              </Button>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <MobileMenu isOpen={isMobileOpen} setIsOpen={setIsMobileOpen} />
+    </header>
+  );
+}

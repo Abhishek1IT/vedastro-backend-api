@@ -1,0 +1,9 @@
+export { default as Home } from "./DownloadApp";
+export { default as FAQ } from "./FAQ";
+export { default as Horoscope } from "./HoroscopeSection";
+export { default as Kundli } from "./KundliSection";
+export { default as Services } from "./Services";
+export { default as Testimonials } from "./Testimonials";
+export { default as LiveAstro } from "./LiveAstrologers";
+export { default as TopAstrologers } from "./TopAstrologers";
+export { default as WhyChooseUs } from "./WhyChooseUs";
