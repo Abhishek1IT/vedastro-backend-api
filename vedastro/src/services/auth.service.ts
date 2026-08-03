@@ -52,24 +52,27 @@ export const authService = {
 
   // Verify OTP
   async verifyOtp(phone: string, otp: string) {
-  const response = await api.post(
-    "/auth/verify-otp",
-    { phone, otp },
-    { withCredentials: true }
-  );
+    const response = await api.post(
+      "/auth/verify-otp",
+      { phone, otp },
+      { withCredentials: true },
+    );
 
-  console.log(response.data);
+    console.log(response.data);
 
-  return response.data.data;
-},
-
+    return response.data.data;
+  },
   // Complete Profile
   async completeProfile(payload: CompleteProfilePayload): Promise<AuthUser> {
-    const response = await api.put(API_ENDPOINTS.AUTH.COMPLETE_REGISTRATION, payload, {
-      withCredentials: true,
-    });
+    const response = await api.put(
+      API_ENDPOINTS.AUTH.COMPLETE_REGISTRATION,
+      payload,
+      {
+        withCredentials: true,
+      },
+    );
 
-    return response.data.data.user;
+    return response.data.data;
   },
 
   // Current User
