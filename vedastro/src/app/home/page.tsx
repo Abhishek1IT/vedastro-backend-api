@@ -3,6 +3,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 import { useAuthStore } from "../../store/authStore";
 
 import {
@@ -19,58 +20,76 @@ import {
 
 export default function DashboardHomePage() {
   const router = useRouter();
+
   const { isAuthenticated, isHydrated, hydrateStore } = useAuthStore();
 
+  // Load user from backend cookie
   useEffect(() => {
-    hydrateStore();
-  }, []);
+    if (!isHydrated) {
+      hydrateStore();
+    }
+  }, [isHydrated]);
 
+  // Redirect if not logged in
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
       router.replace("/login");
     }
   }, [isHydrated, isAuthenticated, router]);
 
+  // Loading state
   if (!isHydrated) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  // Prevent rendering before redirect
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col gap-12 py-8">
-      {/* 1. Live & Top Astrologers */}
+      {/* Live Astrologers */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <LiveAstro />
       </section>
 
+      {/* Top Astrologers */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <TopAstrologers />
       </section>
 
-      {/* 2. Core Astrology Services */}
+      {/* Services */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <Services />
       </section>
 
-      {/* 3. Kundli & Horoscope Features */}
+      {/* Kundli Horoscope */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         <Kundli />
         <Horoscope />
       </section>
 
-      {/* 4. Trust, Testimonials & App Download */}
+      {/* Why Choose */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <WhyChooseUs />
       </section>
 
+      {/* Testimonials */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <Testimonials />
       </section>
 
+      {/* Download App */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <DownloadApp />
       </section>
 
-      {/* 5. FAQs */}
+      {/* FAQ */}
       <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
         <FAQ />
       </section>

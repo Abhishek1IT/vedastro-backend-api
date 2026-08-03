@@ -41,17 +41,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   hydrateStore: async () => {
     try {
-      const response = await authService.getCurrentUser();
+      const res = await authService.getCurrentUser();
 
-      console.log("CURRENT USER RESPONSE:", response);
+      console.log("CURRENT USER:", res);
 
-      const currentUser = response.user || response.data || response;
+      const user = res.user || res.data?.user || res.data;
 
       set({
-        user: currentUser,
-
+        user,
         isAuthenticated: true,
-
         isHydrated: true,
       });
     } catch (error) {
@@ -59,9 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({
         user: null,
-
         isAuthenticated: false,
-
         isHydrated: true,
       });
     }

@@ -2,35 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token =
-    request.cookies.get("accessToken")?.value ||
-    request.cookies.get("authToken")?.value;
-
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = ["/", "/login", "/register"];
-
-  const protectedRoutes = [
-    "/home",
-    "/consultations",
-    "/shop",
-    "/profile",
-    "/chat",
-    "/call",
-  ];
-
-  const isPublic = publicRoutes.some((route) => pathname.startsWith(route));
-
-  const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
-
-  if (!token && isProtected) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (token && isPublic && pathname !== "/") {
-    return NextResponse.redirect(new URL("/home", request.url));
+  // Only redirect public pages if needed
+  if (pathname === "/login" || pathname === "/register") {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
