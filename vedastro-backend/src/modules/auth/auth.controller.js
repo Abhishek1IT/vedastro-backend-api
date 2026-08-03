@@ -99,6 +99,9 @@ class AuthController {
   // Complete Profile
   async completeProfile(req, res, next) {
     try {
+      console.log("BODY:", req.body);
+      console.log("USER:", req.user);
+
       const { name, email, dob } = req.body;
 
       const user = await AuthService.completeProfile(req.user._id, {
@@ -106,6 +109,8 @@ class AuthController {
         email,
         dob,
       });
+
+      console.log("SAVED USER:", user);
 
       return res.status(200).json(
         new ApiResponse(200, user, "Profile completed successfully")
