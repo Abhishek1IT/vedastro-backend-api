@@ -41,11 +41,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   hydrateStore: async () => {
     try {
-      const res = await authService.getCurrentUser();
+      const user = await authService.getCurrentUser();
 
-      console.log("CURRENT USER:", res);
-
-      const user = res.user || res.data?.user || res.data;
+      console.log("CURRENT USER:", user);
 
       set({
         user,

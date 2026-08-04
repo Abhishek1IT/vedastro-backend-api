@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,19 +24,11 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      console.log("Sending:", {
-        name,
-        email,
-        dob,
-      });
-
       const updatedUser = await authService.completeProfile({
         name,
         email,
         dob,
       });
-
-      console.log("Updated User:", updatedUser);
 
       setUser(updatedUser);
 
@@ -46,25 +39,6 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const response = await authService.getCurrentUser();
-
-        const currentUser = response.user || response.data || response;
-
-        setUser(currentUser);
-
-        setName(currentUser.name || "");
-        setEmail(currentUser.email || "");
-        setDob(currentUser.dob || "");
-      } catch (error) {
-        console.log(error);
-        router.replace("/login");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
@@ -72,8 +46,14 @@ export default function ProfilePage() {
       return;
     }
 
-    loadProfile();
-  }, [isHydrated, isAuthenticated, router, setUser]);
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setDob(user.dob || "");
+    }
+
+    setLoading(false);
+  }, [user, isHydrated, isAuthenticated, router]);
 
   if (loading) {
     return (

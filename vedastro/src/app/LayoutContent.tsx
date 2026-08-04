@@ -22,11 +22,13 @@ export default function LayoutContent({
   const hydrateStore = useAuthStore((state) => state.hydrateStore);
 
   useEffect(() => {
-    hydrateStore();
+    if (!useAuthStore.getState().isHydrated) {
+      hydrateStore();
+    }
   }, [hydrateStore]);
 
   const isAuthOrConsultationRoute = HIDDEN_LAYOUT_ROUTES.some((routeRegex) =>
-    routeRegex.test(pathname)
+    routeRegex.test(pathname),
   );
 
   return (

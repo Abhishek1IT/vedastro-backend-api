@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import HydrationProvider from "../components/common/HydrationProvider"; 
-import { ThemeProvider } from "../context/ThemeContext"; 
-import { SocketProvider } from "../context/SocketProvider"; 
-import LayoutContent from "../app/LayoutContent"; 
+import HydrationProvider from "../components/common/HydrationProvider";
+import { ThemeProvider } from "../context/ThemeContext";
+import { SocketProvider } from "../context/SocketProvider";
+import LayoutContent from "../app/LayoutContent";
 
 export const metadata: Metadata = {
   title: "VedAstro - Cosmic Alignments",
