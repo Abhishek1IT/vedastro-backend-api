@@ -83,7 +83,14 @@ export const authService = {
 
   // Logout
   async logout(): Promise<{ success: boolean; message?: string }> {
-    const response = await api.post(API_ENDPOINTS.AUTH.LOGOUT);
+    const response = await api.post(
+      API_ENDPOINTS.AUTH.LOGOUT,
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+
     return response.data;
   },
 };

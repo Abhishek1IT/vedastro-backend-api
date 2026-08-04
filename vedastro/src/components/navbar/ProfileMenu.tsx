@@ -16,27 +16,32 @@ export default function ProfileMenu({ user }: { user?: any }) {
   const displayName = user?.name || user?.phone || "User";
   const displayInitial = displayName[0]?.toUpperCase() || "U";
 
-const handleLogout = async () => {
-  try {
-    console.log("Logout Clicked");
+  const handleLogout = async () => {
+    try {
+      console.log("Logout Clicked");
 
-    const res = await authService.logout();
+      await authService.logout();
 
-    console.log(res);
+      logout();
 
-    logout();
+      clearProfile();
 
-    clearProfile();
+      setIsOpen(false);
 
-    router.replace("/");
-  } catch (err) {
-    console.error(err);
-  }
-};
+      router.replace("/");
+    } catch (error) {
+      console.error("Logout Error:", error);
+
+      logout();
+      clearProfile();
+      router.replace("/");
+    }
+  };
 
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-white hover:border-amber-500/50 transition"
       >
@@ -68,6 +73,7 @@ const handleLogout = async () => {
           </button>
 
           <button
+            type="button"
             onClick={handleLogout}
             className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 rounded-lg font-bold transition mt-1"
           >
