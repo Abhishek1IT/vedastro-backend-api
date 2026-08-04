@@ -18,15 +18,12 @@ export const useRegister = () => {
   const [error, setError] = useState("");
 
   const registerUser = async (payload: CompleteProfilePayload) => {
-    console.log("3. registerUser", payload);
 
     setLoading(true);
     setError("");
 
     try {
       const updatedUser = await authService.completeProfile(payload);
-
-      console.log("4. API Success", updatedUser);
 
       // updatedUser is already the user object
       setUser(updatedUser);

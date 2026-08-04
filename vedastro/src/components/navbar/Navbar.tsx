@@ -17,15 +17,6 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, user, isHydrated } = useAuthStore();
 
-  console.log("NAVBAR USER:", user);
-  console.log("NAVBAR AUTH:", isAuthenticated, isHydrated);
-
-  console.log("NAVBAR STATE:", {
-    isHydrated,
-    isAuthenticated,
-    user,
-  });
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);

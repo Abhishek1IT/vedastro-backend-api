@@ -28,8 +28,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setLocalValidationError("");
 
-    console.log("1. handleSubmit");
-
     const cleanName = form.name.trim();
     const cleanEmail = form.email.trim();
 
@@ -51,8 +49,6 @@ export default function RegisterPage() {
       setLocalValidationError("Please select your date of birth.");
       return;
     }
-
-    console.log("2. Validation Passed");
 
     await registerUser({
       name: cleanName,

@@ -62,8 +62,6 @@ export const useLogin = () => {
       // Get logged in user using cookie
       const userResponse = await authService.getCurrentUser();
 
-      console.log("CURRENT USER:", userResponse);
-
       const currentUser =
         userResponse.user || userResponse.data || userResponse;
 

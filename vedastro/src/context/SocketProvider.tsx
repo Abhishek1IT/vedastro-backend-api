@@ -31,7 +31,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    console.log("SocketProvider Mounted");
 
     if (!isAuthenticated || !user?._id) {
       if (socketInstance) {
@@ -52,25 +51,19 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     if (!socketInstance) {
       socketInstance = initSocket();
 
-      // ======================
       // User Online
-      // ======================
 
       socketInstance.on("user:online", ({ userId }) => {
         setUserOnline(userId);
       });
 
-      // ======================
       // User Offline
-      // ======================
 
       socketInstance.on("user:offline", ({ userId }) => {
         setUserOffline(userId);
       });
 
-      // ======================
       // Connected
-      // ======================
 
       socketInstance.on("connect", () => {
         console.log("Socket Connected:", socketInstance?.id);
@@ -78,9 +71,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         setIsConnected(true);
       });
 
-      // ======================
       // Disconnect
-      // ======================
 
       socketInstance.on("disconnect", (reason) => {
         console.log("Socket Disconnected:", reason);
@@ -88,17 +79,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         setIsConnected(false);
       });
 
-      // ======================
       // Error
-      // ======================
 
       socketInstance.on("connect_error", (error) => {
         console.log("Socket Error:", error.message);
       });
 
-      // ======================
       // Reconnect
-      // ======================
 
       socketInstance.io.on("reconnect_attempt", (attempt) => {
         console.log("Reconnect Attempt:", attempt);
