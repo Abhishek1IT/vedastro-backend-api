@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { authService } from "../services/auth.service";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../store/authStore";
 
 interface User {
   id: string;
@@ -24,36 +24,33 @@ interface AuthContextType {
   setError: (error: string | null) => void;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, setUser, hydrateStore, logout: storeLogout } = useAuthStore();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const data = await authService.getCurrentUser();
-        if (data?.user) {
-          setUser(data.user);
-        }
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
+    const init = async () => {
+      await hydrateStore();
+      setIsLoading(false);
     };
-    checkAuth();
-  }, []);
+
+    init();
+  }, [hydrateStore]);
 
   const requestOtp = async (phone: string) => {
     setError(null);
     try {
       await authService.sendOtp(phone);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
+      setError(
+        err.response?.data?.message || "Failed to send OTP. Please try again.",
+      );
       throw err;
     }
   };
@@ -73,24 +70,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       await authService.logout();
-      setUser(null);
-      router.push("/login");
+      storeLogout();
     } catch (err) {
       console.error("Logout execution failed:", err);
     }
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        isAuthenticated: !!user, 
-        isLoading, 
-        requestOtp, 
-        loginWithOtp, 
-        logout, 
-        error, 
-        setError 
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        requestOtp,
+        loginWithOtp,
+        logout,
+        error,
+        setError,
       }}
     >
       {children}
