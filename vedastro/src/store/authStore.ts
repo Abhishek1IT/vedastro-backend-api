@@ -88,6 +88,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       isHydrated: true,
     });
 
-    window.location.href = "/login";
+    window.location.href = "/";
   },
 }));

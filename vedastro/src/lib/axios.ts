@@ -42,7 +42,7 @@ api.interceptors.response.use(
       if (isProtectedRoute(pathname) && pathname !== "/login") {
         console.warn("Unauthorized. Redirecting to login...");
 
-        window.location.href = "/login";
+        window.location.href = "/";
       }
     }
 
