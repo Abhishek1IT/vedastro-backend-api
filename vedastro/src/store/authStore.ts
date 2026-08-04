@@ -97,19 +97,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  logout: async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.log("Logout API failed", error);
-    }
-
+  logout: () => {
     set({
       user: null,
       isAuthenticated: false,
       isHydrated: true,
     });
-
-    window.location.href = "/";
   },
 }));

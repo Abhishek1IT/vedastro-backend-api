@@ -211,6 +211,7 @@ class AuthController {
       next(error);
     }
   }
+  
   // Refresh Token
   async refreshToken(req, res, next) {
     try {
