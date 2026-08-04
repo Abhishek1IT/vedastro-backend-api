@@ -6,7 +6,6 @@ import { ROUTES } from "../../constants/routes";
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
 import ProfileMenu from "./ProfileMenu";
-
 import { useAuthStore } from "../../store/authStore";
 import Button from "../../components/common/Button";
 import SearchBar from "../../components/common/SearchBar";
@@ -14,23 +13,24 @@ import SearchBar from "../../components/common/SearchBar";
 export default function Navbar() {
   const router = useRouter();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isHydrated } = useAuthStore();
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 40);
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (!isHydrated) {
+    return null;
+  }
 
   const handleSearchDispatch = (query: string) => {
     if (query.trim()) {
@@ -50,16 +50,13 @@ export default function Navbar() {
         }`}
       >
         <div className="flex h-14 items-center justify-between gap-4">
-          {/* Logo */}
           <div className="flex items-center gap-6 shrink-0">
-              <span className="text-amber-500 text-2xl transform group-hover:scale-110 transition duration-150">
-                ✨
-              </span>
-              <span>
-                <h1>Ved<span className="text-amber-500">Astro</span></h1>
-              </span>
+            <span className="text-amber-500 text-2xl">✨</span>
 
-            {/* Desktop Menu */}
+            <h1>
+              Ved<span className="text-amber-500">Astro</span>
+            </h1>
+
             <div className="hidden md:block">
               <DesktopMenu />
             </div>
@@ -70,15 +67,8 @@ export default function Navbar() {
             className="hidden md:block flex-1 max-w-xs"
           />
 
-          {/* Desktop Right Actions */}
           <div className="hidden md:flex items-center gap-3">
-            {/* <Button
-              variant="themeToggle"
-              size="sm"
-              aria-label="Toggle workspace look"
-            /> */}
-
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <ProfileMenu user={user} />
             ) : (
               <Button
@@ -91,15 +81,8 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Right Actions */}
           <div className="flex md:hidden items-center gap-3">
-            {/* <Button
-              variant="themeToggle"
-              size="sm"
-              aria-label="Toggle theme map"
-            /> */}
-
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <ProfileMenu user={user} />
             ) : (
               <Button
