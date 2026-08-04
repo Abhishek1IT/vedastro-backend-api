@@ -19,26 +19,43 @@ const categories = [
   "Pyramids",
 ];
 
-type SortType = "latest" | "price_asc" | "price_desc" | "name_asc" | "name_desc" | "";
+type SortType =
+  | "latest"
+  | "price_asc"
+  | "price_desc"
+  | "name_asc"
+  | "name_desc"
+  | "";
 
 function sortProducts(products: Product[], sort: SortType) {
   const sorted = [...products];
 
   switch (sort) {
     case "price_asc":
-      return sorted.sort((a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price));
+      return sorted.sort(
+        (a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price),
+      );
+
     case "price_desc":
-      return sorted.sort((a, b) => (b.salePrice ?? b.price) - (a.salePrice ?? a.price));
+      return sorted.sort(
+        (a, b) => (b.salePrice ?? b.price) - (a.salePrice ?? a.price),
+      );
+
     case "name_asc":
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
+
     case "name_desc":
       return sorted.sort((a, b) => b.name.localeCompare(a.name));
+
     case "latest":
       return sorted.sort((a, b) => {
-        const left = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const right = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return right - left;
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+        return dateB - dateA;
       });
+
     default:
       return sorted;
   }
@@ -53,8 +70,11 @@ function applyFilters(
 ) {
   const filtered = products.filter((product) => {
     const price = product.salePrice ?? product.price;
+
     const categoryMatch = !category || product.category === category;
+
     const minMatch = !minPrice || price >= minPrice;
+
     const maxMatch = !maxPrice || price <= maxPrice;
 
     return categoryMatch && minMatch && maxMatch;
@@ -73,48 +93,54 @@ export default function ShopPage() {
   const queryKey = searchParams.toString();
 
   useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
 
     const loadProducts = async () => {
-      setLoading(true);
-      setError("");
-
       try {
+        setLoading(true);
+        setError("");
+
         const keyword = searchParams.get("search")?.trim() || "";
+
         const category = searchParams.get("category")?.trim() || "";
-        const minPrice = Number(searchParams.get("minPrice") || 0);
-        const maxPrice = Number(searchParams.get("maxPrice") || 0);
+
+        const minPrice = Number(searchParams.get("minPrice")) || 0;
+
+        const maxPrice = Number(searchParams.get("maxPrice")) || 0;
+
         const sort = (searchParams.get("sort") || "") as SortType;
 
         let fetchedProducts: Product[] = [];
 
         if (keyword) {
           const response = await ProductService.search(keyword);
+
           fetchedProducts = response.data || [];
         } else {
           const response = await ProductService.getProducts();
+
           fetchedProducts = response.data || [];
         }
 
-        const visibleProducts = applyFilters(
+        const filteredProducts = applyFilters(
           fetchedProducts,
           category,
-          Number.isFinite(minPrice) ? minPrice : 0,
-          Number.isFinite(maxPrice) ? maxPrice : 0,
+          minPrice,
+          maxPrice,
           sort,
         );
 
-        if (isMounted) {
-          setProducts(visibleProducts);
+        if (mounted) {
+          setProducts(filteredProducts);
         }
-      } catch (err) {
-        if (isMounted) {
+      } catch (error) {
+        if (mounted) {
           setError(
-            err instanceof Error ? err.message : "Failed to load products",
+            error instanceof Error ? error.message : "Failed to load products",
           );
         }
       } finally {
-        if (isMounted) {
+        if (mounted) {
           setLoading(false);
         }
       }
@@ -123,60 +149,50 @@ export default function ShopPage() {
     loadProducts();
 
     return () => {
-      isMounted = false;
+      mounted = false;
     };
-  }, [queryKey, searchParams]);
+  }, [queryKey]);
 
   return (
     <section className="container mx-auto px-4 py-10">
-      {/* Header */}
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <h1 className="text-4xl font-black text-white">Cosmic Shop</h1>
-          <p className="mt-2 text-slate-400">
-            Discover authentic gemstones, Rudraksha, bracelets and spiritual
-            products.
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-4xl font-black text-white">Cosmic Shop</h1>
+
+        <p className="mt-2 text-slate-400">
+          Discover authentic gemstones, Rudraksha, bracelets and spiritual
+          products.
+        </p>
       </div>
 
-      {/* Search */}
       <div className="mb-6">
         <SearchBar />
       </div>
 
-      {/* Filters */}
       <div className="mb-8 flex flex-col gap-4">
         <CategoryFilter categories={categories} />
+
         <PriceFilter />
       </div>
 
-      {/* Loading */}
       {loading && (
-        <div className="py-20 text-center text-white">
-          Loading Products...
-        </div>
+        <div className="py-20 text-center text-white">Loading Products...</div>
       )}
 
-      {/* Error */}
       {!loading && error && (
-        <div className="py-20 text-center text-red-500">
-          {error}
-        </div>
+        <div className="py-20 text-center text-red-500">{error}</div>
       )}
 
-      {/* Products */}
       {!loading && !error && products.length > 0 && (
         <ProductGrid products={products} />
       )}
 
-      {/* Empty */}
       {!loading && !error && products.length === 0 && (
         <div className="flex h-64 items-center justify-center rounded-xl border border-slate-700 bg-slate-900">
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-white">
               No Products Available
             </h2>
+
             <p className="mt-2 text-slate-400">
               Products will appear here once the admin adds them.
             </p>

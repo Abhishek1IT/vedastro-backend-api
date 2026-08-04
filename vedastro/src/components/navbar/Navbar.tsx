@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,6 +10,7 @@ import ProfileMenu from "./ProfileMenu";
 import { useAuthStore } from "../../store/authStore";
 import Button from "../../components/common/Button";
 import SearchBar from "../../components/common/SearchBar";
+import { useCartStore } from "../../store/cartStore";
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,6 +18,13 @@ export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, user, isHydrated } = useAuthStore();
+  const { totalItems, fetchCart } = useCartStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,6 +74,33 @@ export default function Navbar() {
             onSearch={handleSearchDispatch}
             className="hidden md:block flex-1 max-w-xs"
           />
+
+          <button
+            onClick={() => router.push("/cart")}
+            className="relative text-white text-xl"
+          >
+            🛍️
+            {totalItems > 0 && (
+              <span
+                className="
+      absolute
+      -top-2
+      -right-2
+      bg-red-500
+      text-white
+      text-xs
+      rounded-full
+      w-5
+      h-5
+      flex
+      items-center
+      justify-center
+      "
+              >
+                {totalItems}
+              </span>
+            )}
+          </button>
 
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (

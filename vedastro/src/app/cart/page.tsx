@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect } from "react";
@@ -29,10 +30,22 @@ export default function CartPage() {
 
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]);
+  }, []);
 
   const handleCheckout = () => {
     router.push("/checkout");
+  };
+
+  const handleDecrease = async (id: string, quantity: number) => {
+    if (quantity <= 1) {
+      return;
+    }
+
+    await updateQuantity(id, quantity - 1);
+  };
+
+  const handleClearCart = async () => {
+    await clearCart();
   };
 
   return (
@@ -42,14 +55,17 @@ export default function CartPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/80">
             Cart
           </p>
+
           <h1 className="mt-3 text-4xl font-black">Shopping Cart</h1>
+
           <p className="mt-2 text-slate-400">
-            Review items, adjust quantities, remove products, and proceed to checkout.
+            Review items, adjust quantities, remove products, and proceed to
+            checkout.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button variant="secondary" onClick={() => router.push("/shop") }>
+          <Button variant="secondary" onClick={() => router.push("/shop")}>
             <span className="inline-flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               Continue Shopping
@@ -58,7 +74,7 @@ export default function CartPage() {
 
           <Button
             variant="danger"
-            onClick={clearCart}
+            onClick={handleClearCart}
             disabled={!items.length || loading}
           >
             <span className="inline-flex items-center gap-2">
@@ -84,15 +100,16 @@ export default function CartPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-400/10 text-2xl">
             🛒
           </div>
-          <h2 className="text-2xl font-bold text-white">Your cart is empty</h2>
+
+          <h2 className="text-2xl font-bold">Your cart is empty</h2>
+
           <p className="mt-2 text-slate-400">
             Add products from the shop to see them here.
           </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Button onClick={() => router.push("/shop") }>
-              Browse Products
-            </Button>
-          </div>
+
+          <Button className="mt-6" onClick={() => router.push("/shop")}>
+            Browse Products
+          </Button>
         </div>
       ) : (
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
@@ -102,7 +119,7 @@ export default function CartPage() {
                 key={item._id}
                 item={item}
                 onIncrease={() => updateQuantity(item._id, item.quantity + 1)}
-                onDecrease={() => updateQuantity(item._id, item.quantity - 1)}
+                onDecrease={() => handleDecrease(item._id, item.quantity)}
                 onRemove={() => removeItem(item._id)}
               />
             ))}
@@ -123,17 +140,14 @@ export default function CartPage() {
               </p>
 
               <div className="mt-4 grid gap-3">
-                <Button
-                  variant="secondary"
-                  onClick={() => router.push("/checkout")}
-                >
+                <Button variant="secondary" onClick={handleCheckout}>
                   <span className="inline-flex items-center gap-2">
                     <ArrowRight className="h-4 w-4" />
                     Go to Checkout
                   </span>
                 </Button>
 
-                <Button variant="ghost" onClick={() => router.push("/shop") }>
+                <Button variant="ghost" onClick={() => router.push("/shop")}>
                   Continue Browsing
                 </Button>
               </div>
