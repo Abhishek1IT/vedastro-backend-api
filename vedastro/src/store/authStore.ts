@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
 import { authService } from "../services/auth.service";
 
@@ -51,13 +52,30 @@ export const useAuthStore = create<AuthState>((set) => ({
         isHydrated: true,
       });
     } catch (error) {
-      console.log("AUTH FAILED:", error);
-
       set({
         user: null,
         isAuthenticated: false,
         isHydrated: true,
       });
+
+      if (typeof window !== "undefined") {
+        const protectedRoutes = [
+          "/home",
+          "/profile",
+          "/shop",
+          "/chat",
+          "/call",
+          "/admin",
+        ];
+
+        if (
+          protectedRoutes.some((route) =>
+            window.location.pathname.startsWith(route),
+          )
+        ) {
+          window.location.replace("/");
+        }
+      }
     }
   },
 
@@ -82,12 +100,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     set({
       user: null,
-
       isAuthenticated: false,
-
       isHydrated: true,
     });
 
-    window.location.href = "/";
+    window.location.replace("/");
   },
 }));
