@@ -16,25 +16,23 @@ export default function ProfileMenu({ user }: { user?: any }) {
   const displayName = user?.name || user?.phone || "User";
   const displayInitial = displayName[0]?.toUpperCase() || "U";
 
-  const handleLogout = async () => {
-    try {
-      console.log("Logout clicked");
+const handleLogout = async () => {
+  try {
+    console.log("Logout Clicked");
 
-      // Backend cookies clear karega
-      await authService.logout();
+    const res = await authService.logout();
 
-      // Frontend store clear karega
-      logout();
+    console.log(res);
 
-      clearProfile();
+    logout();
 
-      setIsOpen(false);
+    clearProfile();
 
-      router.replace("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+    router.replace("/");
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="relative">
