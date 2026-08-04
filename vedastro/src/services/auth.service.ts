@@ -82,7 +82,7 @@ export const authService = {
   },
 
   // Logout
-  async logout(): Promise<{ success: boolean; message?: string }> {
+  async logout() {
     const response = await api.post(
       API_ENDPOINTS.AUTH.LOGOUT,
       {},

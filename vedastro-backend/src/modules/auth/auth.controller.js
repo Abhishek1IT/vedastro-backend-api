@@ -188,22 +188,29 @@ class AuthController {
       const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite:
+          process.env.NODE_ENV === "production"
+            ? "none"
+            : "lax",
         path: "/",
-        expires: new Date(0),
       };
 
-      res.cookie("accessToken", "", cookieOptions);
-      res.cookie("refreshToken", "", cookieOptions);
+      res.clearCookie("accessToken", cookieOptions);
 
-      return res
-        .status(200)
-        .json(new ApiResponse(200, null, "Logout Successful"));
+      res.clearCookie("refreshToken", cookieOptions);
+
+      return res.status(200).json(
+        new ApiResponse(
+          200,
+          null,
+          "Logout Successful"
+        )
+      );
+
     } catch (error) {
       next(error);
     }
   }
-
   // Refresh Token
   async refreshToken(req, res, next) {
     try {

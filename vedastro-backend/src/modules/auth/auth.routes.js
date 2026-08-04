@@ -49,10 +49,9 @@ authRouter.put(
 authRouter.get("/me", authMiddleware, AuthController.me);
 
 // Logout
-authRouter.post(
+router.post(
   "/logout",
-  authMiddleware,
-  AuthController.logout,
+  AuthController.logout
 );
 
 // Refresh Token
