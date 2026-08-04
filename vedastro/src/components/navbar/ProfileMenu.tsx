@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
 import { useUserStore } from "../../store/userStore";
+import { authService } from "@/src/services/auth.service";
 
 export default function ProfileMenu({ user }: { user?: any }) {
   const router = useRouter();
@@ -15,11 +16,24 @@ export default function ProfileMenu({ user }: { user?: any }) {
   const displayName = user?.name || user?.phone || "User";
   const displayInitial = displayName[0]?.toUpperCase() || "U";
 
-  const handleLogout = () => {
-    logout();
-    clearProfile();
-    setIsOpen(false);
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      console.log("Logout clicked");
+
+      // Backend cookies clear karega
+      await authService.logout();
+
+      // Frontend store clear karega
+      logout();
+
+      clearProfile();
+
+      setIsOpen(false);
+
+      router.replace("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -38,7 +52,11 @@ export default function ProfileMenu({ user }: { user?: any }) {
         <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-800 bg-slate-950 p-2 shadow-2xl z-50">
           <div className="px-3 py-2 border-b border-slate-900">
             <p className="text-xs font-bold text-white">{displayName}</p>
-            {user?.email && <p className="text-[10px] text-slate-400 truncate">{user.email}</p>}
+            {user?.email && (
+              <p className="text-[10px] text-slate-400 truncate">
+                {user.email}
+              </p>
+            )}
           </div>
 
           <button
