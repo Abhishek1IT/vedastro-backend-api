@@ -1,5 +1,5 @@
 import { Router } from "express";
-import OrderController from "./order.controller.js";
+import orderController from "./order.controller.js";
 import authMiddleware from "../../middlewares/auth.middleware.js";
 
 const orderRouter = Router();
@@ -8,15 +8,15 @@ const orderRouter = Router();
 orderRouter.use(authMiddleware);
 
 // Create Order
-orderRouter.post("/", OrderController.createOrder);
+orderRouter.post("/", orderController.createOrder);
 
 // Get Orders by User ID
-orderRouter.get("/user/:userId", OrderController.getOrdersByUserId);
+orderRouter.get("/user/:userId", orderController.getOrdersByUserId);
 
 // Get Order by ID
-orderRouter.get("/:id", OrderController.getOrderById);
+orderRouter.get("/:id", orderController.getOrderById);
 
 // Update Order Status
-orderRouter.put("/:id/status", OrderController.updateOrderStatus);
+orderRouter.put("/:id/status", orderController.updateOrderStatus);
 
 export default orderRouter;

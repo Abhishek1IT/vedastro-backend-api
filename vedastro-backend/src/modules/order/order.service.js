@@ -1,4 +1,4 @@
-import orderRepository from "./order.repository";
+import orderRepository from "./order.repository.js";
 import Cart from "../../models/Cart.js";
 import ApiError from "../../utils/ApiError.js";
 
@@ -25,7 +25,7 @@ class OrderService {
     }
 
     async getOrdersByUserId(userId) {
-        return await orderRepository.findByUUserId(userId);
+        return await orderRepository.findByUserId(userId);
     }
 
     async getOrderById(orderId) {
