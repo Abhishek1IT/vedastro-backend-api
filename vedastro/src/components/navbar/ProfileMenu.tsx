@@ -22,6 +22,8 @@ export default function ProfileMenu({ user }: { user?: any }) {
     router.push("/login");
   };
 
+  console.log("PROFILE MENU:", user);
+
   return (
     <div className="relative">
       <button

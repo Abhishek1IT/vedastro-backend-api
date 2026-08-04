@@ -13,10 +13,18 @@ import SearchBar from "../../components/common/SearchBar";
 export default function Navbar() {
   const router = useRouter();
 
-  const { isAuthenticated, user, isHydrated } = useAuthStore();
-
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { isAuthenticated, user, isHydrated } = useAuthStore();
+
+  console.log("NAVBAR USER:", user);
+  console.log("NAVBAR AUTH:", isAuthenticated, isHydrated);
+
+  console.log("NAVBAR STATE:", {
+    isHydrated,
+    isAuthenticated,
+    user,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
