@@ -29,7 +29,12 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user, setUser, hydrateStore, logout: storeLogout } = useAuthStore();
+  const {
+    user,
+    hydrateStore,
+    logout: storeLogout,
+    isAuthenticated,
+  } = useAuthStore();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -57,9 +62,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithOtp = async (phone: string, otp: string) => {
     setError(null);
+
     try {
-      const data = await authService.verifyOtp(phone, otp);
-      setUser(data.user);
+      await authService.verifyOtp(phone, otp);
+
+      await hydrateStore();
+
       router.push("/home");
     } catch (err: any) {
       setError(err.response?.data?.message || "Invalid OTP entered.");
