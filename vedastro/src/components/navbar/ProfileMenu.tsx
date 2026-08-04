@@ -20,20 +20,21 @@ export default function ProfileMenu({ user }: { user?: any }) {
     try {
       console.log("Logout Clicked");
 
-      await authService.logout();
+      const res = await authService.logout();
+
+      console.log("Logout Response:", res);
 
       logout();
 
       clearProfile();
-
-      setIsOpen(false);
 
       router.replace("/");
-    } catch (error) {
-      console.error("Logout Error:", error);
+    } catch (err) {
+      console.error("Logout Error:", err);
 
       logout();
       clearProfile();
+
       router.replace("/");
     }
   };

@@ -51,6 +51,7 @@ authRouter.get("/me", authMiddleware, AuthController.me);
 // Logout
 authRouter.post(
   "/logout",
+  authMiddleware,
   AuthController.logout
 );
 

@@ -183,35 +183,30 @@ class AuthController {
   // Logout
   async logout(req, res, next) {
     try {
+      console.log("REQ USER:", req.user);
+
       await AuthService.logout(req.user._id);
 
       const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite:
-          process.env.NODE_ENV === "production"
-            ? "none"
-            : "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
       };
 
       res.clearCookie("accessToken", cookieOptions);
-
       res.clearCookie("refreshToken", cookieOptions);
 
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          null,
-          "Logout Successful"
-        )
-      );
-
+      return res.status(200).json({
+        success: true,
+        message: "Logout Successful",
+      });
     } catch (error) {
+      console.error("LOGOUT ERROR:", error);
       next(error);
     }
   }
-  
+
   // Refresh Token
   async refreshToken(req, res, next) {
     try {

@@ -7,6 +7,7 @@ import adminRouter from "../modules/admin/admin.routes.js";
 import callRouter from "../modules/call/call.routes.js";
 import productRouter from "../modules/product/product.routes.js";
 import cartRouter from "../modules/cart/cart.routes.js";
+import orderRouter from "../modules/order/order.routes.js";
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.use("/chat", chatRouter);
 router.use("/admin", adminRouter);
 router.use("/product", productRouter);
 router.use("/cart", cartRouter);
+router.use("/order", orderRouter);
 
 export default router;
