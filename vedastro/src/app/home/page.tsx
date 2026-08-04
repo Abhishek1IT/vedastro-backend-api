@@ -21,19 +21,12 @@ import {
 export default function DashboardHomePage() {
   const router = useRouter();
 
-  const { isAuthenticated, isHydrated, hydrateStore } = useAuthStore();
-
-  // Load user from backend cookie
-  useEffect(() => {
-    if (!isHydrated) {
-      hydrateStore();
-    }
-  }, [isHydrated]);
+  const { isAuthenticated, isHydrated } = useAuthStore();
 
   // Redirect if not logged in
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace("/login");
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

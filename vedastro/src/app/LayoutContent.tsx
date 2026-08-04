@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect } from "react";
@@ -25,7 +26,7 @@ export default function LayoutContent({
     if (!useAuthStore.getState().isHydrated) {
       hydrateStore();
     }
-  }, [hydrateStore]);
+  }, []);
 
   const isAuthOrConsultationRoute = HIDDEN_LAYOUT_ROUTES.some((routeRegex) =>
     routeRegex.test(pathname),
