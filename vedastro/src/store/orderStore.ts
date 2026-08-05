@@ -7,30 +7,24 @@ import { Order } from "../types/order";
 interface OrderState {
   orders: Order[];
   order: Order | null;
-
   loading: boolean;
   error: string | null;
 
   fetchOrders: () => Promise<void>;
-
   fetchOrder: (id: string) => Promise<void>;
-
-  placeOrder: (data: any) => Promise<any>;
-
+  placeOrder: (data: any) => Promise<Order>;
   cancelOrder: (id: string) => Promise<void>;
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
   orders: [],
   order: null,
-
   loading: false,
-
   error: null,
 
   fetchOrders: async () => {
     try {
-      set({ loading: true });
+      set({ loading: true, error: null });
 
       const res = await OrderService.getOrders();
 
@@ -39,7 +33,7 @@ export const useOrderStore = create<OrderState>((set) => ({
       });
     } catch (err: any) {
       set({
-        error: err.response?.data?.message,
+        error: err.response?.data?.message || "Failed to fetch orders",
       });
     } finally {
       set({
@@ -48,15 +42,19 @@ export const useOrderStore = create<OrderState>((set) => ({
     }
   },
 
-  fetchOrder: async (id) => {
+  fetchOrder: async (id: string) => {
     try {
-      set({ loading: true });
+      set({ loading: true, error: null });
 
       const res = await OrderService.getOrder(id);
 
       set({
         order: res.data,
       });
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to fetch order",
+      });
     } finally {
       set({
         loading: false,
@@ -64,13 +62,49 @@ export const useOrderStore = create<OrderState>((set) => ({
     }
   },
 
-  placeOrder: async (data) => {
-    const res = await OrderService.placeOrder(data);
+  placeOrder: async (data: any) => {
+    try {
+      set({ loading: true, error: null });
 
-    return res.data;
+      const res = await OrderService.placeOrder(data);
+
+      return res.data;
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to place order",
+      });
+      throw err;
+    } finally {
+      set({
+        loading: false,
+      });
+    }
   },
 
-  cancelOrder: async (id) => {
-    await OrderService.cancelOrder(id);
+  cancelOrder: async (id: string) => {
+    try {
+      set({ loading: true, error: null });
+
+      await OrderService.cancelOrder(id);
+
+      set((state) => ({
+        orders: state.orders.map((order) =>
+          order._id === id ? { ...order, orderStatus: "CANCELLED" } : order,
+        ),
+        order:
+          state.order?._id === id
+            ? { ...state.order, orderStatus: "CANCELLED" }
+            : state.order,
+      }));
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to cancel order",
+      });
+      throw err;
+    } finally {
+      set({
+        loading: false,
+      });
+    }
   },
 }));

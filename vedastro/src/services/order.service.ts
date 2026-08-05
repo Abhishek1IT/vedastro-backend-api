@@ -22,6 +22,14 @@ const OrderService = {
     const res = await lib.patch(`/orders/${id}/cancel`);
     return res.data;
   },
+
+  async updateOrderStatus(id: string, status: string) {
+    const res = await lib.put(`/orders/${id}/status`, {
+      status,
+    });
+
+    return res.data;
+  },
 };
 
 export default OrderService;

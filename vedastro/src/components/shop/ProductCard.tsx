@@ -14,16 +14,14 @@ import { useAuthStore } from "../../store/authStore";
 
 interface ProductCardProps {
   product: Product;
-  onBuyNow?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onBuyNow }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const { addToCart } = useCartStore();
-
+  const { addToCart, fetchCart } = useCartStore();
   const { isAuthenticated } = useAuthStore();
 
   const image = product.images?.[0]?.url
@@ -45,9 +43,11 @@ export default function ProductCard({ product, onBuyNow }: ProductCardProps) {
     try {
       await addToCart(product._id, 1);
 
-      alert("Product added to cart");
-    } catch (error) {
-      console.log(error);
+      await fetchCart();
+
+      router.push("/cart");
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -57,10 +57,14 @@ export default function ProductCard({ product, onBuyNow }: ProductCardProps) {
       return;
     }
 
-    if (onBuyNow) {
-      onBuyNow(product);
-    } else {
-      router.push(`/checkout?productId=${product._id}`);
+    try {
+      await addToCart(product._id, 1);
+
+      await fetchCart();
+
+      router.push("/checkout");
+    } catch (err) {
+      console.error(err);
     }
   };
 

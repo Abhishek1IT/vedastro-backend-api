@@ -10,18 +10,21 @@ import Badge from "../../../components/ui/Badge";
 
 import { useProductStore } from "../../../store/productStore";
 import { useCartStore } from "../../../store/cartStore";
+import { useAuthStore } from "../../../store/authStore";
 
 export default function ProductDetailsPage() {
   const router = useRouter();
   const params = useParams();
 
-  const id = params.id as string; // agar folder [id] hai
+  const id = params.id as string;
 
   const [quantity, setQuantity] = useState(1);
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   const { product, loading, fetchProduct } = useProductStore();
   const { addToCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     if (id) {
@@ -31,7 +34,7 @@ export default function ProductDetailsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-20 text-center">
+      <div className="container mx-auto py-20 text-center text-white">
         Loading Product...
       </div>
     );
@@ -39,23 +42,56 @@ export default function ProductDetailsPage() {
 
   if (!product) {
     return (
-      <div className="container mx-auto py-20 text-center">
+      <div className="container mx-auto py-20 text-center text-white">
         Product Not Found
       </div>
     );
   }
 
+  const imageUrls =
+    product.images?.map((img) => `${BACKEND_URL}${img.url}`) || [];
+
   const finalPrice = product.salePrice ?? product.price;
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      await addToCart(product._id, quantity);
+
+      // Cart page kholo
+      router.push("/cart");
+    } catch (error) {
+      console.error("Add To Cart Error:", error);
+      alert("Unable to add product to cart.");
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      await addToCart(product._id, quantity);
+
+      // Checkout page kholo
+      router.push("/checkout");
+    } catch (error) {
+      console.error("Buy Now Error:", error);
+      alert("Unable to proceed to checkout.");
+    }
+  };
 
   return (
     <section className="container mx-auto px-4 py-10">
       <div className="grid gap-10 lg:grid-cols-2">
-        <ProductImage
-          images={
-            product.images?.map((image) => `${BACKEND_URL}${image.url}`) ?? []
-          }
-          title={product.name}
-        />
+        <ProductImage images={imageUrls} title={product.name} />
+
         <div>
           <h1 className="text-4xl font-black text-white">{product.name}</h1>
 
@@ -67,7 +103,7 @@ export default function ProductDetailsPage() {
             </span>
 
             {product.salePrice && (
-              <span className="text-xl text-slate-500 line-through">
+              <span className="text-xl line-through text-slate-500">
                 ₹{product.price}
               </span>
             )}
@@ -77,7 +113,7 @@ export default function ProductDetailsPage() {
             {product.stock > 0 ? (
               <Badge variant="success">In Stock ({product.stock})</Badge>
             ) : (
-              <Badge variant="error">Out of Stock</Badge>
+              <Badge variant="error">Out Of Stock</Badge>
             )}
           </div>
 
@@ -94,10 +130,7 @@ export default function ProductDetailsPage() {
               variant="secondary"
               className="flex-1"
               disabled={product.stock === 0}
-              onClick={async () => {
-                await addToCart(product._id, quantity);
-                router.push("/cart");
-              }}
+              onClick={handleAddToCart}
             >
               Add To Cart
             </Button>
@@ -105,10 +138,7 @@ export default function ProductDetailsPage() {
             <Button
               className="flex-1"
               disabled={product.stock === 0}
-              onClick={async () => {
-                await addToCart(product._id, quantity);
-                router.push("/cart");
-              }}
+              onClick={handleBuyNow}
             >
               Buy Now
             </Button>

@@ -1,18 +1,45 @@
 export interface Order {
   _id: string;
-  orderNumber: string;
-  total: number;
+
+  user: string;
+
   items: OrderItem[];
+
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+
+  subtotal: number;
+  shipping: number;
+  total: number;
+
+  paymentMethod: "COD" | "ONLINE";
+
+  paymentStatus: "PENDING" | "PAID" | "FAILED";
+
+  orderStatus: "PLACED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+
   createdAt: string;
-  status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled";
+  updatedAt: string;
 }
 
 export interface OrderItem {
-  _id: string;
-  quantity: number;
-  price: number;
   product: {
     _id: string;
-    title: string;
+    name: string;
+    images: {
+      url: string;
+      publicId?: string;
+    }[];
   };
+
+  name: string;
+  image?: string;
+  price: number;
+  quantity: number;
 }

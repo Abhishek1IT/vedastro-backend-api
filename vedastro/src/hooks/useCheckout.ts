@@ -1,30 +1,44 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { useCartStore } from "../store/cartStore";
 import { useOrderStore } from "../store/orderStore";
+import { useCartStore } from "../store/cartStore";
 
 export function useCheckout() {
+  const router = useRouter();
+
+  const { placeOrder } = useOrderStore();
+  const { fetchCart } = useCartStore();
+
   const [loading, setLoading] = useState(false);
 
-  const cart = useCartStore();
-
-  const orderStore = useOrderStore();
-
-  const checkout = async (address: any, paymentMethod: string) => {
+  const checkout = async (
+    shippingAddress: {
+      fullName: string;
+      phone: string;
+      address: string;
+      city: string;
+      state: string;
+      pincode: string;
+    },
+    paymentMethod: "COD" | "ONLINE",
+  ) => {
     try {
       setLoading(true);
 
-      const order = await orderStore.placeOrder({
-        address,
+      const order = await placeOrder({
+        shippingAddress,
         paymentMethod,
       });
 
-      await cart.clearCart();
+      await fetchCart();
 
-      return order;
+      router.push(`/orders/${order._id}`);
+    } catch (error) {
+      console.error(error);
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -4,21 +4,39 @@ import ApiError from "../../utils/ApiError.js";
 
 class OrderService {
     async createOrder(userId, orderData) {
-        // Check if the user has a cart
-        const cart = await Cart.findOne({ user: userId });
+        const cart = await Cart.findOne({ user: userId })
+            .populate("items.product");
 
         if (!cart || cart.items.length === 0) {
             throw new ApiError(400, "Cart is empty");
         }
 
-        // Create the order
+        const items = cart.items.map((item) => ({
+            product: item.product._id,
+            name: item.product.name,
+            image: item.product.images?.[0]?.url || "",
+            price: item.product.salePrice || item.product.price,
+            quantity: item.quantity,
+        }));
+
+        const subtotal = items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+        );
+
+        const shipping = 0;
+        const total = subtotal + shipping;
+
         const order = await orderRepository.createOrder({
-            ...orderData,
             user: userId,
-            items: cart.items,
+            items,
+            shippingAddress: orderData.shippingAddress,
+            paymentMethod: orderData.paymentMethod || "COD",
+            subtotal,
+            shipping,
+            total,
         });
 
-        // Clear the user's cart
         await Cart.deleteOne({ user: userId });
 
         return order;
@@ -45,6 +63,27 @@ class OrderService {
 
         return order;
     }
+
+    async cancelOrder(orderId, user) {
+  const order = await orderRepository.findById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  if (
+    order.user.toString() !== user._id.toString() &&
+    user.role !== "ADMIN"
+  ) {
+    throw new ApiError(403, "Access denied");
+  }
+
+  if (order.orderStatus === "DELIVERED") {
+    throw new ApiError(400, "Delivered order cannot be cancelled");
+  }
+
+  return await orderRepository.cancelOrder(orderId);
+}
 }
 
 export default new OrderService();

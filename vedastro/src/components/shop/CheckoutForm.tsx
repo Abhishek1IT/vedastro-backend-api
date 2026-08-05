@@ -7,7 +7,6 @@ import Button from "../common/Button";
 export interface CheckoutData {
   fullName: string;
   phone: string;
-  email: string;
   address: string;
   city: string;
   state: string;
@@ -27,7 +26,6 @@ export default function CheckoutForm({
     initialValues ?? {
       fullName: "",
       phone: "",
-      email: "",
       address: "",
       city: "",
       state: "",
@@ -67,14 +65,6 @@ export default function CheckoutForm({
           name="phone"
           placeholder="Phone"
           value={form.phone}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-slate-800 bg-slate-900/20 p-3"
-        />
-
-        <input
-          name="email"
-          placeholder="Email"
-          value={form.email}
           onChange={handleChange}
           className="w-full rounded-lg border border-slate-800 bg-slate-900/20 p-3"
         />

@@ -1,57 +1,52 @@
 "use client";
 
-import Card from "../ui/Card";
-import Badge from "../ui/Badge";
-
-export type PaymentType = "cod" | "razorpay" | "upi";
-
-interface Props {
-  value: PaymentType;
-  onChange: (value: PaymentType) => void;
+interface PaymentMethodProps {
+  value: "COD" | "ONLINE";
+  onChange: (value: "COD" | "ONLINE") => void;
 }
 
-const methods = [
-  {
-    id: "cod",
-    title: "Cash On Delivery",
-  },
-  {
-    id: "razorpay",
-    title: "Razorpay",
-  },
-  {
-    id: "upi",
-    title: "UPI Payment",
-  },
-];
-
-export default function PaymentMethod({ value, onChange }: Props) {
+export default function PaymentMethod({ value, onChange }: PaymentMethodProps) {
   return (
-    <Card>
-      <h2 className="mb-5 text-2xl font-black">Payment Method</h2>
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
+      <h2 className="mb-6 text-xl font-bold text-white">Payment Method</h2>
 
       <div className="space-y-4">
-        {methods.map((method) => (
-          <label
-            key={method.id}
-            className="flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 p-4 hover:border-amber-500"
-          >
-            <div>
-              <p className="font-bold">{method.title}</p>
-            </div>
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-700 p-4 hover:border-amber-500">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="COD"
+            checked={value === "COD"}
+            onChange={() => onChange("COD")}
+          />
 
-            <input
-              type="radio"
-              checked={value === method.id}
-              onChange={() => onChange(method.id as PaymentType)}
-            />
-          </label>
-        ))}
-      </div>
+          <div>
+            <p className="font-semibold text-white">Cash on Delivery</p>
 
-      <div className="mt-5">
-        <Badge variant="amber">Secure Payment</Badge>
+            <p className="text-sm text-slate-400">
+              Pay when your order is delivered.
+            </p>
+          </div>
+        </label>
+
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-700 p-4 hover:border-amber-500">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="ONLINE"
+            checked={value === "ONLINE"}
+            onChange={() => onChange("ONLINE")}
+          />
+
+          <div>
+            <p className="font-semibold text-white">Online Payment</p>
+
+            <p className="text-sm text-slate-400">
+              Pay securely using UPI, Card or Net Banking.
+            </p>
+          </div>
+        </label>
       </div>
-    </Card>
+    </div>
   );
 }

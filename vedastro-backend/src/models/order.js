@@ -114,7 +114,6 @@ const orderSchema = new mongoose.Schema(
             default: "PENDING"
         },
 
-
         orderStatus: {
             type: String,
             enum: [

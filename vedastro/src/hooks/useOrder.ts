@@ -4,12 +4,30 @@
 import { useEffect } from "react";
 import { useOrderStore } from "../store/orderStore";
 
-export function useOrder() {
-  const store = useOrderStore();
+export default function useOrder() {
+  const {
+    orders,
+    order,
+    loading,
+    error,
+    fetchOrders,
+    fetchOrder,
+    placeOrder,
+    cancelOrder,
+  } = useOrderStore();
 
   useEffect(() => {
-    store.fetchOrders();
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
-  return store;
+  return {
+    orders,
+    order,
+    loading,
+    error,
+    fetchOrders,
+    fetchOrder,
+    placeOrder,
+    cancelOrder,
+  };
 }

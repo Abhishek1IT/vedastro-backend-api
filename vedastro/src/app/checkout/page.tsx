@@ -11,8 +11,7 @@ import { useCheckout } from "../../hooks/useCheckout";
 export default function CheckoutPage() {
   const { checkout, loading } = useCheckout();
 
-  const [paymentMethod, setPaymentMethod] =
-    useState("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("COD");
 
   const handleSubmit = async (address: any) => {
     await checkout(address, paymentMethod);
@@ -20,26 +19,13 @@ export default function CheckoutPage() {
 
   return (
     <section className="container mx-auto py-10">
-
       <div className="grid gap-10 lg:grid-cols-2">
+        <CheckoutForm onSubmit={handleSubmit} />
 
-        <CheckoutForm
-          onSubmit={handleSubmit}
-        />
-
-        <PaymentMethod
-          value={paymentMethod as any}
-          onChange={setPaymentMethod}
-        />
-
+        <PaymentMethod value={paymentMethod} onChange={setPaymentMethod} />
       </div>
 
-      {loading && (
-        <p className="mt-5">
-          Placing Order...
-        </p>
-      )}
-
+      {loading && <p className="mt-5">Placing Order...</p>}
     </section>
   );
 }

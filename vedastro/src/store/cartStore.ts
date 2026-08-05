@@ -61,14 +61,15 @@ export const useCartStore = create<CartState>((set, get) => ({
     try {
       set({ loading: true });
 
-      const data = await CartService.getCart();
+      const res = await CartService.getCart();
 
-      const items = data.data || [];
+      const cart = res.data;
+
+      const items = cart.items || [];
 
       const subtotal = items.reduce(
         (sum: number, item: any) =>
           sum + (item.product.salePrice || item.product.price) * item.quantity,
-
         0,
       );
 
@@ -78,18 +79,12 @@ export const useCartStore = create<CartState>((set, get) => ({
 
       set({
         items,
-
         subtotal,
-
         shipping,
-
         discount,
-
         total: subtotal + shipping - discount,
-
         totalItems: items.reduce(
-          (sum: number, i: any) => sum + i.quantity,
-
+          (sum: number, item: any) => sum + item.quantity,
           0,
         ),
       });
