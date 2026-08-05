@@ -4,25 +4,7 @@ import Card from "../ui/Card";
 import Badge from "../ui/Badge";
 import Button from "../common/Button";
 
-export interface OrderItem {
-  _id: string;
-  quantity: number;
-  price: number;
-
-  product: {
-    _id: string;
-    title: string;
-  };
-}
-
-export interface Order {
-  _id: string;
-  orderNumber: string;
-  total: number;
-  items: OrderItem[]; 
-  createdAt: string;
-  status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled";
-}
+import type { Order } from "../../types/order";
 
 interface Props {
   order: Order;
@@ -31,16 +13,16 @@ interface Props {
 
 export default function OrderCard({ order, onView }: Props) {
   const badge =
-    order.status === "Delivered"
+    order.orderStatus === "DELIVERED"
       ? "success"
-      : order.status === "Cancelled"
+      : order.orderStatus === "CANCELLED"
         ? "error"
         : "warning";
 
   return (
     <Card className="flex items-center justify-between">
       <div>
-        <h3 className="font-black">#{order.orderNumber}</h3>
+        <h3 className="font-black">#{order._id}</h3>
 
         <p className="text-sm text-slate-400">{order.items?.length} Items</p>
 
@@ -48,7 +30,7 @@ export default function OrderCard({ order, onView }: Props) {
       </div>
 
       <div className="text-right">
-        <Badge variant={badge}>{order.status}</Badge>
+        <Badge variant={badge}>{order.orderStatus}</Badge>
 
         <p className="mt-3 text-xl font-black">₹{order.total}</p>
 

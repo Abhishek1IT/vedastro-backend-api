@@ -5,7 +5,6 @@
 import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthStore } from "../../../store/authStore";
-import { ROUTES } from "../../../constants/routes";
 import AudioCall from "../../../components/call/AudioCall";
 import VideoCall from "../../../components/call/VideoCall";
 import OutgoingCall from "../../../components/call/OutgoingCall";
@@ -48,12 +47,26 @@ function CallSessionConsole() {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const activeStreamRef = useRef<MediaStream | null>(null);
+  const isHydrated = useAuthStore((state: any) => state.isHydrated ?? true);
+  const user = useAuthStore((state: any) => state.user);
 
   useEffect(() => {
+    if (!isHydrated) return;
+
     if (!isAuthenticated) {
-      router.push(ROUTES.LOGIN);
+      router.replace(
+        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
+      );
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    if (user && !user.profileCompleted) {
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/consultations/chat")}`,
+      );
+      return;
+    }
+  }, [isHydrated, isAuthenticated, user, router]);
 
   useEffect(() => {
     if (!targetId) {

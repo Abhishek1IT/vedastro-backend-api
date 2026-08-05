@@ -10,9 +10,12 @@ import CartSummary from "../../components/shop/CartSummary";
 import Button from "../../components/common/Button";
 
 import { useCartStore } from "../../store/cartStore";
+import { useAuthStore } from "../../store/authStore";
 
 export default function CartPage() {
   const router = useRouter();
+
+  const { isAuthenticated, isHydrated } = useAuthStore();
 
   const {
     items,
@@ -29,17 +32,22 @@ export default function CartPage() {
   } = useCartStore();
 
   useEffect(() => {
+    if (!isHydrated) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login?redirect=/cart");
+      return;
+    }
+
     fetchCart();
-  }, []);
+  }, [isAuthenticated, isHydrated]);
 
   const handleCheckout = () => {
     router.push("/checkout");
   };
 
   const handleDecrease = async (id: string, quantity: number) => {
-    if (quantity <= 1) {
-      return;
-    }
+    if (quantity <= 1) return;
 
     await updateQuantity(id, quantity - 1);
   };
@@ -47,6 +55,18 @@ export default function CartPage() {
   const handleClearCart = async () => {
     await clearCart();
   };
+
+  if (!isHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <section className="container mx-auto px-4 py-10 text-white">

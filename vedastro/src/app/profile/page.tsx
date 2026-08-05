@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useAuthStore } from "../../store/authStore";
 import { authService } from "../../services/auth.service";
@@ -21,6 +21,9 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
+  const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect") || "/home";
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -51,7 +54,7 @@ export default function ProfilePage() {
 
       alert("Profile updated successfully");
 
-      router.push("/home");
+      router.replace(redirect);
     } catch (err) {
       console.error(err);
       alert("Unable to update profile");

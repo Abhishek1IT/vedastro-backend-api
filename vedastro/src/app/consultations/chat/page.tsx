@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquare, Lock } from "lucide-react"; 
+import { ArrowLeft, MessageSquare, Lock } from "lucide-react";
 
 import { useAuthStore } from "../../../store/authStore";
 import ChatSidebar from "../../../components/chat/ChatSidebar";
@@ -38,9 +38,19 @@ export default function ConsultationsChatPage() {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace("/login");
+      router.replace(
+        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
+      );
+      return;
     }
-  }, [isHydrated, isAuthenticated, router]);
+
+    if (user && !user.profileCompleted) {
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/consultations/chat")}`,
+      );
+      return;
+    }
+  }, [isHydrated, isAuthenticated, user, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !user?._id) return;
@@ -147,7 +157,6 @@ export default function ConsultationsChatPage() {
 
   return (
     <div className="min-h-screen bg-[#0B0907] flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 select-none">
-      
       <div className="w-full max-w-7xl mb-3 flex items-center justify-between px-2">
         <Link
           href="/consultations"
@@ -160,9 +169,7 @@ export default function ConsultationsChatPage() {
 
       {/* Main WhatsApp-Style Container */}
       <div className="flex h-[85vh] w-full max-w-7xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-[#23201C] bg-[#0E0C0A] text-gray-200 shadow-2xl flex-col md:flex-row">
-        
         <div className="w-full md:w-1/3 md:min-w-[320px] lg:min-w-87.5 border-b md:border-b-0 md:border-r border-[#23201C] bg-[#14110E] flex flex-col h-[40vh] md:h-full">
-  
           <ChatSidebar
             activeRoomId={selectedChat.roomId}
             onSelectRoom={handleRoomSelect}
@@ -187,7 +194,7 @@ export default function ConsultationsChatPage() {
                   {loadingRooms ? "Syncing messages..." : "VedAstro Web"}
                 </h2>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  Send and receive messages without keeping your phone online. 
+                  Send and receive messages without keeping your phone online.
                   Select a consultation from the left to begin.
                 </p>
               </div>
@@ -199,7 +206,6 @@ export default function ConsultationsChatPage() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

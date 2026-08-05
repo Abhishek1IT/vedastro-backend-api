@@ -1,16 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useAuthStore } from "../store/authStore";
 import { authService } from "../services/auth.service";
 
 export const useLogin = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect") || "/home";
 
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -40,6 +42,7 @@ export const useLogin = () => {
     }
   };
 
+  // VERIFY OTP
   const verifyOtp = async (phone: string, otp: string) => {
     if (!phone || !otp) {
       setError("Phone number and OTP are required.");
@@ -50,15 +53,33 @@ export const useLogin = () => {
     setError("");
 
     try {
+      // Backend cookie set karega
       await authService.verifyOtp(formatPhone(phone), otp);
 
-      // Get current user
+      // Current logged-in user
       const userResponse = await authService.getCurrentUser();
 
       const currentUser =
         userResponse.user || userResponse.data || userResponse;
 
       setUser(currentUser);
+
+      // ADMIN
+      if (currentUser.role === "ADMIN") {
+        router.replace("/admin");
+        return currentUser;
+      }
+
+      // Profile incomplete
+      if (!currentUser.profileCompleted) {
+        router.replace(
+          `/complete-profile?redirect=${encodeURIComponent(redirect)}`,
+        );
+        return currentUser;
+      }
+
+      // Redirect to original page
+      router.replace(redirect);
 
       return currentUser;
     } catch (err: any) {

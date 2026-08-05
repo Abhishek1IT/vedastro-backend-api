@@ -1,21 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import CheckoutForm from "../../components/shop/CheckoutForm";
 import PaymentMethod from "../../components/shop/PaymentMethod";
 
 import { useCheckout } from "../../hooks/useCheckout";
+import { useAuthStore } from "../../store/authStore";
 
 export default function CheckoutPage() {
+  const router = useRouter();
+
   const { checkout, loading } = useCheckout();
+
+  const { isAuthenticated, isHydrated } = useAuthStore();
 
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("COD");
 
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login?redirect=/checkout");
+    }
+  }, [isAuthenticated, isHydrated, router]);
+
   const handleSubmit = async (address: any) => {
+    if (!isAuthenticated) {
+      router.replace("/login?redirect=/checkout");
+      return;
+    }
+
     await checkout(address, paymentMethod);
   };
+
+  if (!isHydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <section className="container mx-auto py-10">
