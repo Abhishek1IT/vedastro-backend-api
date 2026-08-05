@@ -18,9 +18,26 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
 
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [dob, setDob] = useState(user?.dob || "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (!isAuthenticated) {
+      router.replace("/login?redirect=/profile");
+      return;
+    }
+
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setDob(user.dob || "");
+    }
+
+    setLoading(false);
+  }, [user, isAuthenticated, isHydrated, router]);
 
   const handleSave = async () => {
     try {
@@ -33,27 +50,25 @@ export default function ProfilePage() {
       setUser(updatedUser);
 
       alert("Profile updated successfully");
-    } catch (error) {
-      console.error(error);
+
+      router.push("/home");
+    } catch (err) {
+      console.error(err);
+      alert("Unable to update profile");
     }
   };
 
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    if (!isAuthenticated) {
-      router.replace("/login");
-      return;
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.log(err);
     }
 
-    if (user) {
-      setName(user.name || "");
-      setEmail(user.email || "");
-      setDob(user.dob || "");
-    }
+    logout();
 
-    setLoading(false);
-  }, [user, isHydrated, isAuthenticated, router]);
+    router.replace("/login");
+  };
 
   if (loading) {
     return (
@@ -63,66 +78,69 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6">
-      <div className="max-w-4xl mx-auto mt-10">
+    <div className="min-h-screen bg-slate-950 p-6 text-white">
+      <div className="mx-auto mt-10 max-w-4xl">
         <Card
           hoverEffect={false}
-          className="border border-slate-800 bg-slate-900/40 p-8 rounded-2xl"
+          className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8"
         >
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">My Profile</h1>
 
               <Badge variant="success">Active</Badge>
             </div>
 
-            <Button variant="danger" onClick={logout}>
+            <Button variant="danger" onClick={handleLogout}>
               Logout
             </Button>
           </div>
 
-          <div className="mt-8 grid md:grid-cols-2 gap-5">
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
             <Card hoverEffect={false}>
               <p className="mb-2">Name</p>
+
               <input
-                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
               />
             </Card>
 
             <Card hoverEffect={false}>
               <p className="mb-2">Email</p>
+
               <input
                 type="email"
-                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
               />
             </Card>
 
             <Card hoverEffect={false}>
               <p className="mb-2">Date of Birth</p>
+
               <input
                 type="date"
-                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
+                className="w-full rounded-md border border-slate-700 bg-slate-800 p-2"
               />
             </Card>
 
             <Card hoverEffect={false}>
-              <p>Phone</p>
+              <p className="mb-2">Phone</p>
+
               <p>+91 {user.phone}</p>
             </Card>
 
             <Card hoverEffect={false}>
-              <p>Role</p>
+              <p className="mb-2">Role</p>
+
               <p>{user.role}</p>
             </Card>
           </div>

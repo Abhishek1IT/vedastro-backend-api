@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
@@ -14,9 +15,7 @@ export const useLogin = () => {
   const setUser = useAuthStore((state) => state.setUser);
 
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
-
   const [otpSent, setOtpSent] = useState(false);
 
   const formatPhone = (phone: string) => phone.replace(/\D/g, "").slice(-10);
@@ -33,7 +32,6 @@ export const useLogin = () => {
 
     try {
       await authService.sendOtp(formatPhone(phone));
-
       setOtpSent(true);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to send OTP.");
@@ -42,24 +40,19 @@ export const useLogin = () => {
     }
   };
 
-  // VERIFY OTP
   const verifyOtp = async (phone: string, otp: string) => {
     if (!phone || !otp) {
       setError("Phone number and OTP are required.");
-
-      return;
+      return null;
     }
 
     setLoading(true);
     setError("");
 
     try {
-      // Backend will set accessToken cookie
-      const response = await authService.verifyOtp(formatPhone(phone), otp);
+      await authService.verifyOtp(formatPhone(phone), otp);
 
-      console.log("VERIFY RESPONSE:", response);
-
-      // Get logged in user using cookie
+      // Get current user
       const userResponse = await authService.getCurrentUser();
 
       const currentUser =
@@ -67,15 +60,13 @@ export const useLogin = () => {
 
       setUser(currentUser);
 
-      if (currentUser.role === "ADMIN") {
-        router.replace("/admin");
-      } else {
-        router.replace("/home");
-      }
+      return currentUser;
     } catch (err: any) {
-      console.log("LOGIN ERROR:", err);
+      console.log(err);
 
       setError(err.response?.data?.message || "Invalid or expired OTP.");
+
+      return null;
     } finally {
       setLoading(false);
     }
@@ -83,13 +74,9 @@ export const useLogin = () => {
 
   return {
     sendOtp,
-
     verifyOtp,
-
     otpSent,
-
     loading,
-
     error,
   };
 };
