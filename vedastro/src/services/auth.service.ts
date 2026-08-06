@@ -7,33 +7,15 @@ export interface CompleteProfilePayload {
   dob: string;
 }
 
-export interface SendOtpPayload {
-  phone: string;
-}
-
-export interface VerifyOtpPayload {
-  phone: string;
-  otp: string;
-}
-
 export interface AuthUser {
-  data: AuthUser | null | undefined;
-  user: AuthUser | null | undefined;
   _id: string;
-  id: string;
-  name: string;
-  phone: string;
+  id?: string;
+  name?: string;
   email?: string;
+  phone: string;
   dob?: string;
   role?: string;
   profileCompleted: boolean;
-}
-
-export interface AuthResponse {
-  token: string;
-  accessToken?: string;
-  message: string;
-  user: AuthUser;
 }
 
 export const authService = {
@@ -44,7 +26,9 @@ export const authService = {
     const response = await api.post(
       "/auth/send-otp",
       { phone },
-      { withCredentials: true },
+      {
+        withCredentials: true,
+      },
     );
 
     return response.data;
@@ -54,14 +38,18 @@ export const authService = {
   async verifyOtp(phone: string, otp: string) {
     const response = await api.post(
       "/auth/verify-otp",
-      { phone, otp },
-      { withCredentials: true },
+      {
+        phone,
+        otp,
+      },
+      {
+        withCredentials: true,
+      },
     );
-
-    console.log(response.data);
 
     return response.data.data;
   },
+
   // Complete Profile
   async completeProfile(payload: CompleteProfilePayload): Promise<AuthUser> {
     const response = await api.put(
@@ -77,7 +65,10 @@ export const authService = {
 
   // Current User
   async getCurrentUser(): Promise<AuthUser> {
-    const response = await api.get(API_ENDPOINTS.AUTH.ME);
+    const response = await api.get(API_ENDPOINTS.AUTH.ME, {
+      withCredentials: true,
+    });
+
     return response.data.data;
   },
 

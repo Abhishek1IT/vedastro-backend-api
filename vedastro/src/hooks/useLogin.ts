@@ -3,13 +3,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { useAuthStore } from "../store/authStore";
 import { authService } from "../services/auth.service";
 
 export const useLogin = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const redirect = searchParams.get("redirect") || "/home";
@@ -20,9 +19,10 @@ export const useLogin = () => {
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
 
-  const formatPhone = (phone: string) => phone.replace(/\D/g, "").slice(-10);
+  const formatPhone = (phone: string) => {
+    return phone.replace(/\D/g, "").slice(-10);
+  };
 
-  // SEND OTP
   const sendOtp = async (phone: string) => {
     if (!phone) {
       setError("Please enter a valid mobile number.");
@@ -34,18 +34,19 @@ export const useLogin = () => {
 
     try {
       await authService.sendOtp(formatPhone(phone));
+
       setOtpSent(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to send OTP.");
+      setError(err?.response?.data?.message || "Failed to send OTP.");
     } finally {
       setLoading(false);
     }
   };
 
-  // VERIFY OTP
   const verifyOtp = async (phone: string, otp: string) => {
     if (!phone || !otp) {
       setError("Phone number and OTP are required.");
+
       return null;
     }
 
@@ -53,14 +54,11 @@ export const useLogin = () => {
     setError("");
 
     try {
-      // Backend cookie set karega
       await authService.verifyOtp(formatPhone(phone), otp);
 
-      // Current logged-in user
-      const userResponse = await authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
 
-      const currentUser =
-        userResponse.user || userResponse.data || userResponse;
+      console.log("CURRENT USER:", currentUser);
 
       setUser(currentUser);
 
@@ -68,7 +66,7 @@ export const useLogin = () => {
     } catch (err: any) {
       console.log(err);
 
-      setError(err.response?.data?.message || "Invalid or expired OTP.");
+      setError(err?.response?.data?.message || "Invalid or expired OTP.");
 
       return null;
     } finally {
@@ -82,5 +80,6 @@ export const useLogin = () => {
     otpSent,
     loading,
     error,
+    redirect,
   };
 };

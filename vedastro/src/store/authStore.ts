@@ -4,7 +4,7 @@ import { authService } from "../services/auth.service";
 
 interface AuthUser {
   _id: string;
-  id: string;
+  id?: string;
   name?: string;
   email?: string;
   phone: string;
@@ -47,7 +47,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.log("CURRENT USER:", user);
 
       set({
-        user,
         isAuthenticated: true,
         isHydrated: true,
       });
