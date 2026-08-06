@@ -39,18 +39,10 @@ export default function ConsultationsChatPage() {
 
     if (!isAuthenticated) {
       router.replace(
-        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
+        `/complete-profile?redirect=${encodeURIComponent("/chat")}`,
       );
-      return;
     }
-
-    if (user && !user.profileCompleted) {
-      router.replace(
-        `/complete-profile?redirect=${encodeURIComponent("/consultations/chat")}`,
-      );
-      return;
-    }
-  }, [isHydrated, isAuthenticated, user, router]);
+  }, [isAuthenticated, isHydrated, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !user?._id) return;

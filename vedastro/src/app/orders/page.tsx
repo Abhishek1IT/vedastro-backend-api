@@ -18,7 +18,9 @@ export default function OrdersPage() {
     const token = document.cookie.includes("accessToken");
 
     if (!token) {
-      router.replace(`/login?redirect=${pathname}`);
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/orders")}`,
+      );
       return;
     }
 

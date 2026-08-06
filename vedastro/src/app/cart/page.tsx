@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect } from "react";
@@ -15,7 +14,8 @@ import { useAuthStore } from "../../store/authStore";
 export default function CartPage() {
   const router = useRouter();
 
-  const { isAuthenticated, isHydrated } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   const {
     items,
@@ -32,15 +32,17 @@ export default function CartPage() {
   } = useCartStore();
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !user) return;
 
-    if (!isAuthenticated) {
-      router.replace("/login?redirect=/cart");
+    if (!user.name || !user.email || !user.dob) {
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/cart")}`,
+      );
       return;
     }
 
     fetchCart();
-  }, [isAuthenticated, isHydrated]);
+  }, [isHydrated, user, router, fetchCart]);
 
   const handleCheckout = () => {
     router.push("/checkout");
@@ -58,14 +60,10 @@ export default function CartPage() {
 
   if (!isHydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center text-white">
         Loading...
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (

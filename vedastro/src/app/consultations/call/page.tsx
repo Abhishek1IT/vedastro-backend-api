@@ -48,25 +48,16 @@ function CallSessionConsole() {
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const activeStreamRef = useRef<MediaStream | null>(null);
   const isHydrated = useAuthStore((state: any) => state.isHydrated ?? true);
-  const user = useAuthStore((state: any) => state.user);
 
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
       router.replace(
-        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
+        `/complete-profile?redirect=${encodeURIComponent("/call")}`,
       );
-      return;
     }
-
-    if (user && !user.profileCompleted) {
-      router.replace(
-        `/complete-profile?redirect=${encodeURIComponent("/consultations/chat")}`,
-      );
-      return;
-    }
-  }, [isHydrated, isAuthenticated, user, router]);
+  }, [isAuthenticated, isHydrated, router]);
 
   useEffect(() => {
     if (!targetId) {

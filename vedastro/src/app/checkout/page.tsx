@@ -23,13 +23,17 @@ export default function CheckoutPage() {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace("/login?redirect=/checkout");
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/cart")}`
+      );
     }
   }, [isAuthenticated, isHydrated, router]);
 
   const handleSubmit = async (address: any) => {
     if (!isAuthenticated) {
-      router.replace("/login?redirect=/checkout");
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent("/cart")}`
+      );
       return;
     }
 
