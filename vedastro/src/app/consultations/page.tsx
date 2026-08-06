@@ -42,20 +42,18 @@ export default function ConsultationPage() {
     }
   };
 
-  const handleAction = (astrologerId: string, type: "chat" | "call") => {
+  const handleAction = (type: "chat" | "call") => {
     if (!isAuthenticated) {
-      router.push(`/login?redirect=/consultations/${type}/${astrologerId}`);
+      router.push(`/login?redirect=/consultations/${type}`);
       return;
     }
 
     if (!user?.profileCompleted) {
-      router.push(
-        `/complete-profile?redirect=/consultations/${type}/${astrologerId}`,
-      );
+      router.push(`/complete-profile?redirect=/consultations/${type}`);
       return;
     }
 
-    router.push(`/consultations/${type}/${astrologerId}`);
+    router.push(`/consultations/${type}`);
   };
 
   return (
@@ -129,7 +127,7 @@ export default function ConsultationPage() {
 
                 <div className="mt-8 grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => handleAction(astro._id, "chat")}
+                    onClick={() => handleAction("chat")}
                     className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-black hover:bg-amber-400"
                   >
                     <MessageCircle size={18} />
@@ -137,7 +135,7 @@ export default function ConsultationPage() {
                   </button>
 
                   <button
-                    onClick={() => handleAction(astro._id, "call")}
+                    onClick={() => handleAction("call")}
                     className="flex items-center justify-center gap-2 rounded-xl bg-green-600 py-3 font-semibold hover:bg-green-500"
                   >
                     <Phone size={18} />
