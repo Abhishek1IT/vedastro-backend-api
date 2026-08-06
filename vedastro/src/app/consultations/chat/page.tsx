@@ -39,7 +39,7 @@ export default function ConsultationsChatPage() {
 
     if (!isAuthenticated) {
       router.replace(
-        `/complete-profile?redirect=${encodeURIComponent("/chat")}`,
+        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
       );
     }
   }, [isAuthenticated, isHydrated, router]);
