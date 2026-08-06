@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { create } from "zustand";
+
 import { authService, AuthUser } from "../services/auth.service";
 
 interface AuthState {
@@ -7,9 +9,13 @@ interface AuthState {
 
   isAuthenticated: boolean;
 
+  isExistingUser: boolean;
+
   isHydrated: boolean;
 
   setUser: (user: AuthUser) => void;
+
+  setAuthenticated: (status: boolean, isExisting?: boolean) => void;
 
   hydrateStore: () => Promise<void>;
 
@@ -21,13 +27,25 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   isAuthenticated: false,
 
+  isExistingUser: true,
+
   isHydrated: false,
 
   setUser: (user) => {
     set({
       user,
+
       isAuthenticated: true,
+
       isHydrated: true,
+    });
+  },
+
+  setAuthenticated: (status, isExisting = true) => {
+    set({
+      isAuthenticated: status,
+
+      isExistingUser: isExisting,
     });
   },
 
@@ -58,6 +76,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: null,
 
       isAuthenticated: false,
+
+      isExistingUser: false,
 
       isHydrated: true,
     });
