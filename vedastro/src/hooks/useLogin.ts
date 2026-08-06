@@ -3,12 +3,14 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useAuthStore } from "../store/authStore";
 import { authService } from "../services/auth.service";
 
 export const useLogin = () => {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
 
   const redirect = searchParams.get("redirect") || "/home";
@@ -61,6 +63,13 @@ export const useLogin = () => {
       console.log("CURRENT USER:", currentUser);
 
       setUser(currentUser);
+
+      // Redirect Logic
+      if (currentUser.profileCompleted) {
+        router.replace(redirect);
+      } else {
+        router.replace(`/profile?redirect=${redirect}`);
+      }
 
       return currentUser;
     } catch (err: any) {
