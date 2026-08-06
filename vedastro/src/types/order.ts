@@ -1,4 +1,5 @@
 export interface Order {
+  status: string;
   _id: string;
 
   user: string;

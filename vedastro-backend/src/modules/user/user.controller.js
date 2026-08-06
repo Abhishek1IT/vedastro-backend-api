@@ -1,4 +1,5 @@
 import UserService from "./user.service.js";
+import User from "../../models/User.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 class UserController {
@@ -24,7 +25,7 @@ class UserController {
         "name avatar phone language experience isOnline profileCompleted role"
       );
 
-      return res.json({
+      return res.status(200).json({
         success: true,
         data: astrologers,
       });
