@@ -63,7 +63,10 @@ export const useCartStore = create<CartState>((set, get) => ({
 
       const res = await CartService.getCart();
 
-      const cart = res.data;
+      console.log("GET CART RESPONSE:", res);
+      console.log("GET CART DATA:", res.data);
+
+      const cart = res.data.data;
 
       const items = cart.items || [];
 

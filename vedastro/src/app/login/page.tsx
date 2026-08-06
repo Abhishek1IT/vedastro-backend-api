@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLogin } from "../../hooks/useLogin";
 import Card from "../../components/ui/Card";
 import Button from "../../components/common/Button";
-import Badge from "../../components/ui/Badge";
 
 export default function LoginPage() {
   const { sendOtp, verifyOtp, otpSent, loading, error } = useLogin();
@@ -49,13 +48,21 @@ export default function LoginPage() {
 
     if (!user) return;
 
-    if (!user.profileCompleted) {
-      router.replace("/complete-profile");
+    // Admin
+    if (user.role === "ADMIN") {
+      router.replace("/admin");
       return;
     }
 
-    if (user.role === "ADMIN") {
-      router.replace("/admin");
+    const profileCompleted =
+      Boolean(user.name?.trim()) &&
+      Boolean(user.email?.trim()) &&
+      Boolean(user.dob);
+
+    if (!profileCompleted) {
+      router.replace(
+        `/complete-profile?redirect=${encodeURIComponent(redirect)}`,
+      );
       return;
     }
 
@@ -65,21 +72,14 @@ export default function LoginPage() {
   const displayedError = localValidationError || error;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 text-white">
       <Card
         hoverEffect={false}
         className="w-full max-w-sm rounded-2xl border border-slate-900 bg-yellow-300/40 p-6 shadow-2xl backdrop-blur-md"
       >
         <div className="mb-6 text-center">
-          <Badge
-            variant="amber"
-            className="text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full font-black mb-3"
-          >
-            Secure VedAstro
-          </Badge>
-
           <h2 className="text-xl font-black uppercase text-white">
-            Login to Your Account
+            Login to Verify
           </h2>
 
           <p className="mt-2 text-[10px] text-slate-500">
@@ -123,7 +123,7 @@ export default function LoginPage() {
                 maxLength={6}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                 placeholder="000000"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-center tracking-[0.4em] text-sm font-bold text-white outline-none"
+                className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-center text-sm font-bold tracking-[0.4em] text-white outline-none"
               />
             </>
           )}

@@ -64,23 +64,6 @@ export const useLogin = () => {
 
       setUser(currentUser);
 
-      // ADMIN
-      if (currentUser.role === "ADMIN") {
-        router.replace("/admin");
-        return currentUser;
-      }
-
-      // Profile incomplete
-      if (!currentUser.profileCompleted) {
-        router.replace(
-          `/complete-profile?redirect=${encodeURIComponent(redirect)}`,
-        );
-        return currentUser;
-      }
-
-      // Redirect to original page
-      router.replace(redirect);
-
       return currentUser;
     } catch (err: any) {
       console.log(err);

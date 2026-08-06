@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { ShoppingCart } from "lucide-react";
 
 import { ROUTES } from "../../constants/routes";
 
@@ -12,7 +13,7 @@ import MobileMenu from "./MobileMenu";
 import ProfileMenu from "./ProfileMenu";
 
 import Button from "../common/Button";
-import SearchBar from "../common/SearchBar";
+// import SearchBar from "../common/SearchBar";
 
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
@@ -83,21 +84,22 @@ export default function Navbar() {
 
           {/* Search */}
 
-          <SearchBar
+          {/* <SearchBar
             onSearch={handleSearchDispatch}
             className="hidden max-w-sm flex-1 md:block"
-          />
+          /> */}
 
           <div className="flex items-center gap-4">
             {/* Cart */}
 
             <button
               onClick={() => router.push("/cart")}
-              className="relative text-2xl"
+              className="relative rounded-full p-2 text-white hover:bg-slate-800 transition"
             >
-              🛍️
+              <ShoppingCart className="h-6 w-6" />
+
               {totalItems > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                   {totalItems}
                 </span>
               )}

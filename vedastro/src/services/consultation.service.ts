@@ -1,19 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "../lib/axios";
 
 export const consultationService = {
-  async getTopAstrologers() {
+  // Public
+  async getAstrologers() {
     try {
-      const response = await api.get("/user/astrologers");
-      
-      if (Array.isArray(response.data)) {
-        return response.data
-          .filter((astro: any) => astro.rating >= 4.5)
-          .slice(0, 3);
-      }
-      return [];
+      const { data } = await api.get("/user/astrologers");
+      return data?.data || data || [];
     } catch (error) {
-      console.error("404 Error bypassed. Returning safe fallback array:", error);
+      console.error("Error fetching astrologers:", error);
+      return [];
+    }
+  },
+
+  // Protected
+  async getChatUsers() {
+    try {
+      const { data } = await api.get("/user/chat-users");
+      return data?.data || data || [];
+    } catch (error) {
+      console.error("Error fetching chat users:", error);
       return [];
     }
   },

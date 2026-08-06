@@ -16,12 +16,17 @@ class UserController {
 
   async getAstrologersProfile(req, res, next) {
     try {
-      const astrologers = await UserService.getAstrologersProfile();
+      const astrologers = await User.find({
+        role: "ASTROLOGER",
+        status: "ACTIVE",
+        isVerified: true,
+      }).select(
+        "name avatar phone language experience isOnline profileCompleted role"
+      );
 
-      res.status(200).json({
+      return res.json({
         success: true,
         data: astrologers,
-        message: "Astrologers profiles fetched successfully",
       });
     } catch (error) {
       next(error);
