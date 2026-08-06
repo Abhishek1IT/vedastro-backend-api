@@ -48,8 +48,7 @@ export default function LoginPage() {
 
     if (!user) return;
 
-    // Admin
-    if (user.role === "ADMIN") {
+    if (user.role === "ADMIN" && !redirect.startsWith("/consultations")) {
       router.replace("/admin");
       return;
     }
