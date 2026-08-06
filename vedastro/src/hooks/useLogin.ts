@@ -1,24 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 import { useAuthStore } from "../store/authStore";
 import { authService } from "../services/auth.service";
 
 export const useLogin = () => {
-  const router = useRouter();
-
-  const searchParams = useSearchParams();
-
-  const redirect = searchParams.get("redirect") || "/home";
-
   const setUser = useAuthStore((state) => state.setUser);
 
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
+
   const [otpSent, setOtpSent] = useState(false);
 
   const formatPhone = (phone: string) => {
@@ -26,56 +19,34 @@ export const useLogin = () => {
   };
 
   const sendOtp = async (phone: string) => {
-    if (!phone) {
-      setError("Please enter a valid mobile number.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
     try {
+      setLoading(true);
+
       await authService.sendOtp(formatPhone(phone));
 
       setOtpSent(true);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to send OTP.");
+      setError(err?.response?.data?.message || "OTP failed");
     } finally {
       setLoading(false);
     }
   };
 
   const verifyOtp = async (phone: string, otp: string) => {
-    if (!phone || !otp) {
-      setError("Phone number and OTP are required.");
-
-      return null;
-    }
-
-    setLoading(true);
-    setError("");
-
     try {
+      setLoading(true);
+
       await authService.verifyOtp(formatPhone(phone), otp);
 
-      const currentUser = await authService.getCurrentUser();
+      const user = await authService.getCurrentUser();
 
-      console.log("CURRENT USER:", currentUser);
+      console.log("USER:", user);
 
-      setUser(currentUser);
+      setUser(user);
 
-      // Redirect Logic
-      if (currentUser.profileCompleted) {
-        router.replace(redirect);
-      } else {
-        router.replace(`/profile?redirect=${redirect}`);
-      }
-
-      return currentUser;
+      return user;
     } catch (err: any) {
-      console.log(err);
-
-      setError(err?.response?.data?.message || "Invalid or expired OTP.");
+      setError(err?.response?.data?.message || "Invalid OTP");
 
       return null;
     } finally {
@@ -85,10 +56,13 @@ export const useLogin = () => {
 
   return {
     sendOtp,
+
     verifyOtp,
+
     otpSent,
+
     loading,
+
     error,
-    redirect,
   };
 };

@@ -60,9 +60,8 @@ export default function LoginPage() {
       Boolean(user.dob);
 
     if (!profileCompleted) {
-      router.replace(
-        `/complete-profile?redirect=${encodeURIComponent(redirect)}`,
-      );
+      router.replace(`/profile?redirect=${encodeURIComponent(redirect)}`);
+
       return;
     }
 
