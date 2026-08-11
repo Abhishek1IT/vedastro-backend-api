@@ -16,6 +16,7 @@ export interface AuthUser {
 }
 
 interface AuthState {
+  isExistingUser: any;
   user: AuthUser | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
