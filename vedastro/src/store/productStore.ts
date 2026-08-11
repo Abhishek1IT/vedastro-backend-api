@@ -9,6 +9,7 @@ export interface ProductImage {
 }
 
 export interface Product {
+  energyTag: string | undefined;
   _id: string;
   name: string;
   slug: string;

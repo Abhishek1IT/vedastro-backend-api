@@ -312,10 +312,9 @@ export const ZodiacHoroscopeView: React.FC = () => {
           {/* Left Text & Attributes */}
           <div className="lg:col-span-7 space-y-6">
             <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-              {selectedZodiac.name}, you are a trusted confidant because of
-              your compassion, but make sure your voice is heard as well. Your
-              energy and perspective are positively impacted by your ability
-              to..
+              {selectedZodiac.name}, you are a trusted confidant because of your
+              compassion, but make sure your voice is heard as well. Your energy
+              and perspective are positively impacted by your ability to..
             </p>
 
             {/* Quick Meta Stats */}
@@ -332,16 +331,6 @@ export const ZodiacHoroscopeView: React.FC = () => {
                 <span className="text-gray-400">Color:</span>
                 <span className="w-6 h-3 rounded bg-emerald-400 inline-block"></span>
               </div>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-3 pt-2">
-              <button className="bg-[#EAD170] text-black font-semibold px-5 py-2.5 rounded-full text-xs flex items-center gap-2 hover:bg-yellow-400 transition-all shadow-md">
-                Get my detailed horoscope <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-              <button className="bg-transparent border border-[#3A2C20] hover:border-gray-500 text-gray-300 font-medium px-5 py-2.5 rounded-full text-xs transition-colors">
-                Talk to a specialist
-              </button>
             </div>
           </div>
 

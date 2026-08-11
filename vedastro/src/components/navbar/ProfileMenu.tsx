@@ -18,7 +18,6 @@ export default function ProfileMenu({ user }: { user?: any }) {
 
   const handleLogout = async () => {
     try {
-      console.log("Logout Clicked");
 
       const res = await authService.logout();
 

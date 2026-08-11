@@ -1,8 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  if (pathname === "/admin/login") {
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 

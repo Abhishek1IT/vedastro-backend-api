@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 
 import { ROUTES } from "../../constants/routes";
@@ -13,27 +11,33 @@ import MobileMenu from "./MobileMenu";
 import ProfileMenu from "./ProfileMenu";
 
 import Button from "../common/Button";
-// import SearchBar from "../common/SearchBar";
 
 import { useAuthStore } from "../../store/authStore";
 import { useCartStore } from "../../store/cartStore";
 
 export default function Navbar() {
   const router = useRouter();
-  const pathname = usePathname();
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const { isAuthenticated, user, isHydrated } = useAuthStore();
 
-  const { totalItems, fetchCart, loading } = useCartStore();
+  const { totalItems, fetchCart, syncGuestCart } = useCartStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated, pathname]);
+    if (!isHydrated) return;
+
+    const loadCart = async () => {
+      if (isAuthenticated) {
+        await syncGuestCart();
+      } else {
+        await fetchCart();
+      }
+    };
+
+    loadCart();
+  }, [isHydrated, isAuthenticated, fetchCart, syncGuestCart]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,29 +46,22 @@ export default function Navbar() {
 
     window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
-  if (!isHydrated) return null;
-
-  const handleSearchDispatch = (query: string) => {
-    if (!query.trim()) return;
-
-    router.push(`/shop?search=${encodeURIComponent(query)}`);
-  };
-
   return (
-    <header className="sticky top-0 z-50 flex w-full justify-center transition-all duration-300">
-      <nav
-        className={`w-full transition-all duration-300 ${
-          isScrolled
-            ? "mx-4 max-w-6xl rounded-full border border-slate-800 bg-slate-950/90 px-6 py-1 shadow-2xl backdrop-blur-md"
-            : "max-w-7xl border-b border-slate-900 bg-slate-950/80 px-4 py-2 backdrop-blur-md sm:px-6 lg:px-8"
-        }`}
-      >
-        <div className="flex h-14 items-center justify-between gap-4">
-          {/* Logo */}
-
+    <>
+      <header className="fixed left-0 right-0 top-0 z-50">
+        <nav
+          className={`mx-auto flex w-full items-center justify-between transition-all duration-300 ${
+            isScrolled
+              ? "mx-4 max-w-6xl rounded-full border border-slate-800 bg-slate-950/90 px-6 py-2 shadow-2xl backdrop-blur-md"
+              : "max-w-7xl border-b border-slate-900 bg-slate-950/80 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8"
+          }`}
+        >
+          {/* LOGO */}
           <div
             className="flex cursor-pointer items-center gap-3"
             onClick={() => router.push("/")}
@@ -76,37 +73,30 @@ export default function Navbar() {
             </h1>
           </div>
 
-          {/* Desktop Menu */}
-
+          {/* DESKTOP MENU */}
           <div className="hidden md:block">
             <DesktopMenu />
           </div>
 
-          {/* Search */}
-
-          {/* <SearchBar
-            onSearch={handleSearchDispatch}
-            className="hidden max-w-sm flex-1 md:block"
-          /> */}
-
+          {/* RIGHT SIDE */}
           <div className="flex items-center gap-4">
-            {/* Cart */}
-
+            {/* CART - GUEST + LOGGED IN BOTH */}
             <button
+              type="button"
               onClick={() => router.push("/cart")}
-              className="relative rounded-full p-2 text-white hover:bg-slate-800 transition"
+              className="relative rounded-full p-2 text-white transition hover:bg-slate-800"
+              aria-label="Shopping cart"
             >
               <ShoppingCart className="h-6 w-6" />
 
               {totalItems > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
                   {totalItems}
                 </span>
               )}
             </button>
 
-            {/* Login/Profile */}
-
+            {/* LOGIN / PROFILE */}
             {isAuthenticated && user ? (
               <ProfileMenu user={user} />
             ) : (
@@ -115,10 +105,11 @@ export default function Navbar() {
               </Button>
             )}
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <MobileMenu isOpen={isMobileOpen} setIsOpen={setIsMobileOpen} />
-    </header>
+        {/* MOBILE MENU */}
+        <MobileMenu isOpen={isMobileOpen} setIsOpen={setIsMobileOpen} />
+      </header>
+    </>
   );
 }

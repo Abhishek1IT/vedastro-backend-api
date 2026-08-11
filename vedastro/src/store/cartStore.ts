@@ -1,99 +1,153 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { create } from "zustand";
+"use client";
 
+import { create } from "zustand";
 import CartService from "../services/cart.service";
+import { useAuthStore } from "./authStore";
+import { useGuestCartStore, GuestCartProduct } from "./guestCartStore";
 
 interface CartItem {
   _id: string;
-
   product: any;
-
   quantity: number;
 }
 
 interface CartState {
   items: CartItem[];
-
   loading: boolean;
-
   error: string | null;
 
   totalItems: number;
-
   subtotal: number;
-
   shipping: number;
-
   discount: number;
-
   total: number;
 
   fetchCart: () => Promise<void>;
 
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
+  addToCart: (
+    productId: string,
+    quantity?: number,
+    product?: GuestCartProduct,
+  ) => Promise<void>;
 
-  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  syncGuestCart: () => Promise<void>;
 
-  removeItem: (id: string) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+
+  removeItem: (productId: string) => Promise<void>;
 
   clearCart: () => Promise<void>;
 }
 
+const calculateTotals = (items: CartItem[]) => {
+  const subtotal = items.reduce((sum, item) => {
+    const price = item.product?.salePrice ?? item.product?.price ?? 0;
+
+    return sum + Number(price) * Number(item.quantity || 0);
+  }, 0);
+
+  const shipping = subtotal === 0 || subtotal > 999 ? 0 : 99;
+
+  const discount = 0;
+
+  const totalItems = items.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0,
+  );
+
+  const total = subtotal + shipping - discount;
+
+  return {
+    subtotal,
+    shipping,
+    discount,
+    total,
+    totalItems,
+  };
+};
+
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
-
   loading: false,
-
   error: null,
 
   totalItems: 0,
-
   subtotal: 0,
-
-  shipping: 99,
-
+  shipping: 0,
   discount: 0,
-
   total: 0,
 
+  // FETCH CART
   fetchCart: async () => {
-    try {
-      set({ loading: true });
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-      const res = await CartService.getCart();
+    // GUEST CART
+    if (!isAuthenticated) {
+      const guestItems = useGuestCartStore.getState().items;
 
-      console.log("GET CART RESPONSE:", res);
-      console.log("GET CART DATA:", res.data);
+      const items: CartItem[] = guestItems.map((item) => ({
+        _id: `guest-${item.productId}`,
+        product: item.product,
+        quantity: item.quantity,
+      }));
 
-      const cart = res.data.data;
-
-      const items = cart.items || [];
-
-      const subtotal = items.reduce(
-        (sum: number, item: any) =>
-          sum + (item.product.salePrice || item.product.price) * item.quantity,
-        0,
-      );
-
-      const shipping = subtotal > 999 ? 0 : 99;
-
-      const discount = 0;
+      const totals = calculateTotals(items);
 
       set({
         items,
-        subtotal,
-        shipping,
-        discount,
-        total: subtotal + shipping - discount,
-        totalItems: items.reduce(
-          (sum: number, item: any) => sum + item.quantity,
-          0,
-        ),
+        loading: false,
+        error: null,
+        ...totals,
+      });
+
+      return;
+    }
+
+    // LOGGED-IN CART
+    try {
+      set({
+        loading: true,
+        error: null,
+      });
+
+      const res = await CartService.getCart();
+
+      const cart = res?.data;
+
+      if (!cart) {
+        set({
+          items: [],
+          subtotal: 0,
+          shipping: 0,
+          discount: 0,
+          total: 0,
+          totalItems: 0,
+        });
+
+        return;
+      }
+
+      const items: CartItem[] = cart.items || [];
+
+      const totals = calculateTotals(items);
+
+      set({
+        items,
+        ...totals,
       });
     } catch (err: any) {
+      console.error("FETCH CART ERROR:", err);
+
       set({
-        error: err.response?.data?.message || "Unable to load cart",
+        items: [],
+        subtotal: 0,
+        shipping: 0,
+        discount: 0,
+        total: 0,
+        totalItems: 0,
+        error: err?.response?.data?.message || "Unable to load cart",
       });
     } finally {
       set({
@@ -102,39 +156,185 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
-  addToCart: async (productId, quantity = 1) => {
-    console.log("ADDING PRODUCT:", productId);
+  // ADD TO CART
+  addToCart: async (productId, quantity = 1, product) => {
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-    await CartService.addToCart(productId, quantity);
+    // GUEST
+    if (!isAuthenticated) {
+      if (!product) {
+        throw new Error("Product information is required");
+      }
 
-    await get().fetchCart();
+      useGuestCartStore.getState().addItem(productId, quantity, product);
 
-    console.log("CART STATE:", get().items);
+      await get().fetchCart();
+
+      return;
+    }
+
+    try {
+      await CartService.addToCart(productId, quantity);
+
+      await get().fetchCart();
+    } catch (err: any) {
+      console.error("ADD TO CART ERROR:", err);
+
+      set({
+        error: err?.response?.data?.message || "Unable to add product to cart",
+      });
+
+      throw err;
+    }
   },
 
-  updateQuantity: async (id, quantity) => {
-    await CartService.updateQuantity(id, quantity);
+  syncGuestCart: async () => {
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-    await get().fetchCart();
+    // User login nahi hai
+    if (!isAuthenticated) {
+      return;
+    }
+
+    const guestItems = useGuestCartStore.getState().items;
+
+    console.log("GUEST CART TO SYNC:", guestItems);
+
+    if (!guestItems.length) {
+      await get().fetchCart();
+      return;
+    }
+
+    try {
+      set({
+        loading: true,
+        error: null,
+      });
+
+      for (const item of guestItems) {
+        await CartService.addToCart(item.productId, item.quantity);
+      }
+
+      useGuestCartStore.getState().clearCart();
+
+      console.log("GUEST CART SYNC COMPLETE");
+
+      await get().fetchCart();
+    } catch (err: any) {
+      console.error("GUEST CART SYNC ERROR:", err);
+
+      set({
+        error: err?.response?.data?.message || "Unable to restore guest cart",
+      });
+
+      throw err;
+    } finally {
+      set({
+        loading: false,
+      });
+    }
   },
 
-  removeItem: async (id) => {
-    await CartService.removeItem(id);
+  // UPDATE QUANTITY
+  updateQuantity: async (productId, quantity) => {
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-    await get().fetchCart();
+    // GUEST
+    if (!isAuthenticated) {
+      useGuestCartStore.getState().updateQuantity(productId, quantity);
+
+      await get().fetchCart();
+
+      return;
+    }
+
+    // LOGGED-IN
+    try {
+      await CartService.updateQuantity(productId, quantity);
+
+      await get().fetchCart();
+    } catch (err: any) {
+      console.error("UPDATE CART ERROR:", err);
+
+      set({
+        error: err?.response?.data?.message || "Unable to update cart",
+      });
+
+      throw err;
+    }
   },
 
+  // REMOVE ITEM
+  removeItem: async (productId) => {
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+    // GUEST
+    if (!isAuthenticated) {
+      useGuestCartStore.getState().removeItem(productId);
+
+      await get().fetchCart();
+
+      return;
+    }
+
+    // LOGGED-IN
+    try {
+      await CartService.removeItem(productId);
+
+      await get().fetchCart();
+    } catch (err: any) {
+      console.error("REMOVE CART ITEM ERROR:", err);
+
+      set({
+        error: err?.response?.data?.message || "Unable to remove item",
+      });
+
+      throw err;
+    }
+  },
+
+  // CLEAR CART
   clearCart: async () => {
-    await CartService.clearCart();
+    const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-    set({
-      items: [],
+    // GUEST
+    if (!isAuthenticated) {
+      useGuestCartStore.getState().clearCart();
 
-      subtotal: 0,
+      set({
+        items: [],
+        subtotal: 0,
+        shipping: 0,
+        discount: 0,
+        total: 0,
+        totalItems: 0,
+        error: null,
+      });
 
-      total: 0,
+      return;
+    }
 
-      totalItems: 0,
-    });
+    // LOGGED-IN
+    try {
+      await CartService.clearCart();
+
+      set({
+        items: [],
+        subtotal: 0,
+        shipping: 0,
+        discount: 0,
+        total: 0,
+        totalItems: 0,
+        error: null,
+      });
+    } catch (err: any) {
+      console.error("CLEAR CART ERROR:", err);
+
+      set({
+        error: err?.response?.data?.message || "Unable to clear cart",
+      });
+
+      throw err;
+    }
   },
 }));

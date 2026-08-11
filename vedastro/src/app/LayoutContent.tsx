@@ -1,16 +1,26 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
+
 import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/common/Footer";
-import { useAuthStore } from "../store/authStore";
 
 const HIDDEN_LAYOUT_ROUTES = [
-  /^\/login/,
-  /^\/register/,
-  /^\/(consultations|chat|call)($|\/)/,
+  /^\/login(?:\/|$)/,
+  /^\/register(?:\/|$)/,
+  /^\/admin\/login(?:\/|$)/,
+
+  // Chat / Call
+  /^\/(?:chat|call)(?:\/|$)/,
+  /^\/consultations\/(?:chat|call)(?:\/|$)/,
+
+  // Cart / Checkout
+  /^\/(?:cart|checkout)(?:\/|$)/,
+  /^\/product\/([^\/]+)\/(\d+)(?:\/|$)/,
+
+  // Admin Dashboard
+  // /^\/admin(?:\/|$)/,
 ];
 
 export default function LayoutContent({
@@ -20,27 +30,19 @@ export default function LayoutContent({
 }) {
   const pathname = usePathname() || "";
 
-  const hydrateStore = useAuthStore((state) => state.hydrateStore);
-
-  useEffect(() => {
-    if (!useAuthStore.getState().isHydrated) {
-      hydrateStore();
-    }
-  }, []);
-
-  const isAuthOrConsultationRoute = HIDDEN_LAYOUT_ROUTES.some((routeRegex) =>
-    routeRegex.test(pathname),
+  const isHiddenRoute = HIDDEN_LAYOUT_ROUTES.some((regex) =>
+    regex.test(pathname),
   );
 
   return (
     <>
-      {!isAuthOrConsultationRoute && <Navbar />}
+      {!isHiddenRoute && <Navbar />}
 
       <main className="min-h-screen dynamic-content-optimization-layer">
         {children}
       </main>
 
-      {!isAuthOrConsultationRoute && <Footer />}
+      {!isHiddenRoute && <Footer />}
     </>
   );
 }

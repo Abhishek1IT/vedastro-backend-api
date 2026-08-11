@@ -98,28 +98,13 @@ class MessageService {
     const conversation =
       await ChatRepository.findConversationById(conversationId);
 
-    console.log("Conversation ID:", conversationId);
-    console.log("Logged In User:", userId);
-
     if (!conversation) {
-      console.log("Conversation not found");
       return false;
     }
-
-    console.log(
-      "Participants:",
-      conversation.participants.map((p) => ({
-        id: String(p._id || p),
-        name: p.name,
-        role: p.role,
-      }))
-    );
 
     const hasAccess = conversation.participants.some(
       (p) => String(p._id || p) === String(userId)
     );
-
-    console.log("Has Access:", hasAccess);
 
     return hasAccess;
   }

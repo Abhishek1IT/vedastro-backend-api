@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useEffect, useState } from "react";
 import { Search, MoreVertical, SlidersHorizontal } from "lucide-react";
 import lib from "../../lib/axios";
@@ -9,53 +10,83 @@ import { useChatStore } from "../../store/chatStore";
 
 interface ChatSidebarProps {
   activeRoomId: string;
+  selectedAstroId?: string;
   onSelectRoom: (
     id: string,
-    metadata?: { name: string; isOnline: boolean; conversationId?: string },
+    metadata?: {
+      name: string;
+      isOnline: boolean;
+      conversationId?: string;
+    },
   ) => void;
 }
 
 export default function ChatSidebar({
   activeRoomId,
+  selectedAstroId,
   onSelectRoom,
 }: ChatSidebarProps) {
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [filter, setFilter] = useState<"ALL" | "USER" | "ASTROLOGER">("ALL");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const { user } = useAuthStore() as any;
   const { onlineUsers } = useChatStore();
+
   const isUser = user?.role === "USER";
   const isAstrologer = user?.role === "ASTROLOGER";
   const isAdmin = user?.role === "ADMIN";
 
+  // USER SIDEBAR
   const fetchUserSidebar = async () => {
     const res = await lib.get("/user/astrologers");
+
     const data = res.data?.data || [];
-    setAstrologers(Array.isArray(data) ? data : []);
+
+    let list = Array.isArray(data) ? data : [];
+
+    // Consultation page se specific astrologer select hua hai
+    if (selectedAstroId) {
+      list = list.filter(
+        (astro: any) => String(astro._id) === String(selectedAstroId),
+      );
+    }
+
+    setAstrologers(list);
   };
 
+  // ASTROLOGER SIDEBAR
   const fetchAstrologerSidebar = async () => {
     const currentUserId = user?._id || user?.id;
+
     const res = await lib.get("/chat/conversations");
+
     const conversations = res.data?.data || [];
 
     const parsedUsers = conversations
-      .map((conv: any) => {
-        const participants = conv.participants || [];
+      .map((conversation: any) => {
+        const participants = conversation.participants || [];
+
         const otherParticipant = participants.find(
-          (p: any) => String(p._id || p.id) !== String(currentUserId),
+          (participant: any) =>
+            String(participant._id || participant.id) !== String(currentUserId),
         );
 
-        if (!otherParticipant) return null;
+        if (!otherParticipant) {
+          return null;
+        }
 
         return {
-          _id: otherParticipant._id,
-          name: otherParticipant.name,
-          isOnline: otherParticipant.isOnline,
-          conversationId: conv._id,
-          lastMessage: conv.lastMessage,
+          _id: otherParticipant._id || otherParticipant.id,
+          name: otherParticipant.name || "User",
+          role: otherParticipant.role,
+          avatar: otherParticipant.avatar,
+          isOnline: otherParticipant.isOnline || false,
+          lastSeen: otherParticipant.lastSeen,
+          conversationId: conversation._id,
+          lastMessage: conversation.lastMessage,
+          lastMessageAt: conversation.lastMessageAt,
         };
       })
       .filter(Boolean);
@@ -63,9 +94,12 @@ export default function ChatSidebar({
     setAstrologers(parsedUsers);
   };
 
+  // ADMIN SIDEBAR
   const fetchAdminSidebar = async () => {
     const res = await lib.get("/admin/chat-users");
+
     const data = res.data?.data || [];
+
     setAstrologers(Array.isArray(data) ? data : []);
   };
 
@@ -74,6 +108,7 @@ export default function ChatSidebar({
 
     try {
       setLoading(true);
+
       if (isUser) {
         await fetchUserSidebar();
       } else if (isAstrologer) {
@@ -81,8 +116,9 @@ export default function ChatSidebar({
       } else if (isAdmin) {
         await fetchAdminSidebar();
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.error("Chat sidebar error:", error);
+      setAstrologers([]);
     } finally {
       setLoading(false);
     }
@@ -90,12 +126,13 @@ export default function ChatSidebar({
 
   useEffect(() => {
     fetchSidebar();
-  }, [user?._id, user?.role]);
+  }, [user?._id, user?.role, selectedAstroId]);
 
   const filteredList = astrologers.filter((item: any) => {
     const matchesRole = isAdmin
       ? filter === "ALL" || item.role?.toUpperCase() === filter
       : true;
+
     const matchesSearch = item.name
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -105,8 +142,7 @@ export default function ChatSidebar({
 
   return (
     <div className="w-full h-full bg-[#14110E] flex flex-col border-r border-[#23201C]">
-      
-      {/* 1. TOP HEADER BAR */}
+      {/* HEADER */}
       <div className="p-3.5 bg-[#1A1612] border-b border-[#23201C] flex justify-between items-center shrink-0">
         <h2 className="text-sm font-semibold text-gray-200 tracking-wide">
           {isUser
@@ -118,14 +154,17 @@ export default function ChatSidebar({
             ({filteredList.length})
           </span>
         </h2>
+
         <div className="flex items-center gap-2 text-gray-400">
           <MoreVertical size={18} className="cursor-pointer hover:text-white" />
         </div>
       </div>
 
+      {/* SEARCH */}
       <div className="p-3 border-b border-[#23201C] space-y-2 bg-[#14110E] shrink-0">
         <div className="flex items-center gap-2 bg-[#1A1612] px-3 py-2 rounded-xl border border-[#2B231D] focus-within:border-amber-600/60 transition-colors">
           <Search size={15} className="text-gray-400 shrink-0" />
+
           <input
             type="text"
             value={searchQuery}
@@ -138,6 +177,7 @@ export default function ChatSidebar({
         {isAdmin && (
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={14} className="text-amber-500" />
+
             <select
               value={filter}
               onChange={(e) =>
@@ -153,10 +193,15 @@ export default function ChatSidebar({
         )}
       </div>
 
+      {/* CHAT LIST */}
       <div className="flex-1 overflow-y-auto divide-y divide-[#1A1612] scrollbar-none">
         {loading ? (
           <div className="p-4 text-center text-xs text-gray-500 animate-pulse">
-            {isUser ? "Loading astrologers..." : "Loading conversations..."}
+            {isUser
+              ? "Loading astrologers..."
+              : isAstrologer
+                ? "Loading clients..."
+                : "Loading conversations..."}
           </div>
         ) : filteredList.length === 0 ? (
           <div className="p-6 text-center text-xs text-gray-500">
@@ -169,7 +214,9 @@ export default function ChatSidebar({
         ) : (
           filteredList.map((item: any) => {
             const itemId = item._id || item.id;
-            const isOnline = onlineUsers[itemId] ?? item.isOnline;
+
+            const isOnline = onlineUsers[itemId] ?? item.isOnline ?? false;
+
             const isActive =
               activeRoomId === itemId || activeRoomId === item.conversationId;
 
@@ -180,20 +227,27 @@ export default function ChatSidebar({
                   try {
                     let conversationId = item.conversationId;
 
+                    // Existing conversation nahi hai
                     if (!conversationId) {
                       const res = await lib.post("/chat/conversations", {
-                        receiverId: item._id,
+                        receiverId: itemId,
                       });
-                      conversationId = res.data.data._id;
+
+                      conversationId = res.data?.data?._id;
                     }
 
-                    onSelectRoom(item._id, {
-                      name: item.name,
+                    if (!conversationId) {
+                      console.error("Conversation ID not found");
+                      return;
+                    }
+
+                    onSelectRoom(itemId, {
+                      name: item.name || "User",
                       isOnline,
                       conversationId,
                     });
                   } catch (error) {
-                    console.log("Conversation create error", error);
+                    console.error("Conversation create error:", error);
                   }
                 }}
                 className={`flex items-center gap-3 p-3.5 cursor-pointer transition-colors ${
@@ -202,35 +256,39 @@ export default function ChatSidebar({
                     : "hover:bg-[#1A1612]"
                 }`}
               >
-                {/* Avatar with Online Badge */}
+                {/* AVATAR */}
                 <div className="relative shrink-0">
                   <div className="w-11 h-11 rounded-full bg-linear-to-tr from-amber-600 to-orange-500 text-white font-semibold flex items-center justify-center text-sm shadow-md">
                     {item.name?.[0]?.toUpperCase() || "U"}
                   </div>
+
                   {isOnline && (
                     <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#14110E]" />
                   )}
                 </div>
 
+                {/* USER INFO */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
                     <h3 className="text-xs font-semibold text-gray-100 truncate">
                       {item.name}
                     </h3>
-                    {item.lastMessage?.createdAt && (
+
+                    {item.lastMessageAt && (
                       <span className="text-[10px] text-gray-500">
-                        {new Date(item.lastMessage.createdAt).toLocaleTimeString([], {
+                        {new Date(item.lastMessageAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
                       </span>
                     )}
                   </div>
+
                   <p className="text-[11px] text-gray-400 truncate">
-                    {item.lastMessage?.text ||
+                    {item.lastMessage ||
                       (isUser
                         ? item.specialization || "Online Astrologer"
-                        : "Click to start chat")}
+                        : "Click to open chat")}
                   </p>
                 </div>
               </div>
@@ -238,7 +296,6 @@ export default function ChatSidebar({
           })
         )}
       </div>
-
     </div>
   );
 }

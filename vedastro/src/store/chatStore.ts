@@ -1,148 +1,126 @@
 import { create } from "zustand";
 
-export interface Message {
-  _id: string;
-  conversation: string;
-
-  sender:
-    | string
-    | {
-        _id: string;
-        name?: string;
-        role?: string;
-        avatar?: string;
-      };
-
-  receiver:
-    | string
-    | {
-        _id: string;
-        name?: string;
-        role?: string;
-        avatar?: string;
-      };
-
+export interface ChatMessage {
+  _id?: string;
   text: string;
-  isSeen?: boolean;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-export interface Contact {
-  _id: string;
-  name: string;
-  avatar?: string;
-  isOnline?: boolean;
+  sender: string | { _id: string };
+  receiver?: string | { _id: string };
+  conversation: string | { _id: string };
+  createdAt?: string;
+  status?: "sending" | "sent" | "failed";
 }
 
 interface ChatState {
-  activeRoomId: string | null;
-
-  messagesByRoom: Record<string, Message[]>;
-
-  activeContacts: Contact[];
-
+  messagesByRoom: Record<string, ChatMessage[]>;
   onlineUsers: Record<string, boolean>;
 
-  setActiveRoom: (roomId: string | null) => void;
+  setMessages: (roomId: string, messages: ChatMessage[]) => void;
 
-  setMessages: (roomId: string, messages: Message[]) => void;
+  addMessage: (roomId: string, message: ChatMessage) => void;
 
-  addMessage: (roomId: string, message: Message) => void;
+  replaceMessage: (
+    roomId: string,
+    tempId: string,
+    message: ChatMessage,
+  ) => void;
 
-  deleteMessage: (roomId: string, messageId: string) => void;
+  updateMessageStatus: (
+    roomId: string,
+    messageId: string,
+    status: ChatMessage["status"],
+  ) => void;
 
-  clearMessages: (roomId: string) => void;
-
-  setActiveContacts: (contacts: Contact[]) => void;
-
-  // Online status actions
-  setUserOnline: (userId: string) => void;
-
-  setUserOffline: (userId: string) => void;
+  setUserOnline: (userId: string, isOnline: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
-  activeRoomId: null,
-
   messagesByRoom: {},
-
-  activeContacts: [],
-
   onlineUsers: {},
 
-  setActiveRoom: (roomId) =>
-    set({
-      activeRoomId: roomId,
-    }),
+  setMessages: (roomId, messages) => {
+    set((state) => {
+      const uniqueMessages = messages.filter(
+        (message, index, array) =>
+          !message._id ||
+          array.findIndex((item) => item._id === message._id) === index,
+      );
 
-  setMessages: (roomId, messages) =>
-    set((state) => ({
-      messagesByRoom: {
-        ...state.messagesByRoom,
-        [roomId]: messages,
-      },
-    })),
+      return {
+        messagesByRoom: {
+          ...state.messagesByRoom,
+          [roomId]: uniqueMessages,
+        },
+      };
+    });
+  },
 
   addMessage: (roomId, message) =>
     set((state) => {
-      const current = state.messagesByRoom[roomId] || [];
+      const existingMessages = state.messagesByRoom[roomId] || [];
 
-      if (current.some((m) => m._id === message._id)) {
+      if (
+        message._id &&
+        existingMessages.some(
+          (item) => String(item._id) === String(message._id),
+        )
+      ) {
         return state;
       }
 
       return {
         messagesByRoom: {
           ...state.messagesByRoom,
-          [roomId]: [...current, message],
+          [roomId]: [...existingMessages, message],
         },
       };
     }),
 
-  deleteMessage: (roomId, messageId) =>
-    set((state) => ({
-      messagesByRoom: {
-        ...state.messagesByRoom,
-        [roomId]: (state.messagesByRoom[roomId] || []).filter(
-          (m) => m._id !== messageId,
-        ),
-      },
-    })),
+  replaceMessage: (roomId, tempId, message) => {
+    set((state) => {
+      const currentMessages = state.messagesByRoom[roomId] || [];
 
-  clearMessages: (roomId) =>
-    set((state) => ({
-      messagesByRoom: {
-        ...state.messagesByRoom,
-        [roomId]: [],
-      },
-    })),
+      return {
+        messagesByRoom: {
+          ...state.messagesByRoom,
+          [roomId]: currentMessages.map((item) =>
+            String(item._id) === String(tempId)
+              ? {
+                  ...message,
+                  status: "sent",
+                }
+              : item,
+          ),
+        },
+      };
+    });
+  },
 
-  setActiveContacts: (contacts) =>
-    set({
-      activeContacts: contacts,
-    }),
+  updateMessageStatus: (roomId, messageId, status) => {
+    set((state) => {
+      const currentMessages = state.messagesByRoom[roomId] || [];
 
-  // User Online
-  setUserOnline: (userId) =>
+      return {
+        messagesByRoom: {
+          ...state.messagesByRoom,
+          [roomId]: currentMessages.map((item) =>
+            String(item._id) === String(messageId)
+              ? {
+                  ...item,
+                  status,
+                }
+              : item,
+          ),
+        },
+      };
+    });
+  },
+
+  setUserOnline: (userId, isOnline) => {
     set((state) => ({
       onlineUsers: {
         ...state.onlineUsers,
-        [userId]: true,
+        [String(userId)]: isOnline,
       },
-    })),
-
-  // User Offline
-  setUserOffline: (userId) =>
-    set((state) => ({
-      onlineUsers: {
-        ...state.onlineUsers,
-        [userId]: false,
-      },
-    })),
-
-  clearOnlineUsers: () =>
-    set({
-      onlineUsers: {},
-    }),
+    }));
+  },
 }));

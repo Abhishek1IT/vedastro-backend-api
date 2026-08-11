@@ -1,96 +1,101 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import Card from "../ui/Card";
 import Badge from "../ui/Badge";
-import Button from "../common/Button";
 
 import { Product } from "../../store/productStore";
 import { useCartStore } from "../../store/cartStore";
-import { useAuthStore } from "../../store/authStore";
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const router = useRouter();
+  const { addToCart } = useCartStore();
 
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-  const { addToCart, fetchCart } = useCartStore();
-  const { isAuthenticated } = useAuthStore();
+  const rawImage = product.images?.[0]?.url;
 
-  const image = product.images?.[0]?.url
-    ? `${BACKEND_URL}${product.images[0].url}`
+  const image = rawImage
+    ? rawImage.startsWith("http")
+      ? rawImage
+      : `${BACKEND_URL.replace(/\/$/, "")}/${rawImage.replace(/^\//, "")}`
     : "/images/product-placeholder.png";
 
   const sellingPrice = product.salePrice ?? product.price;
 
-  const discount = product.salePrice
-    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-    : 0;
+  const discount =
+    product.salePrice && product.price > 0
+      ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+      : 0;
 
-  const handleAddCart = async () => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
+  const handleAddCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
     try {
-      await addToCart(product._id, 1);
+   
+      await addToCart(product._id, 1, product);
 
-      await fetchCart();
-
-      router.push("/cart");
+      console.log("PRODUCT ADDED TO CART:", product.name);
     } catch (err) {
-      console.error(err);
+      console.error("ADD TO CART ERROR:", err);
     }
   };
 
-  const handleBuyNow = async () => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
+  const handleBuyNow = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
     try {
-      await addToCart(product._id, 1);
+      await addToCart(product._id, 1, product);
 
-      await fetchCart();
-
-      router.push("/checkout");
+      window.location.href = "/checkout";
     } catch (err) {
-      console.error(err);
+      console.error("BUY NOW ERROR:", err);
     }
   };
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/30 transition hover:border-amber-500/50">
-      <Link href={`/shop/${product._id}`}>
-        <div className="relative aspect-square overflow-hidden bg-slate-950">
-          <Image
-            src={image}
-            alt={product.name}
-            fill
-            sizes="(max-width:640px)100vw,(max-width:1024px)33vw,20vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+    <Card className="group flex h-full flex-col overflow-hidden">
+      {/* PRODUCT IMAGE */}
+      <Link
+        href={`/shop/${product._id}`}
+        className="relative block h-64 w-full overflow-hidden"
+      >
+        <img
+          src={image}
+          alt={product.name}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            console.error("IMAGE LOAD FAILED:", image);
 
-          {discount > 0 && (
-            <Badge variant="success" className="absolute right-2 top-2">
-              {discount}% OFF
-            </Badge>
-          )}
-        </div>
+            if (
+              !e.currentTarget.src.endsWith("/images/product-placeholder.png")
+            ) {
+              e.currentTarget.src = "/images/product-placeholder.png";
+            }
+          }}
+        />
+
+        {discount > 0 && (
+          <Badge variant="success" className="absolute right-2 top-2 z-10">
+            {discount}% OFF
+          </Badge>
+        )}
       </Link>
 
+      {/* PRODUCT CONTENT */}
       <div className="flex flex-1 flex-col justify-between p-4">
         <div>
-          <div className="flex items-center justify-between">
+          {/* CATEGORY + STOCK */}
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs uppercase text-slate-400">
               {product.category}
             </span>
@@ -102,40 +107,48 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          <h3 className="mt-2 line-clamp-2 font-bold text-white">
-            {product.name}
-          </h3>
+          {/* PRODUCT NAME */}
+          <Link href={`/shop/${product._id}`}>
+            <h3 className="mt-2 line-clamp-2 font-bold text-white transition-colors hover:text-orange-400">
+              {product.name}
+            </h3>
+          </Link>
 
+          {/* PRICE */}
           <div className="mt-3">
             <span className="text-lg font-bold text-white">
               ₹{sellingPrice}
             </span>
 
-            {product.salePrice && (
-              <span className="ml-2 text-sm line-through text-slate-500">
+            {product.salePrice != null && (
+              <span className="ml-2 text-sm text-slate-500 line-through">
                 ₹{product.price}
               </span>
             )}
           </div>
         </div>
 
-        <div className="mt-5 flex gap-2">
-          <Button
-            variant="secondary"
-            className="flex-1"
-            disabled={product.stock === 0}
+        {/* BUTTONS */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {/* ADD TO CART */}
+          <button
+            type="button"
             onClick={handleAddCart}
+            disabled={product.stock <= 0}
+            className="flex h-14 w-full items-center justify-center rounded-xl bg-slate-800 px-2 text-center text-sm font-semibold leading-tight text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add To Cart
-          </Button>
+          </button>
 
-          <Button
-            className="flex-1"
-            disabled={product.stock === 0}
+          {/* BUY NOW */}
+          <button
+            type="button"
             onClick={handleBuyNow}
+            disabled={product.stock <= 0}
+            className="flex h-14 w-full items-center justify-center rounded-xl bg-orange-500 px-2 text-center text-sm font-semibold leading-tight text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Buy Now
-          </Button>
+          </button>
         </div>
       </div>
     </Card>

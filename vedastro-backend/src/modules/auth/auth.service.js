@@ -21,19 +21,38 @@ class AuthService {
   }
 
   // Send OTP
-  async sendOtp(phone) {
+  async sendOtp(phone, role) {
+    const normalizedRole = String(role || "").toUpperCase();
+
+    if (!["USER", "ASTROLOGER", "ADMIN"].includes(normalizedRole)) {
+      throw new ApiError(400, "Invalid role");
+    }
+
     let user = await AuthRepository.findByPhone(phone);
 
     if (!user) {
+      if (normalizedRole === "ADMIN") {
+        throw new ApiError(404, "Admin account not found");
+      }
+
       user = await AuthRepository.create({
         phone,
+        role: normalizedRole,
         profileCompleted: false,
         isVerified: false,
       });
     }
 
-    // const otp = math.floor(100000 + Math.random() * 900000).toString(); 
+    if (user.role !== normalizedRole) {
+      throw new ApiError(
+        403,
+        `This account is registered as ${user.role}`,
+      );
+    }
+
+    // Testing OTP
     const otp = "123456";
+
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
     await AuthRepository.saveOtp(phone, otp, otpExpiry);
@@ -42,13 +61,25 @@ class AuthService {
       message: "OTP sent successfully",
     };
   }
-
   // Verify OTP
-  async verifyOtp(phone, otp) {
+  async verifyOtp(phone, otp, role) {
+    const normalizedRole = String(role || "").toUpperCase();
+
+    if (!["USER", "ASTROLOGER", "ADMIN"].includes(normalizedRole)) {
+      throw new ApiError(400, "Invalid role");
+    }
+
     const user = await AuthRepository.findByPhone(phone);
 
     if (!user) {
       throw new ApiError(404, "User not found");
+    }
+
+    if (user.role !== normalizedRole) {
+      throw new ApiError(
+        403,
+        `This account is registered as ${user.role}`,
+      );
     }
 
     if (user.otp !== otp) {
@@ -67,23 +98,28 @@ class AuthService {
     user.refreshToken = refreshToken;
 
     await user.save();
+
     await AuthRepository.clearOtp(user._id);
 
     return {
       message: "OTP verified successfully",
+
       accessToken,
       refreshToken,
+
       user: {
         _id: user._id,
         id: user._id,
         phone: user.phone,
         name: user.name,
+        email: user.email,
+        dob: user.dob,
         role: user.role,
         profileCompleted: user.profileCompleted,
       },
     };
   }
-  
+
   async logout(userId) {
     await AuthRepository.clearRefreshToken(userId);
   }

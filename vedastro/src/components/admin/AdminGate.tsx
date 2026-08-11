@@ -1,40 +1,53 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
 
-export default function AdminGate({ children }: { children: React.ReactNode }) {
+export default function AdminGate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
+
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const user = useAuthStore((state) => state.user);
 
+  const isLoginPage = pathname === "/admin/login";
+  const isAdmin = user?.role === "ADMIN";
+
   useEffect(() => {
-    if (!isHydrated) {
-      return;
-    }
+    // Admin login page ko protect mat karo
+    if (isLoginPage) return;
 
-    const isAdmin = user?.role === "ADMIN";
+    // Auth hydration complete hone do
+    if (!isHydrated) return;
 
-    if (!isAdmin) {
-      router.replace("/login");
+    // User nahi hai ya admin nahi hai
+    if (!user || user.role !== "ADMIN") {
+      router.replace("/admin/login");
     }
-  }, [isHydrated, router, user?.role]);
+  }, [isLoginPage, isHydrated, user, router]);
+
+  // Login page always accessible
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (!isHydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">
+      <div className="flex min-h-screen items-center justify-center">
         Loading admin access...
       </div>
     );
   }
 
-  const isAdmin = user?.role === "ADMIN";
-
   if (!isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-slate-400">
-        Redirecting to login...
+      <div className="flex min-h-screen items-center justify-center">
+        Redirecting to admin login...
       </div>
     );
   }

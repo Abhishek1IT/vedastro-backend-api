@@ -18,7 +18,14 @@ const CartService = {
   },
 
   async updateQuantity(productId: string, quantity: number) {
-    const res = await lib.put(API_ENDPOINTS.SHOP.UPDATE_CART_ITEM(productId), {
+    if (!productId || productId === "undefined") {
+      console.error("Aborting API call: productId is undefined or empty!");
+      return;
+    }
+
+    const url = API_ENDPOINTS.SHOP.UPDATE_CART_ITEM(productId);
+
+    const res = await lib.put(url, {
       quantity,
     });
 
@@ -26,7 +33,9 @@ const CartService = {
   },
 
   async removeItem(productId: string) {
-    const res = await lib.delete(API_ENDPOINTS.SHOP.REMOVE_CART_ITEM(productId));
+    const res = await lib.delete(
+      API_ENDPOINTS.SHOP.REMOVE_CART_ITEM(productId),
+    );
     return res.data;
   },
 

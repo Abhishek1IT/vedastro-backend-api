@@ -44,9 +44,9 @@ class AuthController {
   // Send OTP
   async sendOtp(req, res, next) {
     try {
-      const { phone } = req.body;
+      const { phone, role } = req.body;
 
-      const result = await AuthService.sendOtp(phone);
+      const result = await AuthService.sendOtp(phone, role);
 
       return res
         .status(200)
@@ -59,61 +59,67 @@ class AuthController {
   // Verify OTP
   async verifyOtp(req, res, next) {
     try {
-      const { phone, otp } = req.body;
+      const { phone, otp, role } = req.body;
 
-      const result = await AuthService.verifyOtp(phone, otp);
+      const result = await AuthService.verifyOtp(
+        phone,
+        otp,
+        role
+      );
+
+      const isProduction =
+        process.env.NODE_ENV === "production";
 
       const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         path: "/",
       };
 
       res.cookie("accessToken", result.accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.cookie("refreshToken", result.refreshToken, {
         ...cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
-      return res.status(200).json(
-        new ApiResponse(
-          200,
-          {
-            user: result.user,
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
-          },
-          "OTP Verified Successfully"
-        )
-      );
+      return res.status(200).json({
+        success: true,
+        data: {
+          user: result.user,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        },
+        message: "OTP Verified Successfully",
+      });
     } catch (error) {
       next(error);
     }
   }
 
-  // Complete Profile
   async completeProfile(req, res, next) {
     try {
-      console.log("BODY:", req.body);
-      console.log("USER:", req.user);
+      const updateData = {
+        name: req.body.name,
+        email: req.body.email,
+        dob: req.body.dob,
+      };
 
-      const { name, email, dob } = req.body;
+      const updatedUser = await AuthService.completeProfile(
+        req.user.id,
+        updateData,
+      );
 
-      const user = await AuthService.completeProfile(req.user._id, {
-        name,
-        email,
-        dob,
-      });
-
-      console.log("SAVED USER:", user);
-
-      return res.status(200).json(
-        new ApiResponse(200, user, "Profile completed successfully")
+      return res.json(
+        new ApiResponse(
+          200,
+          updatedUser,
+          "Profile completed successfully",
+        ),
       );
     } catch (error) {
       next(error);
@@ -183,7 +189,6 @@ class AuthController {
   // Logout
   async logout(req, res, next) {
     try {
-      console.log("REQ USER:", req.user);
 
       await AuthService.logout(req.user._id);
 
@@ -210,24 +215,38 @@ class AuthController {
   // Refresh Token
   async refreshToken(req, res, next) {
     try {
-      const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+      const refreshToken =
+        req.cookies?.refreshToken ||
+        req.body?.refreshToken;
 
-      const result = await AuthService.refreshToken(refreshToken);
+      if (!refreshToken) {
+        return res.status(401).json({
+          success: false,
+          message: "Refresh token missing",
+        });
+      }
+
+      const result =
+        await AuthService.refreshToken(refreshToken);
+
+      const isProduction =
+        process.env.NODE_ENV === "production";
+
+      const cookieOptions = {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        path: "/",
+      };
 
       res.cookie("accessToken", result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60 * 1000,
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        ...cookieOptions,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
       return res.status(200).json(

@@ -49,15 +49,15 @@ class CartService {
         return cart;
     }
 
-    // Update quantity of a product in the cart
     async updateQuantity(userId, productId, quantity) {
         const cart = await cartRepository.findByUser(userId);
+
         if (!cart) {
             throw new ApiError(404, "Cart not found");
         }
-        
+
         const item = cart.items.find(
-            (i) => i.product._id.toString() === productId
+            (i) => i.product?._id?.toString() === productId
         );
 
         if (!item) {
@@ -65,12 +65,12 @@ class CartService {
         }
 
         item.quantity = quantity;
+
         await cartRepository.save(cart);
 
         return await cartRepository.findByUser(userId);
     }
 
-    // Remove a product from the cart
     async removeFromCart(userId, productId) {
         const cart = await cartRepository.findByUser(userId);
         if (!cart) {

@@ -156,7 +156,7 @@ export default function ShopPage() {
 
   return (
     <section className="container mx-auto px-4 py-10">
-      <div className="mb-8">
+      <div className="mb-8 pt-20">
         <h1 className="text-4xl font-black text-white">Cosmic Shop</h1>
 
         <p className="mt-2 text-slate-400">

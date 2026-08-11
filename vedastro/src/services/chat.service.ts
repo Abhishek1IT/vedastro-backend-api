@@ -20,9 +20,6 @@ export interface Message {
   updatedAt: string;
 }
 
-/**
- * Create Conversation
- */
 export const createConversation = async (
   receiverId: string,
 ): Promise<Conversation> => {
@@ -33,18 +30,12 @@ export const createConversation = async (
   return data.data;
 };
 
-/**
- * Get All Conversations
- */
 export const getConversations = async (): Promise<Conversation[]> => {
   const { data } = await api.get("/chat/conversations");
 
   return data.data;
 };
 
-/**
- * Get Messages
- */
 export const getMessages = async (
   conversationId: string,
 ): Promise<Message[]> => {
@@ -53,9 +44,6 @@ export const getMessages = async (
   return data.data;
 };
 
-/**
- * Send Message
- */
 export const sendMessage = async (
   receiverId: string,
   text: string,
@@ -68,9 +56,6 @@ export const sendMessage = async (
   return data.data;
 };
 
-/**
- * Mark Message as Seen
- */
 export const markMessageSeen = async (messageId: string): Promise<Message> => {
   const { data } = await api.put(`/chat/message/seen/${messageId}`);
 

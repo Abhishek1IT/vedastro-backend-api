@@ -31,9 +31,7 @@ export const initSocket = (server) => {
 
   });
 
-
   socketAuth(io);
-
 
   io.on(
     "connection",
@@ -45,7 +43,6 @@ export const initSocket = (server) => {
         "User:",
         socket.user?.id
       );
-
 
       socket.on(
         "disconnect",
@@ -62,20 +59,13 @@ export const initSocket = (server) => {
     }
   );
 
-
   return io;
 };
-
 
 export const getIO = () => {
 
   if (!io) {
-    throw new Error(
-      "Socket.IO is not initialized"
-    );
+    throw new Error("Socket.IO is not initialized");
   }
-
-
   return io;
-
 };

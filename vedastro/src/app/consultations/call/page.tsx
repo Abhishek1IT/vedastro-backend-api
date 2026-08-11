@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -13,7 +14,7 @@ import EmptyState from "../../../components/common/EmptyState";
 import Button from "../../../components/common/Button";
 import Card from "../../../components/ui/Card";
 import api from "../../../lib/axios";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 
 interface DbCallParticipant {
   id: string;
@@ -54,7 +55,9 @@ function CallSessionConsole() {
 
     if (!isAuthenticated) {
       router.replace(
-        `/complete-profile?redirect=${encodeURIComponent("/call")}`,
+        `/complete-profile?redirect=${encodeURIComponent(
+          `/consultations/call?astroId=${targetId}`,
+        )}`,
       );
     }
   }, [isAuthenticated, isHydrated, router]);
@@ -68,10 +71,27 @@ function CallSessionConsole() {
     const fetchParticipantDetails = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/users/astrologers`);
-        setParticipant(response.data);
+
+        const response = await api.get("/user/astrologers");
+
+        const astrologers = response.data?.data || [];
+
+        const astro = astrologers.find((item: any) => item._id === targetId);
+
+        if (!astro) {
+          setParticipant(null);
+          return;
+        }
+
+        setParticipant({
+          id: astro._id,
+          name: astro.name,
+          role: "astrologer",
+          avatarUrl: astro.avatar,
+          isOnline: astro.isOnline,
+        });
       } catch (error) {
-        console.error("Error fetching participant details:", error);
+        console.error(error);
         setParticipant(null);
       } finally {
         setLoading(false);
@@ -139,7 +159,7 @@ function CallSessionConsole() {
           title="Missing Link Identifier"
           description="No active participant ID query parameter detected in route structure parameters index."
           actionLabel="Return to Directory"
-          onActionClick={() => router.push("/consultations/astrologers")}
+          onActionClick={() => router.push("/consultations")}
         />
       </div>
     );
@@ -204,7 +224,7 @@ function CallSessionConsole() {
             <Button
               variant="secondary"
               className="flex-1 rounded-xl text-[10px] uppercase font-black tracking-wider"
-              onClick={() => router.push("/consultations/astrologers")}
+              onClick={() => router.push("/consultations")}
             >
               Back
             </Button>

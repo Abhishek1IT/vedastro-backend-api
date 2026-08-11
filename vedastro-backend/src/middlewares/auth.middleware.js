@@ -3,15 +3,10 @@ import { verifyAccessToken } from "../utils/jwt.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
-    console.log("AUTH");
-    console.log("Cookies:", req.cookies);
-    console.log("AccessToken:", req.cookies?.accessToken);
-    console.log("Headers Cookie:", req.headers.cookie);
 
     const token = req.cookies?.accessToken;
 
     if (!token || token === "undefined" || token === "null") {
-      console.log("Token Missing");
 
       return res.status(401).json({
         success: false,
@@ -21,19 +16,29 @@ const authMiddleware = async (req, res, next) => {
 
     const decoded = verifyAccessToken(token);
 
-    console.log("Decoded Token:", decoded);
-
     const userId = decoded.id || decoded._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token: user id missing",
+      });
+    }
 
     const user = await User.findById(userId);
 
-    console.log("User:", user);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not found",
+      });
+    }
 
     req.user = user;
 
     next();
   } catch (error) {
-    console.log(error);
+    console.error("AUTH MIDDLEWARE ERROR:", error);
 
     return res.status(401).json({
       success: false,

@@ -66,7 +66,7 @@ class UserRepository {
       role: ROLES.ASTROLOGER,
     }).select("-otp -otpExpiry -refreshToken");
   }
-
+  
   async updateProfile(userId, data) {
     return await User.findByIdAndUpdate(userId, data, {
       new: true,

@@ -2,103 +2,160 @@ import User from "../../models/User.js";
 import { onlineUsers } from "../../config/socketAuthHandler.js";
 
 export default function registerChatSocket(io) {
-
   io.on("connection", async (socket) => {
+    try {
+      const userId = String(socket.user.id);
 
-    const userId = socket.user.id;
+      console.log(
+        `${socket.user.name} Socket Connected: ${socket.id}`,
+      );
 
-    console.log(
-      `${socket.user.name} Socket Connected`
-    );
+      socket.join(`user:${userId}`);
 
-    // user room join
-    socket.join(`user:${userId}`);
+      if (!onlineUsers.has(userId)) {
+        onlineUsers.set(userId, new Set());
+      }
 
-    // online map
-    if (!onlineUsers.has(userId)) {
-      onlineUsers.set(userId, new Set());
-    }
+      onlineUsers.get(userId).add(socket.id);
 
-    onlineUsers.get(userId).add(socket.id);
-
-    await User.findByIdAndUpdate(
-      userId,
-      {
+      await User.findByIdAndUpdate(userId, {
         isOnline: true,
-        lastSeen: new Date()
-      }
-    );
-
-    console.log("Connected User:", userId);
-
-    io.emit("user:online", { userId });
-
-    console.log("Online Event Emitted:", userId);
-
-    // join conversation
-    socket.on(
-      "conversation:join",
-      (conversationId, callback) => {
-
-        socket.join(
-          `conversation:${conversationId}`
-        );
-
-        console.log(
-          `${socket.user.name} joined conversation ${conversationId}`
-        );
-
-        callback?.({
-          success: true
-        });
-
-      }
-    );
-
-    socket.on(
-      "conversation:leave",
-      (conversationId) => {
-
-        socket.leave(
-          `conversation:${conversationId}`
-        );
-      }
-    );
-
-    socket.on("typing:start", ({ conversationId }) => {
-      socket.to(`conversation:${conversationId}`).emit("typing:start", {
-        userId: socket.user.id,
+        lastSeen: new Date(),
       });
-    });
 
-    socket.on("typing:stop", ({ conversationId }) => {
-      socket.to(`conversation:${conversationId}`).emit("typing:stop", {
-        userId: socket.user.id,
+      console.log("Connected User:", userId);
+
+      io.emit("user:online", {
+        userId,
       });
-    });
 
-    socket.on("disconnect", async (reason) => {
-      console.log(`${socket.user.name} Disconnected`);
-      console.log("Reason:", reason);
+      socket.on(
+        "conversation:join",
+        (conversationId, callback) => {
+          if (!conversationId) {
+            callback?.({
+              success: false,
+              message: "Conversation ID required",
+            });
 
-      const sockets = onlineUsers.get(userId);
+            return;
+          }
 
-      if (sockets) {
-        sockets.delete(socket.id);
+          const room = `conversation:${conversationId}`;
 
-        if (sockets.size === 0) {
-          onlineUsers.delete(userId);
+          socket.join(room);
 
-          await User.findByIdAndUpdate(userId, {
-            isOnline: false,
-            lastSeen: new Date(),
+          console.log(
+            `${socket.user.name} joined ${room}`,
+          );
+
+          callback?.({
+            success: true,
+            conversationId,
           });
+        },
+      );
 
-          io.emit("user:offline", {
-            userId,
-          });
-        }
-      }
-    });
+      socket.on(
+        "conversation:leave",
+        (conversationId) => {
+          if (!conversationId) {
+            return;
+          }
+
+          socket.leave(
+            `conversation:${conversationId}`,
+          );
+
+          console.log(
+            `${socket.user.name} left conversation:${conversationId}`,
+          );
+        },
+      );
+
+      socket.on(
+        "typing:start",
+        ({ conversationId }) => {
+          if (!conversationId) {
+            return;
+          }
+
+          socket
+            .to(`conversation:${conversationId}`)
+            .emit("typing:start", {
+              userId,
+            });
+        },
+      );
+
+      socket.on(
+        "typing:stop",
+        ({ conversationId }) => {
+          if (!conversationId) {
+            return;
+          }
+
+          socket
+            .to(`conversation:${conversationId}`)
+            .emit("typing:stop", {
+              userId,
+            });
+        },
+      );
+
+      socket.on(
+        "disconnect",
+        async (reason) => {
+          console.log(
+            `${socket.user.name} Disconnected`,
+          );
+
+          console.log(
+            "Socket:",
+            socket.id,
+          );
+
+          console.log(
+            "Reason:",
+            reason,
+          );
+
+          const sockets =
+            onlineUsers.get(userId);
+
+          if (!sockets) {
+            return;
+          }
+
+          sockets.delete(socket.id);
+
+          if (sockets.size === 0) {
+            onlineUsers.delete(userId);
+
+            await User.findByIdAndUpdate(
+              userId,
+              {
+                isOnline: false,
+                lastSeen: new Date(),
+              },
+            );
+
+            io.emit("user:offline", {
+              userId,
+            });
+
+            console.log(
+              "User Offline:",
+              userId,
+            );
+          }
+        },
+      );
+    } catch (error) {
+      console.error(
+        "Chat socket connection error:",
+        error,
+      );
+    }
   });
 }

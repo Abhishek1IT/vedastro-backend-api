@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
+
   const searchParams = useSearchParams();
 
   const redirect = searchParams.get("redirect") || "/home";
@@ -34,9 +35,9 @@ export default function ProfilePage() {
     }
 
     if (user) {
-      setName(user.name || "");
-      setEmail(user.email || "");
-      setDob(user.dob || "");
+      setName(user.name ?? "");
+      setEmail(user.email ?? "");
+      setDob(user.dob ?? "");
     }
 
     setLoading(false);
@@ -56,7 +57,8 @@ export default function ProfilePage() {
 
       router.replace(redirect);
     } catch (err) {
-      console.error(err);
+      console.error("Profile update error:", err);
+
       alert("Unable to update profile");
     }
   };
@@ -70,12 +72,12 @@ export default function ProfilePage() {
 
     logout();
 
-    router.replace("/login");
+    router.replace("/admin/login");
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
         Loading Profile...
       </div>
     );
@@ -84,17 +86,16 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6 text-white">
-      <div className="mx-auto mt-10 max-w-4xl">
-        <Card
-          hoverEffect={false}
-          className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8"
-        >
+    <div className="min-h-screen bg-slate-950 px-4 py-10 text-white">
+      <div className="mx-auto max-w-4xl">
+        <Card hoverEffect={false}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">My Profile</h1>
 
-              <Badge variant="success">Active</Badge>
+              <div className="mt-2">
+                <Badge variant="success">Active</Badge>
+              </div>
             </div>
 
             <Button variant="danger" onClick={handleLogout}>
@@ -139,12 +140,6 @@ export default function ProfilePage() {
               <p className="mb-2">Phone</p>
 
               <p>+91 {user.phone}</p>
-            </Card>
-
-            <Card hoverEffect={false}>
-              <p className="mb-2">Role</p>
-
-              <p>{user.role}</p>
             </Card>
           </div>
 

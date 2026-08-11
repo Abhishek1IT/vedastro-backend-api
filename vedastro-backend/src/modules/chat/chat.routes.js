@@ -7,7 +7,6 @@ import { ROLES } from "../../common/roles.js";
 
 const chatRouter = Router();
 
-// Authentication required
 chatRouter.use(authMiddleware);
 
 // Get conversations
@@ -19,6 +18,16 @@ chatRouter.get(
     ROLES.USER
   ),
   ChatController.getConversations
+);
+
+chatRouter.get(
+  "/conversations/:conversationId",
+  roleMiddleware(
+    ROLES.ADMIN,
+    ROLES.ASTROLOGER,
+    ROLES.USER
+  ),
+  ChatController.getConversationById
 );
 
 // Get messages

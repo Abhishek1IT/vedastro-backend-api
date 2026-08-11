@@ -1,13 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageSquare, Lock } from "lucide-react";
+import { ArrowLeft, MessageSquare } from "lucide-react";
 
 import { useAuthStore } from "../../../store/authStore";
-import ChatSidebar from "../../../components/chat/ChatSidebar";
 import ChatWindow from "../../../components/chat/ChatWindow";
 import lib from "../../../lib/axios";
 
@@ -20,10 +22,15 @@ interface SelectedChatState {
 
 export default function ConsultationsChatPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
   const user = useAuthStore((state: any) => state.user);
-  const isHydrated = useAuthStore((state: any) => state.isHydrated ?? true);
+  const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
+  const isHydrated = useAuthStore((state: any) => state.isHydrated);
+
+  const astroId = searchParams.get("astroId");
+  const userId = searchParams.get("userId");
+  const conversationId = searchParams.get("conversationId");
 
   const [selectedChat, setSelectedChat] = useState<SelectedChatState>({
     roomId: "",
@@ -32,170 +39,274 @@ export default function ConsultationsChatPage() {
     isOnline: false,
   });
 
-  const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
+  const [loadingRooms, setLoadingRooms] = useState(true);
 
   useEffect(() => {
     if (!isHydrated) return;
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
+      const query = searchParams.toString();
+
       router.replace(
-        `/login?redirect=${encodeURIComponent("/consultations/chat")}`,
+        `/login?redirect=${encodeURIComponent(
+          `/consultations/chat${query ? `?${query}` : ""}`,
+        )}`,
+      );
+
+      return;
+    }
+
+    if (user.profileCompleted !== true) {
+      const query = searchParams.toString();
+
+      router.replace(
+        `/profile?redirect=${encodeURIComponent(
+          `/consultations/chat${query ? `?${query}` : ""}`,
+        )}`,
       );
     }
-  }, [isAuthenticated, isHydrated, router]);
+  }, [isHydrated, isAuthenticated, user, router, searchParams]);
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!isAuthenticated || !user?._id) return;
+    if (user.profileCompleted !== true) return;
+
+    if (!astroId && !userId && !conversationId) {
+      setLoadingRooms(false);
+      return;
+    }
 
     const controller = new AbortController();
 
-    const fetchInitialChatRooms = async () => {
+    const openChat = async () => {
       try {
         setLoadingRooms(true);
-        const isUser = user.role === "USER";
-        const endpoint = isUser ? "/user/astrologers" : "/chat/conversations";
 
-        const response = await lib.get(endpoint, {
-          signal: controller.signal,
-        });
-
-        const roomsData =
-          response.data?.data ||
-          response.data?.conversations ||
-          response.data ||
-          [];
-
-        if (Array.isArray(roomsData) && roomsData.length > 0) {
-          const firstRoom = roomsData[0];
-
-          if (isUser) {
-            const astroId = firstRoom._id || firstRoom.id;
-            setSelectedChat({
-              roomId: astroId,
-              receiverId: astroId,
-              receiverName: firstRoom.name || "Astrologer Expert",
-              isOnline: firstRoom.isOnline || false,
-            });
-          } else {
-            const otherUser = firstRoom.participants?.find(
-              (p: any) =>
-                (p._id || p.id || p)?.toString() !== user._id?.toString(),
+        if (conversationId) {
+          try {
+            const response = await lib.get(
+              `/chat/conversations/${conversationId}`,
+              {
+                signal: controller.signal,
+              },
             );
 
-            const conversationId = firstRoom._id || firstRoom.id;
-            const clientId = otherUser?._id || otherUser?.id || otherUser;
+            const conversation = response?.data?.data;
+
+            const participants = conversation?.participants || [];
+
+            const otherUser = Array.isArray(participants)
+              ? participants.find((participant: any) => {
+                  const participantId =
+                    typeof participant === "object"
+                      ? participant?._id || participant?.id
+                      : participant;
+
+                  return String(participantId) !== String(user._id);
+                })
+              : null;
+
+            const actualReceiverId = otherUser?._id || otherUser?.id || userId;
+
+            const actualReceiverName =
+              otherUser?.name ||
+              otherUser?.fullName ||
+              (otherUser?.role === "ASTROLOGER" ? "Astrologer" : "User");
+
+            const actualOnlineStatus = Boolean(otherUser?.isOnline);
+
+            if (!actualReceiverId) {
+              console.error("Receiver ID not found");
+
+              setSelectedChat({
+                roomId: "",
+                receiverId: "",
+                receiverName: "",
+                isOnline: false,
+              });
+
+              return;
+            }
 
             setSelectedChat({
-              roomId: conversationId,
-              receiverId: String(clientId || ""),
-              receiverName: otherUser?.name || "Client User",
-              isOnline: otherUser?.isOnline || false,
+              roomId: String(conversationId),
+              receiverId: String(actualReceiverId),
+              receiverName: actualReceiverName,
+              isOnline: actualOnlineStatus,
             });
+
+            return;
+          } catch (error: any) {
+            if (
+              error?.name === "CanceledError" ||
+              error?.code === "ERR_CANCELED"
+            ) {
+              return;
+            }
+
+            console.error(
+              "GET CONVERSATION ERROR:",
+              error?.response?.data || error,
+            );
+
+            return;
           }
         }
-      } catch (error: any) {
-        if (error.name !== "CanceledError") {
-          console.error("Error fetching initial chat rooms:", error);
+
+        const receiverId = astroId || userId;
+
+        if (!receiverId) {
+          setLoadingRooms(false);
+          return;
         }
+
+        const response = await lib.post(
+          "/chat/conversations",
+          {
+            receiverId: String(receiverId),
+          },
+          {
+            signal: controller.signal,
+          },
+        );
+
+        const conversation = response?.data?.data;
+
+        if (!conversation?._id) {
+          console.error("Conversation not found:", response?.data);
+
+          setSelectedChat({
+            roomId: "",
+            receiverId: "",
+            receiverName: "",
+            isOnline: false,
+          });
+
+          return;
+        }
+
+        const participants = conversation?.participants || [];
+
+        const otherUser = Array.isArray(participants)
+          ? participants.find((participant: any) => {
+              const participantId =
+                typeof participant === "object"
+                  ? participant?._id || participant?.id
+                  : participant;
+
+              return String(participantId) !== String(user._id);
+            })
+          : null;
+
+        const actualReceiverId = otherUser?._id || otherUser?.id || receiverId;
+
+        const actualReceiverName =
+          otherUser?.name ||
+          otherUser?.fullName ||
+          (otherUser?.role === "ASTROLOGER"
+            ? "Astrologer"
+            : astroId
+              ? "Astrologer"
+              : "User");
+
+        const actualOnlineStatus = Boolean(otherUser?.isOnline);
+
+        setSelectedChat({
+          roomId: String(conversation._id),
+          receiverId: String(actualReceiverId),
+          receiverName: actualReceiverName,
+          isOnline: actualOnlineStatus,
+        });
+      } catch (error: any) {
+        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+          return;
+        }
+
+        console.error("ERROR OPENING CHAT:", error?.response?.data || error);
+
+        setSelectedChat({
+          roomId: "",
+          receiverId: "",
+          receiverName: "",
+          isOnline: false,
+        });
       } finally {
-        setLoadingRooms(false);
+        if (!controller.signal.aborted) {
+          setLoadingRooms(false);
+        }
       }
     };
 
-    fetchInitialChatRooms();
+    openChat();
 
     return () => {
       controller.abort();
     };
-  }, [isAuthenticated, user?._id, user?.role]);
-
-  const handleRoomSelect = useCallback(
-    (
-      roomId: string,
-      metadata?: {
-        name: string;
-        isOnline: boolean;
-        conversationId?: string;
-      },
-    ) => {
-      const conversationId = metadata?.conversationId || roomId;
-
-      setSelectedChat({
-        roomId: conversationId,
-        receiverId: roomId,
-        receiverName: metadata?.name || "Chat Partner",
-        isOnline: metadata?.isOnline || false,
-      });
-    },
-    [],
-  );
+  }, [
+    isHydrated,
+    isAuthenticated,
+    user?._id,
+    user?.profileCompleted,
+    astroId,
+    userId,
+    conversationId,
+  ]);
 
   if (!isHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0907] text-gray-400">
-        <div className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-          <p className="text-sm font-medium animate-pulse">
-            Connecting securely...
-          </p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#0B0907] text-gray-400">
+        Connecting securely...
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user || user.profileCompleted !== true) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0907] flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 select-none">
-      <div className="w-full max-w-7xl mb-3 flex items-center justify-between px-2">
+    <div className="min-h-screen bg-[#0B0907] px-4 py-6 text-gray-200">
+      <div className="mx-auto max-w-7xl">
+        {/* BACK */}
         <Link
           href="/consultations"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 hover:text-amber-400 transition-colors group"
+          className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
         >
-          <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Consultations</span>
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </Link>
-      </div>
 
-      {/* Main WhatsApp-Style Container */}
-      <div className="flex h-[85vh] w-full max-w-7xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-[#23201C] bg-[#0E0C0A] text-gray-200 shadow-2xl flex-col md:flex-row">
-        <div className="w-full md:w-1/3 md:min-w-[320px] lg:min-w-87.5 border-b md:border-b-0 md:border-r border-[#23201C] bg-[#14110E] flex flex-col h-[40vh] md:h-full">
-          <ChatSidebar
-            activeRoomId={selectedChat.roomId}
-            onSelectRoom={handleRoomSelect}
-          />
-        </div>
+        {/* CHAT */}
+        <div className="flex h-[85vh] w-full overflow-hidden rounded-xl border border-[#23201C] bg-[#0E0C0A] text-gray-200 shadow-2xl sm:rounded-2xl">
+          <div className="relative flex h-full flex-1 flex-col bg-[#0B0907]">
+            {selectedChat.roomId ? (
+              <ChatWindow
+                roomId={selectedChat.roomId}
+                receiverId={selectedChat.receiverId}
+                receiverName={selectedChat.receiverName}
+                isReceiverOnline={selectedChat.isOnline}
+              />
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center space-y-4 bg-[#0B0907] p-6 text-center text-gray-500">
+                <div className="rounded-full border border-[#23201C] bg-[#14110E] p-5 shadow-inner">
+                  <MessageSquare className="h-10 w-10 text-gray-400" />
+                </div>
 
-        <div className="flex-1 flex flex-col bg-[#0B0907] relative h-[45vh] md:h-full">
-          {selectedChat.roomId ? (
-            <ChatWindow
-              roomId={selectedChat.roomId}
-              receiverId={selectedChat.receiverId}
-              receiverName={selectedChat.receiverName}
-              isReceiverOnline={selectedChat.isOnline}
-            />
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-gray-500 space-y-4 bg-[#0B0907] border-b-[6px] border-amber-600">
-              <div className="p-5 rounded-full bg-[#14110E] border border-[#23201C] shadow-inner">
-                <MessageSquare className="w-10 h-10 text-gray-400" />
+                <div className="max-w-sm space-y-2">
+                  <h2 className="text-xl font-light text-gray-200">
+                    {loadingRooms ? "Opening chat..." : "Unable to open chat"}
+                  </h2>
+
+                  <p className="text-sm leading-relaxed text-gray-500">
+                    {loadingRooms
+                      ? "Connecting you with the selected user..."
+                      : "Please go back to consultations and select the user again."}
+                  </p>
+                </div>
               </div>
-              <div className="max-w-sm space-y-2">
-                <h2 className="text-xl font-light text-gray-200">
-                  {loadingRooms ? "Syncing messages..." : "VedAstro Web"}
-                </h2>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  Send and receive messages without keeping your phone online.
-                  Select a consultation from the left to begin.
-                </p>
-              </div>
-              <div className="absolute bottom-10 flex items-center gap-1.5 text-xs text-gray-600">
-                <Lock className="w-3 h-3" />
-                <span>End-to-end encrypted</span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

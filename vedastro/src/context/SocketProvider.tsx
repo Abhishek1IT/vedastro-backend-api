@@ -24,25 +24,20 @@ let socketInstance: Socket | null = null;
 export function SocketProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuthStore();
 
-  const { setUserOnline, setUserOffline } = useChatStore();
+  const setUserOnline = useChatStore((state) => state.setUserOnline);
 
   const [socket, setSocket] = useState<Socket | null>(null);
-
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-
     if (!isAuthenticated || !user?._id) {
       if (socketInstance) {
         socketInstance.removeAllListeners();
-
         socketInstance.disconnect();
-
         socketInstance = null;
       }
 
       setSocket(null);
-
       setIsConnected(false);
 
       return;
@@ -51,19 +46,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     if (!socketInstance) {
       socketInstance = initSocket();
 
-      // User Online
-
       socketInstance.on("user:online", ({ userId }) => {
-        setUserOnline(userId);
+        setUserOnline(userId, true);
       });
-
-      // User Offline
 
       socketInstance.on("user:offline", ({ userId }) => {
-        setUserOffline(userId);
+        setUserOnline(userId, false);
       });
-
-      // Connected
 
       socketInstance.on("connect", () => {
         console.log("Socket Connected:", socketInstance?.id);
@@ -71,21 +60,15 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         setIsConnected(true);
       });
 
-      // Disconnect
-
       socketInstance.on("disconnect", (reason) => {
         console.log("Socket Disconnected:", reason);
 
         setIsConnected(false);
       });
 
-      // Error
-
       socketInstance.on("connect_error", (error) => {
         console.log("Socket Error:", error.message);
       });
-
-      // Reconnect
 
       socketInstance.io.on("reconnect_attempt", (attempt) => {
         console.log("Reconnect Attempt:", attempt);
@@ -105,7 +88,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     return () => {
       console.log("SocketProvider Cleanup");
     };
-  }, [isAuthenticated, user?._id, setUserOnline, setUserOffline]);
+  }, [isAuthenticated, user?._id, setUserOnline]);
 
   const emitEvent = (event: string, data?: any) => {
     if (socketInstance && socketInstance.connected) {

@@ -52,21 +52,21 @@ export const API_ENDPOINTS = {
 
     ADD_TO_CART: "/cart",
 
-    UPDATE_CART_ITEM: (id: string) => `/cart/${id}`,
+    UPDATE_CART_ITEM: (productId: string) => `/cart/${productId}`,
 
-    REMOVE_CART_ITEM: (id: string) => `/cart/${id}`,
+    REMOVE_CART_ITEM: (productId: string) => `/cart/${productId}`,
 
     CLEAR_CART: "/cart",
 
     // Orders
-    // ORDERS: "/api/orders",
+    ORDERS: "/api/orders",
 
-    // ORDER_DETAILS: (id: string) => `/api/orders/${id}`,
+    ORDER_DETAILS: (id: string) => `/api/orders/${id}`,
 
     // Payment
-    // CREATE_PAYMENT: "/api/payment/create",
+    CREATE_PAYMENT: "/api/payment/create",
 
-    // VERIFY_PAYMENT: "/api/payment/verify",
+    VERIFY_PAYMENT: "/api/payment/verify",
   },
 };
 

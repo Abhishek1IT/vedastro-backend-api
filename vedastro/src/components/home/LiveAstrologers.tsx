@@ -38,7 +38,7 @@ const LiveAstrologers: React.FC = () => {
           </div>
           
           <div className="pt-2">
-            <Link href="consultations/chat">
+            <Link href="consultations">
               <button className="bg-[#EAD170] text-black font-semibold px-6 py-3 rounded-full text-sm flex items-center gap-2 hover:bg-yellow-400 transition-transform hover:scale-105 shadow-xl shadow-yellow-500/10">
                 Start Free Chat <ArrowRight className="w-4 h-4" />
               </button>

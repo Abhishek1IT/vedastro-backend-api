@@ -1,24 +1,30 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../../store/authStore";
+
+interface HydrationProviderProps {
+  children: React.ReactNode;
+}
 
 export default function HydrationProvider({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: HydrationProviderProps) {
   const [mounted, setMounted] = useState(false);
+
   const hydrateStore = useAuthStore((state) => state.hydrateStore);
 
   useEffect(() => {
-    hydrateStore();       
-    setMounted(true);     
+    const hydrate = async () => {
+      await hydrateStore();
+      setMounted(true);
+    };
+
+    hydrate();
   }, [hydrateStore]);
 
   if (!mounted) {
-    return <div className="min-h-screen bg-slate-950" />;
+    return null;
   }
 
   return <>{children}</>;

@@ -2,8 +2,17 @@ import ChatRepository from "./chat.repository.js";
 import ApiError from "../../utils/ApiError.js";
 
 class ChatService {
-  async getConversations(userId) {
-    return await ChatRepository.getUserConversations(userId);
+  async getConversations(userId, role) {
+    return await ChatRepository.getUserConversations(
+      userId,
+      role,
+    );
+  }
+
+  async getConversationById(conversationId) {
+    return await ChatRepository.findConversationById(
+      conversationId,
+    );
   }
 
   async createConversation(user1, user2) {

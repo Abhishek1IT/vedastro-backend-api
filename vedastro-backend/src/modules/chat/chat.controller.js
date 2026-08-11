@@ -9,11 +9,39 @@ class ChatController {
   // Get all conversations
   async getConversations(req, res, next) {
     try {
-      const conversations = await ChatService.getConversations(req.user.id);
+      const conversations = await ChatService.getConversations(
+        req.user.id,
+        req.user.role,
+      );
 
       res.status(200).json({
         success: true,
         data: conversations,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Get single conversation
+  async getConversationById(req, res, next) {
+    try {
+      const { conversationId } = req.params;
+
+      const conversation =
+        await ChatService.getConversationById(conversationId);
+
+      if (!conversation) {
+        return res.status(404).json({
+          success: false,
+          message: "Conversation not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: conversation,
+        message: "Conversation fetched successfully",
       });
     } catch (error) {
       next(error);
@@ -84,14 +112,7 @@ class ChatController {
           ? message.conversation._id
           : message.conversation;
 
-      console.log("Sending Message");
-      console.log("Conversation:", conversationId);
-      console.log("Sender:", req.user.id);
-      console.log("Receiver:", receiverId);
-
       io.to(`conversation:${conversationId}`).emit("message:new", message);
-
-      console.log("Message emitted");
 
       res.status(201).json({
         success: true,

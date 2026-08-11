@@ -5,8 +5,7 @@ import {
   Briefcase, 
   User, 
   TrendingUp, 
-  HeartHandshake, 
-  ArrowRight,
+  HeartHandshake,
   ArrowUpRight
 } from 'lucide-react';
 
@@ -100,10 +99,6 @@ export const Services: React.FC = () => {
               astrologer, <span className="text-[#C88029] font-normal">for You</span>
             </h2>
           </div>
-
-          <button className="bg-[#EAD170] text-black font-semibold px-5 py-2.5 rounded-full text-xs flex items-center gap-2 hover:bg-yellow-400 transition-all self-start md:self-auto shrink-0 shadow-lg shadow-yellow-500/10">
-            View all astrologers <ArrowRight className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Category Cards Grid */}
