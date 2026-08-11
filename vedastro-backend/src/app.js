@@ -21,11 +21,15 @@ console.log("Uploads Path:", uploadsPath);
 
 // CORS
 
+// CORS
+
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
 
   "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
 
+  "https://vedastro-backend-api.vercel.app",
   "https://vedastro-backend-api-3hvy.vercel.app",
 
   "https://vedastro-backend-api-3hvy-bjix1dn53-abhishek1its-projects.vercel.app",
@@ -36,21 +40,23 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-
+      // Postman / server-to-server
       if (!origin) {
         return callback(null, true);
       }
 
-      if (
-        origin.endsWith(".vercel.app") ||
-        origin === "http://localhost:3000"
-      ) {
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Allow Vercel preview deployments
+      if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
 
       console.log("Blocked CORS:", origin);
 
-      return callback(null, false);
+      return callback(new Error(`CORS blocked: ${origin}`));
     },
 
     credentials: true,
@@ -61,15 +67,14 @@ app.use(
       "PUT",
       "PATCH",
       "DELETE",
-      "OPTIONS"
+      "OPTIONS",
     ],
 
     allowedHeaders: [
       "Content-Type",
       "Authorization",
-      "Cookie"
-    ]
-  })
+    ],
+  }),
 );
 
 // SECURITY
