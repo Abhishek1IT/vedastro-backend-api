@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 const LiveAstrologers: React.FC = () => {
   return (
-    <div className="bg-[#0D0905] text-white min-h-screen flex flex-col justify-between font-sans relative overflow-hidden">
+    <div className="w-full min-h-screen bg-[#0D0905] text-white flex flex-col justify-between font-sans relative overflow-hidden">
 
       {/* 2. Hero Content Section */}
       <main className="max-w-7xl mx-auto px-6 md:px-12 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 relative z-10">

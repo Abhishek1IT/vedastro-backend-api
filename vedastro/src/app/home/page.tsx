@@ -38,51 +38,54 @@ export default function DashboardHomePage() {
     );
   }
 
-  // Prevent rendering before redirect
   if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col gap-12 py-8">
+    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col gap-12 py-8">
       {/* Live Astrologers */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full p-0">
         <LiveAstro />
       </section>
 
       {/* Top Astrologers */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <TopAstrologers />
       </section>
 
       {/* Services */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <Services />
       </section>
 
-      {/* Kundli Horoscope */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Kundli */}
+      <section className="w-full px-4 sm:px-6">
         <Kundli />
+      </section>
+
+      {/* Horoscope */}
+      <section className="w-full px-4 sm:px-6">
         <Horoscope />
       </section>
 
       {/* Why Choose */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <WhyChooseUs />
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <Testimonials />
       </section>
 
       {/* Download App */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <DownloadApp />
       </section>
 
       {/* FAQ */}
-      <section className="max-w-7xl mx-auto w-full px-4 sm:px-6">
+      <section className="w-full px-4 sm:px-6">
         <FAQ />
       </section>
     </div>
