@@ -19,143 +19,99 @@ const uploadsPath = path.join(__dirname, "../uploads");
 
 console.log("Uploads Path:", uploadsPath);
 
-// CORS
-
 const allowedOrigins = [
   "http://localhost:3000",
-
-  "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
+  "http://localhost:3001",
 
   "https://vedastro-backend-api.vercel.app",
+
+  "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
   "https://vedastro-backend-api-3hvy.vercel.app",
-
   "https://vedastro-backend-api-3hvy-bjix1dn53-abhishek1its-projects.vercel.app",
-
   "https://vedastro-backend-api-3hvy-3qwj7xlnk-abhishek1its-projects.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      console.log("CORS ORIGIN:", origin);
+const corsOptions = {
+  origin: (origin, callback) => {
+    console.log("CORS REQUEST:", origin);
 
-      if (!origin) {
-        return callback(null, true);
-      }
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      // Vercel preview URLs
-      if (origin.endsWith(".vercel.app")) {
-        return callback(null, true);
-      }
+    // Vercel preview deployments
+    if (origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
 
-      console.log("BLOCKED CORS:", origin);
+    console.log("CORS BLOCKED:", origin);
 
-      return callback(new Error(`CORS blocked: ${origin}`));
-    },
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
 
-    credentials: true,
+  credentials: true,
 
-    methods: [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "OPTIONS",
-    ],
+  methods: [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+  ],
 
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
-  }),
-);
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
 
-// SECURITY
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-  })
+  }),
 );
 
-// BODY
-
-app.use(
-  express.json()
-);
+app.use(express.json());
 
 app.use(
   express.urlencoded({
     extended: true,
-  })
+  }),
 );
 
-// COOKIE
+app.use(cookieParser());
 
-app.use(
-  cookieParser()
-);
+app.use("/uploads", express.static(uploadsPath));
 
-// STATIC
+app.use(compression());
 
-app.use(
-  "/uploads",
-  express.static(
-    uploadsPath
-  )
-);
+app.use(morgan("dev"));
 
-// COMMON
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "VedAstro Backend Running 🚀",
+  });
+});
 
-app.use(
-  compression()
-);
+app.use("/api", routes);
 
-app.use(
-  morgan("dev")
-);
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route Not Found",
+  });
+});
 
-// HEALTH
-
-app.get(
-  "/",
-  (req, res) => {
-
-    res.status(200).json({
-      success: true,
-      message: "VedAstro Backend Running 🚀"
-    });
-  }
-);
-
-// ROUTES
-
-app.use(
-  "/api",
-  routes
-);
-
-// 404
-
-app.use(
-  (req, res) => {
-
-    res.status(404).json({
-      success: false,
-      message: "Route Not Found"
-    });
-  }
-);
-
-// ERROR
-
-app.use(
-  errorMiddleware
-);
+app.use(errorMiddleware);
 
 export default app;
