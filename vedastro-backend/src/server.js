@@ -18,13 +18,15 @@ async function startServer() {
     await connectDB();
 
     await User.updateMany(
-      {},
+      { isOnline: true },
       {
-        $inc: {
-          sessionVersion: 1,
+        $set: {
+          isOnline: false,
         },
-      },
+      }
     );
+
+    console.log("All users marked offline");
 
     // HTTP Server
     const server = http.createServer(app);
