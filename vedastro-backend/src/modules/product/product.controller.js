@@ -5,17 +5,15 @@ class ProductController {
   // Create Product
   async create(req, res, next) {
     try {
-
       const product = await ProductService.create(
         req.body,
-        req.files
+        req.files || []
       );
 
       return res.status(201).json({
         success: true,
         data: product,
       });
-
     } catch (error) {
       next(error);
     }

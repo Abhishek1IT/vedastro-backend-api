@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 interface ProductImageItem {
   url: string;
@@ -39,13 +40,10 @@ export default function ProductImage({ images, title }: ProductImageProps) {
     <div className="space-y-4">
       {/* MAIN IMAGE */}
       <div className="relative aspect-square overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20">
-        <Image
+        <img
           src={image}
           alt={title}
-          fill
-          priority
-          unoptimized
-          className="object-cover"
+          className="h-full w-full object-cover"
           onError={(e) => {
             console.error("PRODUCT IMAGE FAILED:", image);
 
@@ -77,12 +75,10 @@ export default function ProductImage({ images, title }: ProductImageProps) {
                   selected === index ? "border-amber-500" : "border-slate-800"
                 }`}
               >
-                <Image
+                <img
                   src={imageUrl}
                   alt={`${title}-${index}`}
-                  fill
-                  unoptimized
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                   onError={(e) => {
                     console.error("THUMBNAIL IMAGE FAILED:", imageUrl);
 

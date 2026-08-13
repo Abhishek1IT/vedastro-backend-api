@@ -40,7 +40,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
 
     try {
-   
       await addToCart(product._id, 1, product);
 
       console.log("PRODUCT ADDED TO CART:", product.name);
@@ -74,12 +73,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
-            console.error("IMAGE LOAD FAILED:", image);
+            const target = e.currentTarget;
 
-            if (
-              !e.currentTarget.src.endsWith("/images/product-placeholder.png")
-            ) {
-              e.currentTarget.src = "/images/product-placeholder.png";
+            if (!target.src.includes("/images/product-placeholder.png")) {
+              target.src = "/images/product-placeholder.png";
             }
           }}
         />

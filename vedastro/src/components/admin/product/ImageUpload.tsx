@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface ExistingImage {
@@ -22,7 +23,9 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
     const urls = files.map((file) => URL.createObjectURL(file));
@@ -47,7 +50,6 @@ export default function ImageUpload({
     const updated = [...files, ...valid];
 
     setFiles(updated);
-
     onChange(updated);
 
     e.target.value = "";
@@ -57,8 +59,15 @@ export default function ImageUpload({
     const updated = files.filter((_, i) => i !== index);
 
     setFiles(updated);
-
     onChange(updated);
+  };
+
+  const getImageUrl = (url: string) => {
+    if (url.startsWith("http")) {
+      return url;
+    }
+
+    return `${BACKEND_URL.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
   };
 
   return (
@@ -71,28 +80,38 @@ export default function ImageUpload({
         className="block w-full rounded-lg border border-slate-700 p-3"
       />
 
+      {/* EXISTING IMAGES */}
       {existingImages.length > 0 && (
         <>
           <h3 className="font-semibold">Existing Images</h3>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-            {existingImages.map((img) => (
-              <div
-                key={img.url}
-                className="relative h-28 overflow-hidden rounded-lg"
-              >
-                <Image
-                  src={`${BACKEND_URL}${img.url}`}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ))}
+            {existingImages.map((img) => {
+              const imageUrl = getImageUrl(img.url);
+
+              return (
+                <div
+                  key={img.publicId || img.url}
+                  className="relative h-28 overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={imageUrl}
+                    alt="Product"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      console.error("EXISTING IMAGE LOAD FAILED:", imageUrl);
+
+                      e.currentTarget.src = "/images/product-placeholder.png";
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
         </>
       )}
 
+      {/* NEW SELECTED IMAGES */}
       {previewUrls.length > 0 && (
         <>
           <h3 className="font-semibold">Selected Images</h3>
@@ -103,7 +122,11 @@ export default function ImageUpload({
                 key={index}
                 className="relative h-28 overflow-hidden rounded-lg"
               >
-                <Image src={img} alt="" fill className="object-cover" />
+                <img
+                  src={img}
+                  alt="Selected product"
+                  className="h-full w-full object-cover"
+                />
 
                 <button
                   type="button"

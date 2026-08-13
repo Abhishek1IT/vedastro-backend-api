@@ -5,7 +5,7 @@ import { ROUTES } from "../../constants/routes";
 
 export default function HeroContent() {
   return (
-    <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-left-4 duration-500">
+    <div className="flex flex-col space-y-6 pt-16 lg:pt-24 animate-in fade-in slide-in-from-left-4 duration-500 ">
       <div className="inline-flex max-w-fit items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-400">
         <span></span> Learn from Top Vedic Astrologers
       </div>
@@ -25,12 +25,6 @@ export default function HeroContent() {
         >
           Consult An Expert Now
         </Link>
-        {/* <Link
-          href={ROUTES.FREE_SERVICES.KUNDLI}
-          className="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 text-sm font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition"
-        >
-          Generate Free Kundli
-        </Link> */}
       </div>
     </div>
   );

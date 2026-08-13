@@ -16,7 +16,6 @@ function generateSku(name) {
 class ProductService {
 
   async create(data, files = []) {
-
     data.slug = slugify(data.name, {
       lower: true,
       strict: true,
@@ -26,7 +25,7 @@ class ProductService {
       data.sku = generateSku(data.name);
     }
 
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       data.images = files.map((file) => ({
         url: `/uploads/${file.filename}`,
         publicId: file.filename,
@@ -48,7 +47,6 @@ class ProductService {
   }
 
   async updateProduct(id, data = {}, files = []) {
-
     if (data.name) {
       data.slug = slugify(data.name, {
         lower: true,
@@ -61,7 +59,7 @@ class ProductService {
     }
 
     // New uploaded images
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       data.images = files.map((file) => ({
         url: `/uploads/${file.filename}`,
         publicId: file.filename,

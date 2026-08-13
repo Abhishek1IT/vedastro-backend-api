@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 import routes from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -23,9 +24,10 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
 
-  "https://vedastro-backend-api.vercel.app",
-
   "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
+
+  // Backend domains (if required)
+  "https://vedastro-backend-api.vercel.app",
   "https://vedastro-backend-api-3hvy.vercel.app",
   "https://vedastro-backend-api-3hvy-bjix1dn53-abhishek1its-projects.vercel.app",
   "https://vedastro-backend-api-3hvy-3qwj7xlnk-abhishek1its-projects.vercel.app",
@@ -39,11 +41,12 @@ const corsOptions = {
       return callback(null, true);
     }
 
+    // Exact allowed origins
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    // Vercel preview deployments
+    // Allow Vercel preview deployments
     if (origin.endsWith(".vercel.app")) {
       return callback(null, true);
     }
@@ -71,7 +74,6 @@ const corsOptions = {
 
   optionsSuccessStatus: 204,
 };
-
 app.use(cors(corsOptions));
 
 app.use(
@@ -90,16 +92,16 @@ app.use(
 
 app.use(cookieParser());
 
-app.use("/uploads", express.static(uploadsPath));
-
 app.use(compression());
 
 app.use(morgan("dev"));
 
+app.use("/uploads", express.static(uploadsPath));
+
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "VedAstro Backend Running 🚀",
+    message: "VedAstro Backend Running",
   });
 });
 
