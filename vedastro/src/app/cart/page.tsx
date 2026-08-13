@@ -90,6 +90,13 @@ export default function CartPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <Button variant="secondary" onClick={() => router.push("/orders")}>
+            <span className="inline-flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              My Orders
+            </span>
+          </Button>
+
           <Button variant="secondary" onClick={() => router.push("/shop")}>
             <span className="inline-flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
