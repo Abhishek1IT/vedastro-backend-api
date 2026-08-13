@@ -7,6 +7,7 @@ import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/common/Footer";
 
 const HIDDEN_LAYOUT_ROUTES = [
+  // Auth
   /^\/login(?:\/|$)/,
   /^\/register(?:\/|$)/,
   /^\/admin\/login(?:\/|$)/,
@@ -17,10 +18,15 @@ const HIDDEN_LAYOUT_ROUTES = [
 
   // Cart / Checkout
   /^\/(?:cart|checkout)(?:\/|$)/,
+
+  // Product
   /^\/product\/([^\/]+)\/(\d+)(?:\/|$)/,
 
-  // Admin Dashboard
-  // /^\/admin(?:\/|$)/,
+  // Orders
+  /^\/orders(?:\/|$)/,
+
+  // Payment
+  /^\/payment(?:\/|$)/,
 ];
 
 export default function LayoutContent({

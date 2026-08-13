@@ -4,26 +4,27 @@ import ApiError from "../../utils/ApiError.js";
 
 class CartService {
 
-    // Add a product to the user's cart
     async addToCart(userId, productId, quantity) {
-
-        // Check if the product exists
         const product = await ProductRepository.findById(productId);
+
         if (!product) {
             throw new ApiError(404, "Product not found");
         }
 
-        // find the user's cart
         let cart = await cartRepository.findByUser(userId);
 
-        // create cart if it doesn't exist
         if (!cart) {
             cart = await cartRepository.create(userId);
         }
 
-        // Check if product already exists
+        cart.items = cart.items.filter(
+            (item) => item.product !== null
+        );
+
         const item = cart.items.find(
-            (i) => i.product._id.toString() === productId
+            (item) =>
+                item.product &&
+                item.product._id.toString() === productId.toString()
         );
 
         if (item) {

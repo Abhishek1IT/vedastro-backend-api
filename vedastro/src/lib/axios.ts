@@ -80,7 +80,6 @@ api.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    // Another request is already refreshing
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         subscribeToRefresh((success) => {

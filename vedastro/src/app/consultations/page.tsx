@@ -107,22 +107,63 @@ export default function ConsultationPage() {
   };
 
   const loadAstrologers = async () => {
-    const data = await consultationService.getAstrologers();
+    try {
+      console.log("LOADING ASTROLOGERS...");
 
-    const astrologers: ConsultationPerson[] = Array.isArray(data)
-      ? data
-          .filter((astro: any) => {
-            const astroId = String(astro?._id || astro?.id || "");
+      const data = await consultationService.getAstrologers();
 
-            return (
-              String(astro?.role || "").toUpperCase() === "ASTROLOGER" &&
-              astroId !== String(user?._id || "")
-            );
-          })
-          .map((astro: any) => mapPerson(astro, "ASTROLOGER"))
-      : [];
+      console.log("ASTROLOGERS FROM SERVICE:", data);
 
-    setPeople(uniquePeople(astrologers));
+      if (!Array.isArray(data)) {
+        console.error("Astrologers data is not array:", data);
+        setPeople([]);
+        return;
+      }
+
+      const currentUserId = String(user?._id || "");
+
+      const astrologers: ConsultationPerson[] = data
+        .filter((astro: any) => {
+          const astroId = String(astro?._id || astro?.id || "");
+
+          // Current logged-in user ko list se hatao
+          return astroId && astroId !== currentUserId;
+        })
+        .map((astro: any) => ({
+          _id: String(astro._id || astro.id),
+
+          name: astro.name || "Astrologer",
+
+          phone: astro.phone || "",
+
+          email: astro.email || "",
+
+          avatar: astro.avatar || "",
+
+          language: astro.language || "en",
+
+          experience: Number(astro.experience || 0),
+
+          role: "ASTROLOGER",
+
+          isOnline: Boolean(astro.isOnline),
+
+          isVerified: Boolean(astro.isVerified),
+
+          conversationId: undefined,
+
+          lastMessage: "",
+
+          lastMessageAt: undefined,
+        }));
+
+      console.log("FINAL ASTROLOGERS:", astrologers);
+
+      setPeople(uniquePeople(astrologers));
+    } catch (error) {
+      console.error("LOAD ASTROLOGERS ERROR:", error);
+      setPeople([]);
+    }
   };
 
   const loadUsersForAdmin = async () => {
@@ -132,10 +173,10 @@ export default function ConsultationPage() {
 
     const users: ConsultationPerson[] = Array.isArray(usersData)
       ? usersData
-          .filter((item: any) => {
-            return String(item?.role || "").toUpperCase() === "USER";
-          })
-          .map((item: any) => mapPerson(item, "USER"))
+        .filter((item: any) => {
+          return String(item?.role || "").toUpperCase() === "USER";
+        })
+        .map((item: any) => mapPerson(item, "USER"))
       : [];
 
     setPeople(uniquePeople(users));
@@ -372,6 +413,50 @@ export default function ConsultationPage() {
     );
   }
 
+  function ProfileAvatar({
+    person,
+  }: {
+    person: ConsultationPerson;
+  }) {
+    const [imageError, setImageError] = useState(false);
+
+    const name =
+      person.name ||
+      (person.role === "ASTROLOGER" ? "Astrologer" : "User");
+
+    const getInitials = (value: string) => {
+      return value
+        .split(" ")
+        .slice(0, 2)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join("");
+    };
+
+    const avatar =
+      person.avatar &&
+        person.avatar !== "/images/default-avatar.png" &&
+        !person.avatar.includes("default-avatar.png")
+        ? person.avatar
+        : "";
+
+    if (!avatar || imageError) {
+      return (
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xl font-bold text-amber-400">
+          {getInitials(name)}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={avatar}
+        alt={name}
+        className="h-20 w-20 shrink-0 rounded-full border border-slate-700 object-cover"
+        onError={() => setImageError(true)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -430,11 +515,10 @@ export default function ConsultationPage() {
                       setAdminFilter("USER");
                       setAdminDropdownOpen(false);
                     }}
-                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${
-                      adminFilter === "USER"
-                        ? "bg-slate-800 text-amber-400"
-                        : "text-white"
-                    }`}
+                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${adminFilter === "USER"
+                      ? "bg-slate-800 text-amber-400"
+                      : "text-white"
+                      }`}
                   >
                     Users
                   </button>
@@ -445,11 +529,10 @@ export default function ConsultationPage() {
                       setAdminFilter("ASTROLOGER");
                       setAdminDropdownOpen(false);
                     }}
-                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${
-                      adminFilter === "ASTROLOGER"
-                        ? "bg-slate-800 text-amber-400"
-                        : "text-white"
-                    }`}
+                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${adminFilter === "ASTROLOGER"
+                      ? "bg-slate-800 text-amber-400"
+                      : "text-white"
+                      }`}
                   >
                     Astrologers
                   </button>
@@ -496,19 +579,7 @@ export default function ConsultationPage() {
               >
                 {/* Profile */}
                 <div className="flex items-center gap-4">
-                  <img
-                    src={
-                      person.avatar ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        person.name ||
-                          (person.role === "ASTROLOGER"
-                            ? "Astrologer"
-                            : "User"),
-                      )}`
-                    }
-                    alt={person.name || "Profile"}
-                    className="h-20 w-20 rounded-full border border-slate-700 object-cover"
-                  />
+                  <ProfileAvatar person={person} />
 
                   <div className="min-w-0">
                     <h2 className="truncate text-lg font-bold">

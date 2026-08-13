@@ -94,6 +94,36 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
+    skills: {
+      type: [String],
+      default: [],
+    },
+
+    languages: {
+      type: [String],
+      default: ["English"],
+    },
+
+    rating: {
+      type: Number,
+      default: 5,
+    },
+
+    totalOrders: {
+      type: Number,
+      default: 0,
+    },
+
+    consultationPrice: {
+      type: Number,
+      default: 0,
+    },
+
+    badge: {
+      type: String,
+      enum: ["TOP CHOICE", "CELEBRITY", null],
+      default: null,
+    },
   },
   {
     timestamps: true,

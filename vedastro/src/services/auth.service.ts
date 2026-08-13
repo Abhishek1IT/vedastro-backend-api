@@ -1,6 +1,5 @@
 import api from "../lib/axios";
 import { API_ENDPOINTS } from "../constants/api";
-import { useAuthStore } from "../store/authStore";
 
 export type LoginRole = "USER" | "ASTROLOGER" | "ADMIN";
 
@@ -22,6 +21,7 @@ export interface AuthUser {
 }
 
 export const authService = {
+
   // Send OTP
   async sendOtp(
     phone: string,
@@ -55,13 +55,7 @@ export const authService = {
       },
     );
 
-    const user = response.data?.data?.user;
-
-    if (user) {
-      localStorage.setItem("hasSession", "true");
-
-      useAuthStore.getState().setUser(user);
-    }
+    localStorage.setItem("hasSession", "true");
 
     return response.data;
   },

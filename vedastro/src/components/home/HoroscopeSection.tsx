@@ -152,9 +152,6 @@ const zodiacs: Zodiac[] = [
 ];
 
 export const HoroscopeSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "Today" | "Tomorrow" | "Week" | "Month"
-  >("Today");
 
   return (
     <section className="bg-[#0B0805] text-white py-16 px-6 md:px-12 font-sans border-t border-[#1C1610] relative overflow-hidden">
@@ -214,23 +211,6 @@ export const HoroscopeSection: React.FC = () => {
             <p className="text-gray-400 text-xs md:text-sm pt-1">
               Pick your raashi to see today&apos;s pillars at a glance.
             </p>
-          </div>
-
-          {/* Timeframe Filter Switcher */}
-          <div className="bg-[#140E0A] border border-[#261C14] p-1.5 rounded-full flex items-center gap-1 self-start md:self-auto">
-            {(["Today", "Tomorrow", "Week", "Month"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
-                  activeTab === tab
-                    ? "bg-[#D68528] text-black font-semibold shadow-md"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
           </div>
         </div>
 

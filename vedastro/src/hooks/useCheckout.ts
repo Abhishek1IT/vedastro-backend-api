@@ -3,41 +3,54 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useOrderStore } from "../store/orderStore";
-import { useCartStore } from "../store/cartStore";
+import orderService from "../services/order.service";
+
+interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+interface BuyNowItem {
+  productId?: string;
+  quantity?: number;
+}
 
 export function useCheckout() {
   const router = useRouter();
 
-  const { placeOrder } = useOrderStore();
-  const { fetchCart } = useCartStore();
-
   const [loading, setLoading] = useState(false);
 
   const checkout = async (
-    shippingAddress: {
-      fullName: string;
-      phone: string;
-      address: string;
-      city: string;
-      state: string;
-      pincode: string;
-    },
+    shippingAddress: ShippingAddress,
     paymentMethod: "COD" | "ONLINE",
+    buyNow?: BuyNowItem,
   ) => {
     try {
       setLoading(true);
 
-      const order = await placeOrder({
+      const orderData = {
         shippingAddress,
         paymentMethod,
-      });
 
-      await fetchCart();
+        ...(buyNow?.productId
+          ? {
+              productId: buyNow.productId,
+              quantity: buyNow.quantity || 1,
+            }
+          : {}),
+      };
 
-      router.push(`/orders/${order._id}`);
+      console.log("ORDER DATA:", orderData);
+
+      await orderService.placeOrder(orderData);
+
+      router.push("/orders");
     } catch (error) {
-      console.error(error);
+      console.error("CHECKOUT ERROR:", error);
       throw error;
     } finally {
       setLoading(false);

@@ -48,17 +48,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
 
-  const handleBuyNow = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleBuyNow = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    try {
-      await addToCart(product._id, 1, product);
-
-      window.location.href = "/checkout";
-    } catch (err) {
-      console.error("BUY NOW ERROR:", err);
-    }
+    window.location.href = `/checkout?mode=buy-now&productId=${product._id}`;
   };
 
   return (

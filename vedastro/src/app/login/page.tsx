@@ -68,24 +68,25 @@ export default function LoginPage() {
     try {
       const user = await verifyOtp(cleanPhone, cleanOtp, role);
 
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
-      if (user.role === "ADMIN") {
+      console.log("LOGIN PAGE USER:", user);
+
+      if (String(user.role).toUpperCase() === "ADMIN") {
         router.replace("/admin");
         return;
       }
 
-      const profileCompleted =
-        Boolean(user.name?.trim()) &&
-        Boolean(user.email?.trim()) &&
-        Boolean(user.dob);
-
-      if (!profileCompleted) {
-        router.replace(`/profile?redirect=${encodeURIComponent(redirect)}`);
+      if (user.profileCompleted === true) {
+        router.replace("/home");
         return;
       }
 
-      router.replace(redirect);
+      router.replace(
+        `/profile?redirect=${encodeURIComponent(redirect)}`
+      );
     } catch (error) {
       console.error("VERIFY OTP ERROR:", error);
     }

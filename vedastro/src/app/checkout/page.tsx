@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import CheckoutForm from "../../components/shop/CheckoutForm";
 import PaymentMethod from "../../components/shop/PaymentMethod";
@@ -15,37 +14,74 @@ import { ArrowLeft } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { checkout, loading } = useCheckout();
 
-  const { isAuthenticated, isHydrated } = useAuthStore();
+  const {
+    isAuthenticated,
+    isHydrated,
+  } = useAuthStore();
 
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("COD");
+  const [paymentMethod, setPaymentMethod] =
+    useState<"COD" | "ONLINE">("COD");
 
-  // LOGIN REQUIRED ONLY AT CHECKOUT
+  const productId =
+    searchParams.get("productId");
+
+  const quantity =
+    Number(searchParams.get("quantity")) || 1;
+
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace(`/login?redirect=${encodeURIComponent("/checkout")}`);
+      router.replace(
+        `/login?redirect=${encodeURIComponent(
+          `/checkout${productId
+            ? `?productId=${productId}&quantity=${quantity}`
+            : ""
+          }`
+        )}`
+      );
     }
-  }, [isAuthenticated, isHydrated, router]);
+  }, [
+    isAuthenticated,
+    isHydrated,
+    router,
+    productId,
+    quantity,
+  ]);
 
-  // PLACE ORDER
-  const handleSubmit = async (address: any) => {
+  const handleSubmit = async (address: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+  }) => {
     if (!isAuthenticated) {
-      router.replace(`/login?redirect=${encodeURIComponent("/checkout")}`);
+      router.replace("/login?redirect=/checkout");
       return;
     }
 
     try {
-      await checkout(address, paymentMethod);
+      await checkout(
+        address,
+        paymentMethod,
+        productId
+          ? {
+            productId,
+            quantity,
+          }
+          : undefined
+      );
     } catch (error) {
       console.error("CHECKOUT ERROR:", error);
     }
   };
 
-  // HYDRATION
   if (!isHydrated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
@@ -54,7 +90,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // NOT LOGGED IN
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
@@ -63,16 +98,16 @@ export default function CheckoutPage() {
             Login required to place your order
           </p>
 
-          <p className="mt-2 text-sm text-slate-400">Redirecting to login...</p>
+          <p className="mt-2 text-sm text-slate-400">
+            Redirecting to login...
+          </p>
         </div>
       </div>
     );
   }
 
-  // CHECKOUT
   return (
     <section className="container mx-auto px-4 py-10">
-      {/* BACK TO CART */}
       <div className="mb-6">
         <Link
           href="/cart"
@@ -86,7 +121,10 @@ export default function CheckoutPage() {
       <div className="grid gap-10 lg:grid-cols-2">
         <CheckoutForm onSubmit={handleSubmit} />
 
-        <PaymentMethod value={paymentMethod} onChange={setPaymentMethod} />
+        <PaymentMethod
+          value={paymentMethod}
+          onChange={setPaymentMethod}
+        />
       </div>
 
       {loading && (

@@ -1,35 +1,47 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import api from "../lib/axios";
 
-import lib from "../lib/axios";
-
-const OrderService = {
-  async getOrders() {
-    const res = await lib.get("/order");
-    return res.data;
+const orderService = {
+  getOrders: async () => {
+    const response = await api.get("/order");
+    return response.data;
   },
 
-  async getOrder(id: string) {
-    const res = await lib.get(`/order/${id}`);
-    return res.data;
+  getOrder: async (id: string) => {
+    const response = await api.get(`/order/${id}`);
+    return response.data;
   },
 
-  async placeOrder(data: any) {
-    const res = await lib.post("/order", data);
-    return res.data;
+  placeOrder: async (data: {
+    shippingAddress: {
+      fullName: string;
+      phone: string;
+      address: string;
+      city: string;
+      state: string;
+      pincode: string;
+    };
+    paymentMethod: "COD" | "ONLINE";
+    productId?: string;
+    quantity?: number;
+  }) => {
+    const response = await api.post("/order", data);
+
+    return response.data;
   },
 
-  async cancelOrder(id: string) {
-    const res = await lib.patch(`/order/${id}/cancel`);
-    return res.data;
+  cancelOrder: async (id: string) => {
+    const response = await api.patch(`/order/${id}/cancel`);
+
+    return response.data;
   },
 
-  async updateOrderStatus(id: string, status: string) {
-    const res = await lib.put(`/order/${id}/status`, {
+  updateOrderStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/order/${id}/status`, {
       status,
     });
 
-    return res.data;
+    return response.data;
   },
 };
 
-export default OrderService;
+export default orderService;

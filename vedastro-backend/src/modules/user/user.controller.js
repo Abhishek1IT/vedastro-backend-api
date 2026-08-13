@@ -16,23 +16,22 @@ class UserController {
   }
 
   async getAstrologersProfile(req, res, next) {
-    try {
-      const astrologers = await User.find({
-        role: "ASTROLOGER",
-        status: "ACTIVE",
-        isVerified: true,
-      }).select(
-        "name avatar phone language experience isOnline profileCompleted role"
-      );
+  try {
+    const astrologers = await User.find({
+      role: "ASTROLOGER",
+      status: "ACTIVE",
+    }).select(
+      "name avatar language languages experience skills rating totalOrders consultationPrice badge isOnline"
+    );
 
-      return res.status(200).json({
-        success: true,
-        data: astrologers,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json({
+      success: true,
+      data: astrologers,
+    });
+  } catch (error) {
+    next(error);
   }
+}
 
   async updateProfile(req, res, next) {
     try {

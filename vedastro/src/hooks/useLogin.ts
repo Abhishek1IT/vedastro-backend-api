@@ -8,7 +8,7 @@ import { authService } from "../services/auth.service";
 type LoginRole = "USER" | "ASTROLOGER";
 
 export const useLogin = () => {
-  const setUser = useAuthStore((state: { setUser: any; }) => state.setUser);
+  const setUser = useAuthStore((state: { setUser: any }) => state.setUser);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +28,7 @@ export const useLogin = () => {
       setOtpSent(true);
     } catch (err: any) {
       setError(err?.response?.data?.message || "OTP failed");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -38,17 +39,29 @@ export const useLogin = () => {
       setLoading(true);
       setError("");
 
+      // Verify OTP
       await authService.verifyOtp(formatPhone(phone), otp, role);
 
-      const user = await authService.getCurrentUser();
+      // Get fresh user from backend
+      const currentUser = await authService.getCurrentUser();
 
-      console.log("USER:", user);
+      console.log("========== LOGIN DEBUG ==========");
+      console.log("CURRENT USER:", currentUser);
+      console.log("ROLE:", currentUser?.role);
+      console.log("PROFILE COMPLETED:", currentUser?.profileCompleted);
+      console.log("=================================");
 
-      setUser(user);
+      if (!currentUser) {
+        throw new Error("User data not received");
+      }
 
-      return user;
+      setUser(currentUser);
+
+      return currentUser;
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Invalid OTP");
+      console.error("VERIFY OTP ERROR:", err);
+
+      setError(err?.response?.data?.message || err?.message || "Invalid OTP");
 
       return null;
     } finally {

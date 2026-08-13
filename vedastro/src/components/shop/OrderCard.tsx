@@ -9,9 +9,14 @@ import type { Order } from "../../types/order";
 interface Props {
   order: Order;
   onView?: (id: string) => void;
+  onCancel?: (id: string) => void;
 }
 
-export default function OrderCard({ order, onView }: Props) {
+export default function OrderCard({
+  order,
+  onView,
+  onCancel,
+}: Props) {
   const badge =
     order.orderStatus === "DELIVERED"
       ? "success"
@@ -19,24 +24,56 @@ export default function OrderCard({ order, onView }: Props) {
         ? "error"
         : "warning";
 
+  const canCancel =
+    order.orderStatus !== "DELIVERED" &&
+    order.orderStatus !== "CANCELLED";
+
   return (
-    <Card className="flex items-center justify-between">
+    <Card className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      {/* ORDER INFO */}
       <div>
-        <h3 className="font-black">#{order._id}</h3>
+        <h3 className="font-black">
+          #{order._id}
+        </h3>
 
-        <p className="text-sm text-slate-400">{order.items?.length} Items</p>
+        <p className="text-sm text-slate-400">
+          {order.items?.length || 0} Items
+        </p>
 
-        <p className="text-sm text-slate-400">{order.createdAt}</p>
+        <p className="text-sm text-slate-400">
+          {new Date(order.createdAt).toLocaleDateString()}
+        </p>
       </div>
 
-      <div className="text-right">
-        <Badge variant={badge}>{order.orderStatus}</Badge>
+      {/* RIGHT SIDE */}
+      <div className="text-left sm:text-right">
+        <Badge variant={badge}>
+          {order.orderStatus}
+        </Badge>
 
-        <p className="mt-3 text-xl font-black">₹{order.total}</p>
+        <p className="mt-3 text-xl font-black">
+          ₹{order.total}
+        </p>
 
-        <Button size="sm" className="mt-3" onClick={() => onView?.(order._id)}>
-          View Details
-        </Button>
+        {/* BUTTONS */}
+        <div className="mt-3 flex gap-2 sm:justify-end">
+          <Button
+            size="sm"
+            onClick={() => onView?.(order._id)}
+          >
+            View Order
+          </Button>
+
+          {canCancel && (
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => onCancel?.(order._id)}
+            >
+              Cancel Order
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
