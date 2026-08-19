@@ -292,7 +292,6 @@ export default function ConsultationPage() {
         } else {
           await loadAstrologers();
         }
-
         return;
       }
 
@@ -302,14 +301,20 @@ export default function ConsultationPage() {
       }
 
       await loadAstrologers();
+
     } catch (error) {
       console.error("Load consultations error:", error);
-
       setPeople([]);
     } finally {
       setLoading(false);
     }
-  }, [isAdmin, adminFilter, isAstrologer, isAuthenticated, user?._id]);
+  }, [
+    isAdmin,
+    adminFilter,
+    isAstrologer,
+    isAuthenticated,
+    user?._id,
+  ]);
 
   useEffect(() => {
     if (!isHydrated) {
