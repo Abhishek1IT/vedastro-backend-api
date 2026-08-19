@@ -7,8 +7,8 @@ interface PaymentMethodProps {
 
 export default function PaymentMethod({ value, onChange }: PaymentMethodProps) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
-      <h2 className="mb-6 text-xl font-bold text-white">Payment Method</h2>
+    <div className="rounded-2xl border border-slate-800 bg-white p-6">
+      <h2 className="mb-6 text-xl font-bold text-black">Payment Method</h2>
 
       <div className="space-y-4">
         <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-700 p-4 hover:border-amber-500">
@@ -21,7 +21,7 @@ export default function PaymentMethod({ value, onChange }: PaymentMethodProps) {
           />
 
           <div>
-            <p className="font-semibold text-white">Cash on Delivery</p>
+            <p className="font-semibold text-black">Cash on Delivery</p>
 
             <p className="text-sm text-slate-400">
               Pay when your order is delivered.
@@ -39,9 +39,9 @@ export default function PaymentMethod({ value, onChange }: PaymentMethodProps) {
           />
 
           <div>
-            <p className="font-semibold text-white">Online Payment</p>
+            <p className="font-semibold text-black">Online Payment</p>
 
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-black/40">
               Pay securely using UPI, Card or Net Banking.
             </p>
           </div>

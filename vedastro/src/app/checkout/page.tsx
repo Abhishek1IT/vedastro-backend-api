@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import CheckoutForm from "../../components/shop/CheckoutForm";
 import PaymentMethod from "../../components/shop/PaymentMethod";
@@ -9,11 +9,10 @@ import PaymentMethod from "../../components/shop/PaymentMethod";
 import { useCheckout } from "../../hooks/useCheckout";
 import { useAuthStore } from "../../store/authStore";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import Button from "@/src/components/common/Button";
+import router from "next/router";
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const { checkout, loading } = useCheckout();
@@ -21,6 +20,7 @@ export default function CheckoutPage() {
   const {
     isAuthenticated,
     isHydrated,
+    openLoginModal,
   } = useAuthStore();
 
   const [paymentMethod, setPaymentMethod] =
@@ -32,25 +32,19 @@ export default function CheckoutPage() {
   const quantity =
     Number(searchParams.get("quantity")) || 1;
 
+  /*
+   * Open login modal when user is not logged in
+   */
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace(
-        `/login?redirect=${encodeURIComponent(
-          `/checkout${productId
-            ? `?productId=${productId}&quantity=${quantity}`
-            : ""
-          }`
-        )}`
-      );
+      openLoginModal();
     }
   }, [
-    isAuthenticated,
     isHydrated,
-    router,
-    productId,
-    quantity,
+    isAuthenticated,
+    openLoginModal,
   ]);
 
   const handleSubmit = async (address: {
@@ -62,7 +56,7 @@ export default function CheckoutPage() {
     pincode: string;
   }) => {
     if (!isAuthenticated) {
-      router.replace("/login?redirect=/checkout");
+      openLoginModal();
       return;
     }
 
@@ -78,7 +72,10 @@ export default function CheckoutPage() {
           : undefined
       );
     } catch (error) {
-      console.error("CHECKOUT ERROR:", error);
+      console.error(
+        "CHECKOUT ERROR:",
+        error
+      );
     }
   };
 
@@ -99,8 +96,16 @@ export default function CheckoutPage() {
           </p>
 
           <p className="mt-2 text-sm text-slate-400">
-            Redirecting to login...
+            Please login to continue.
           </p>
+
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="mt-5 rounded-lg bg-orange-500 px-6 py-3 font-semibold text-white transition hover:bg-orange-600"
+          >
+            Login
+          </button>
         </div>
       </div>
     );
@@ -109,17 +114,18 @@ export default function CheckoutPage() {
   return (
     <section className="container mx-auto px-4 py-10">
       <div className="mb-6">
-        <Link
-          href="/cart"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
+        <Button
+          size="sm"
+          onClick={() => router.push("/shop")}
         >
-          <ArrowLeft size={18} />
-          <span>Back To Cart</span>
-        </Link>
+          ← Back to Shop
+        </Button>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <CheckoutForm onSubmit={handleSubmit} />
+        <CheckoutForm
+          onSubmit={handleSubmit}
+        />
 
         <PaymentMethod
           value={paymentMethod}

@@ -23,12 +23,20 @@ export const API_ENDPOINTS = {
 
   ADMIN: {
     USERS: "/admin/users",
-    ASTROLOGERS: "/admin/astrologers",
-    CHAT_USERS: "/admin/chat-users",
     USER_DETAILS: (id: string) => `/admin/users/${id}`,
+
+    ASTROLOGERS: "/admin/astrologers",
+    PENDING_ASTROLOGERS: "/admin/astrologers/pending",
+    ASTROLOGER_DETAILS: (id: string) => `/admin/astrologers/${id}`,
+
+    APPROVE_ASTROLOGER: (id: string) => `/admin/astrologers/${id}/approve`,
+
+    REJECT_ASTROLOGER: (id: string) => `/admin/astrologers/${id}/reject`,
+
+    CHAT_USERS: "/admin/chat-users",
     CHATS: "/admin/chats",
   },
-
+  
   CONSULTATIONS: {
     HISTORY: "/consultations/history",
     SESSION: (id: string) => `/consultations/session/${id}`,

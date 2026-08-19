@@ -13,6 +13,26 @@ class AdminRepository {
     }).select("-password -refreshToken");
   }
 
+  async getPendingAstrologers() {
+    return await User.find({
+      role: "ASTROLOGER",
+      approvalStatus: "PENDING",
+    }).select("-password -refreshToken");
+  }
+
+  async getAstrologerById(id) {
+    return await User.findById(id).select("-password -refreshToken");
+  }
+
+  async updateAstrologerApproval(id, approvalStatus, rejectionReason) {
+    const updateData = {
+      approvalStatus,
+      rejectionReason: approvalStatus === "REJECTED" ? rejectionReason : null,
+    };
+
+    return await User.findByIdAndUpdate(id, updateData, { new: true }).select("-password -refreshToken");
+  }
+
   async getChatUsers() {
     return await User.find({
       role: {

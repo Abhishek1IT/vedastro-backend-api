@@ -12,16 +12,37 @@ export interface CompleteProfilePayload {
 export interface AuthUser {
   _id: string;
   id?: string;
+
   name?: string;
   email?: string;
   phone: string;
   dob?: string;
+
   role?: "USER" | "ASTROLOGER" | "ADMIN";
-  profileCompleted: boolean;
+
+  profileCompleted?: boolean;
+
+  isOnline?: boolean;
+
+  gender?: "MALE" | "FEMALE" | "OTHER" | string;
+  birthPlace?: string | null;
+  birthTime?: string | null;
+
+  experience?: number;
+  skills?: string[];
+  languages?: string[];
+
+  consultationPrice?: number;
+  rating?: number;
+
+  approvalStatus?: "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
+
+  rejectionReason?: string | null;
+
+  avatar?: string;
 }
 
 export const authService = {
-
   // Send OTP
   async sendOtp(
     phone: string,
@@ -42,7 +63,11 @@ export const authService = {
   },
 
   // Verify OTP
-  async verifyOtp(phone: string, otp: string, role: LoginRole) {
+  async verifyOtp(
+    phone: string,
+    otp: string,
+    role: "USER" | "ASTROLOGER" | "ADMIN",
+  ) {
     const response = await api.post(
       "/auth/verify-otp",
       {
@@ -55,9 +80,13 @@ export const authService = {
       },
     );
 
-    localStorage.setItem("hasSession", "true");
+    const data = response.data?.data;
 
-    return response.data;
+    if (!data?.user) {
+      throw new Error("User data not received after OTP verification");
+    }
+
+    return data.user;
   },
 
   // Complete Profile

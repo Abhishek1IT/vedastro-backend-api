@@ -4,6 +4,7 @@ import HydrationProvider from "../components/common/HydrationProvider";
 import { ThemeProvider } from "../context/ThemeContext";
 import { SocketProvider } from "../context/SocketProvider";
 import LayoutContent from "../app/LayoutContent";
+import AuthModalProvider from "../components/auth/AuthModalProvider";
 
 export const metadata: Metadata = {
   title: "VedAstro - Cosmic Alignments",
@@ -22,6 +23,7 @@ export default function RootLayout({
           <HydrationProvider>
             <SocketProvider>
               <LayoutContent>{children}</LayoutContent>
+              <AuthModalProvider />
             </SocketProvider>
           </HydrationProvider>
         </ThemeProvider>

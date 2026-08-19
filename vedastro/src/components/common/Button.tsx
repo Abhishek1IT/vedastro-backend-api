@@ -4,12 +4,12 @@ import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?:
-    | "primary"
-    | "secondary"
-    | "amber"
-    | "danger"
-    | "ghost"
-    | "themeToggle";
+  | "primary"
+  | "secondary"
+  | "amber"
+  | "danger"
+  | "ghost"
+  | "themeToggle";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
 }
@@ -27,14 +27,14 @@ export default function Button({
     "inline-flex items-center justify-center rounded-lg font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants = {
-    primary: "bg-amber-500 hover:bg-amber-600 text-slate-950",
-    amber: "bg-amber-500 hover:bg-amber-600 text-slate-950",
-    secondary: "bg-slate-800 hover:bg-slate-700 text-white",
+    primary: "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-slate-950",
+    amber: "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-slate-950",
+    secondary: "bg-[var(--surface-tertiary)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border-strong)]",
     ghost:
-      "bg-transparent border border-slate-700 hover:bg-slate-800 text-white",
+      "bg-transparent border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]",
     danger: "bg-red-600 hover:bg-red-700 text-white",
     themeToggle:
-      "bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700",
+      "bg-[var(--surface-secondary)] text-[var(--accent)] border border-[var(--border)] hover:bg-[var(--surface-tertiary)]",
   };
 
   const sizes = {

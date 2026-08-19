@@ -18,24 +18,23 @@ export default function OrdersPage() {
   const {
     isAuthenticated,
     isHydrated,
+    openLoginModal,
   } = useAuthStore();
 
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace(
-        `/login?redirect=${encodeURIComponent("/orders")}`
-      );
+      openLoginModal();
       return;
     }
-
     fetchOrders();
   }, [
     isAuthenticated,
     isHydrated,
     fetchOrders,
     router,
+    openLoginModal,
   ]);
 
   if (!isHydrated) {
@@ -76,16 +75,17 @@ export default function OrdersPage() {
   };
 
   return (
-    <section className="container mx-auto py-10">
+    <section className="container mx-auto py-24">
       <Button
-        size="sm"
-        onClick={() => router.push("/shop")}
-      >
-        ← Back to Shop  
-      </Button>
-      <h1 className="mb-8 text-4xl font-black">
-        My Orders
-      </h1>
+              size="sm"
+              onClick={() => router.push("/cart")}
+            >
+              ← Back to Cart
+            </Button>
+
+        <h1 className="mb-8 text-4xl font-black">
+          My Orders
+        </h1>
 
       {orders.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-8 text-center">

@@ -13,10 +13,8 @@ import {
   Star,
   Briefcase,
   Circle,
-  ArrowLeft,
   ChevronDown,
 } from "lucide-react";
-import Link from "next/link";
 
 import { consultationService } from "../../services/consultation.service";
 import { useAuthStore } from "../../store/authStore";
@@ -44,7 +42,7 @@ type AdminFilter = "USER" | "ASTROLOGER";
 export default function ConsultationPage() {
   const router = useRouter();
 
-  const { user, isAuthenticated, isHydrated } = useAuthStore();
+  const { user, isAuthenticated, isHydrated, openLoginModal } = useAuthStore();
 
   const [loading, setLoading] = useState(true);
   const [people, setPeople] = useState<ConsultationPerson[]>([]);
@@ -57,7 +55,7 @@ export default function ConsultationPage() {
   const isNormalUser = currentRole === "USER";
   const isAdmin = currentRole === "ADMIN";
 
-  const isProfileComplete = user?.profileCompleted === true;
+  // const isProfileComplete = user?.profileCompleted === true;
 
   const mapPerson = (
     person: any,
@@ -327,8 +325,7 @@ export default function ConsultationPage() {
     conversationId?: string,
   ) => {
     if (!isAuthenticated || !user) {
-      router.push(`/login?redirect=${encodeURIComponent("/consultations")}`);
-
+      openLoginModal();
       return;
     }
 
@@ -441,7 +438,7 @@ export default function ConsultationPage() {
 
     if (!avatar || imageError) {
       return (
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xl font-bold text-amber-400">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-lg font-bold text-amber-400">
           {getInitials(name)}
         </div>
       );
@@ -451,7 +448,7 @@ export default function ConsultationPage() {
       <img
         src={avatar}
         alt={name}
-        className="h-20 w-20 shrink-0 rounded-full border border-slate-700 object-cover"
+        className="h-16 w-16 shrink-0 rounded-full border border-slate-700 object-cover"
         onError={() => setImageError(true)}
       />
     );
@@ -459,17 +456,7 @@ export default function ConsultationPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Back */}
-        <div className="mx-auto mb-4 max-w-7xl">
-          <Link
-            href="/home"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
-          >
-            <ArrowLeft size={18} />
-            <span>Back</span>
-          </Link>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -542,21 +529,6 @@ export default function ConsultationPage() {
           )}
         </div>
 
-        {/* Logged out */}
-        {!isAuthenticated && (
-          <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-5 py-4 text-sm text-amber-200">
-            You can browse astrologers without logging in. Login is required to
-            Chat or Call.
-          </div>
-        )}
-
-        {/* Profile incomplete */}
-        {isAuthenticated && user && !isAdmin && !isProfileComplete && (
-          <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-5 py-4 text-sm text-amber-200">
-            Complete your profile before starting a Chat or Call.
-          </div>
-        )}
-
         {/* Loading */}
         {loading ? (
           <div className="py-20 text-center text-slate-400">Loading...</div>
@@ -571,11 +543,11 @@ export default function ConsultationPage() {
                 : "No astrologers available."}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {people.map((person) => (
               <div
                 key={person.conversationId || person._id}
-                className="rounded-3xl border border-slate-800 bg-slate-900 p-6 transition hover:border-amber-500"
+                className="rounded-2xl border border-slate-800 bg-slate-900 p-4 transition hover:border-amber-500"
               >
                 {/* Profile */}
                 <div className="flex items-center gap-4">
@@ -606,7 +578,7 @@ export default function ConsultationPage() {
                 </div>
 
                 {/* Details */}
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 space-y-2">
                   {person.role === "ASTROLOGER" ? (
                     <>
                       <div className="flex items-center gap-2 text-sm">
@@ -641,15 +613,15 @@ export default function ConsultationPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="mt-8 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() =>
                       handleAction("chat", person._id, person.conversationId)
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-semibold text-black transition hover:bg-amber-400"
+                    className="flex items-center justify-center gap-1.5 rounded-md bg-amber-500 px-2 py-1.5 text-xs font-semibold text-black transition hover:bg-amber-400"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle size={15} />
                     Chat
                   </button>
 
@@ -658,9 +630,9 @@ export default function ConsultationPage() {
                     onClick={() =>
                       handleAction("call", person._id, person.conversationId)
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-green-600 py-3 font-semibold text-white transition hover:bg-green-500"
+                    className="flex items-center justify-center gap-1.5 rounded-md bg-green-600 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-green-500"
                   >
-                    <Phone size={18} />
+                    <Phone size={15} />
                     Call
                   </button>
                 </div>

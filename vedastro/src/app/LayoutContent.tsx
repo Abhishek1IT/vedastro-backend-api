@@ -10,22 +10,17 @@ const HIDDEN_LAYOUT_ROUTES = [
   // Auth
   /^\/login(?:\/|$)/,
   /^\/register(?:\/|$)/,
-  /^\/admin\/login(?:\/|$)/,
+
+  // Admin
+  /^\/admin(?:\/|$)/,
 
   // Chat / Call
-  /^\/(?:chat|call)(?:\/|$)/,
+  /^\/chat(?:\/|$)/,
+  /^\/call(?:\/|$)/,
   /^\/consultations\/(?:chat|call)(?:\/|$)/,
 
-  // Cart / Checkout
-  /^\/(?:cart|checkout)(?:\/|$)/,
-
-  // Product
-  /^\/product\/([^\/]+)\/(\d+)(?:\/|$)/,
-
-  // Orders
-  /^\/orders(?:\/|$)/,
-
-  // Payment
+  // Checkout / Payment
+  /^\/checkout(?:\/|$)/,
   /^\/payment(?:\/|$)/,
 ];
 
@@ -36,19 +31,19 @@ export default function LayoutContent({
 }) {
   const pathname = usePathname() || "";
 
-  const isHiddenRoute = HIDDEN_LAYOUT_ROUTES.some((regex) =>
+  const hideLayout = HIDDEN_LAYOUT_ROUTES.some((regex) =>
     regex.test(pathname),
   );
 
   return (
     <>
-      {!isHiddenRoute && <Navbar />}
+      {!hideLayout && <Navbar />}
 
       <main className="min-h-screen dynamic-content-optimization-layer">
         {children}
       </main>
 
-      {!isHiddenRoute && <Footer />}
+      {!hideLayout && <Footer />}
     </>
   );
 }

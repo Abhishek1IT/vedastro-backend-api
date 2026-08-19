@@ -78,9 +78,10 @@ export default function CartItem({
   };
 
   return (
-    <Card className="flex flex-col gap-5 p-5 sm:flex-row">
-      {/* PRODUCT IMAGE */}
-      <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-xl bg-slate-900 sm:h-32 sm:w-32">
+    /* FIX: Mapped Card component styles explicitly to support light mode layouts */
+    <Card className="flex flex-col gap-5 p-5 sm:flex-row bg-(--surface-secondary) border border-(--border) rounded-xl transition-colors duration-200">
+      
+      <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-xl bg-(--surface-tertiary) border border-(--border) sm:h-32 sm:w-32">
         <img
           src={imageUrl}
           alt={product.name || "Product"}
@@ -105,22 +106,22 @@ export default function CartItem({
           </Badge>
         )}
 
-        <h3 className="text-xl font-bold text-white">{product.name}</h3>
+        <h3 className="text-xl font-bold text-(--text-primary)">{product.name}</h3>
 
-        <p className="mt-1 text-slate-400">{product.category}</p>
+        <p className="mt-1 text-(--text-secondary)">{product.category}</p>
 
-        {/* PRICE */}
+        {/* PRICE SECTION */}
         <div className="mt-3 flex items-center gap-3">
-          <span className="text-2xl font-black text-amber-400">₹{price}</span>
+          <span className="text-2xl font-black text-(--accent-hover)">₹{price}</span>
 
           {product.salePrice && product.salePrice < product.price && (
-            <span className="text-sm text-slate-500 line-through">
+            <span className="text-sm text-(--text-muted) line-through">
               ₹{product.price}
             </span>
           )}
         </div>
 
-        {/* QUANTITY */}
+        {/* QUANTITY PICKER CONTROLS */}
         <div className="mt-5">
           <QuantitySelector
             quantity={item.quantity}
@@ -136,18 +137,17 @@ export default function CartItem({
         </div>
       </div>
 
-      {/* TOTAL / ACTIONS */}
       <div className="flex flex-col justify-between sm:min-w-40">
-        {/* TOTAL */}
+        
+        {/* ROW ITEM TOTAL PRICE */}
         <div className="text-left sm:text-right">
-          <p className="text-sm text-slate-400">Total</p>
-
-          <p className="text-2xl font-black text-white">
+          <p className="text-sm text-(--text-muted)">Total</p>
+          <p className="text-2xl font-black text-(--text-primary)">
             ₹{price * item.quantity}
           </p>
         </div>
 
-        {/* ACTION BUTTONS */}
+        {/* ACTION ACTION BUTTONS */}
         <div className="mt-4 flex gap-3 sm:flex-col">
           <Button variant="danger" onClick={onRemove} className="flex-1">
             Remove
@@ -157,7 +157,7 @@ export default function CartItem({
             type="button"
             onClick={handleBuyNow}
             disabled={!product.stock || item.quantity <= 0}
-            className="flex-1 bg-linear-to-r! from-amber-400! to-orange-500! font-bold! text-black! hover:from-amber-300! hover:to-orange-400!"
+            className="flex-1 bg-linear-to-r from-(--accent) to-orange-500 font-bold text-slate-950 hover:opacity-90"
           >
             Buy Now
           </Button>

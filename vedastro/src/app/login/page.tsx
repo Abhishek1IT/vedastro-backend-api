@@ -39,7 +39,7 @@ export default function LoginPage() {
 
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setLocalValidationError(
-        "Provide a valid 10-digit mobile number starting with 6-9.",
+        "mobile number.",
       );
       return;
     }
@@ -61,12 +61,18 @@ export default function LoginPage() {
     const cleanOtp = otpCode.replace(/\D/g, "").trim();
 
     if (!/^\d{6}$/.test(cleanOtp)) {
-      setLocalValidationError("Verification token must be exactly 6 digits.");
+      setLocalValidationError(
+        " ",
+      );
       return;
     }
 
     try {
-      const user = await verifyOtp(cleanPhone, cleanOtp, role);
+      const user = await verifyOtp(
+        cleanPhone,
+        cleanOtp,
+        role
+      );
 
       if (!user) {
         return;
@@ -74,19 +80,67 @@ export default function LoginPage() {
 
       console.log("LOGIN PAGE USER:", user);
 
-      if (String(user.role).toUpperCase() === "ADMIN") {
+      const userRole = String(user.role).toUpperCase();
+
+      // ADMIN
+      if (userRole === "ADMIN") {
         router.replace("/admin");
         return;
       }
 
-      if (user.profileCompleted === true) {
-        router.replace("/home");
+      // ASTROLOGER
+      if (userRole === "ASTROLOGER") {
+        // Profile not completed
+        if (user.profileCompleted !== true) {
+          router.replace(
+            `/profile?redirect=${encodeURIComponent(
+              redirect
+            )}`
+          );
+          return;
+        }
+
+        // Waiting for admin approval
+        if (user.approvalStatus === "PENDING") {
+          router.replace("/astrologer/pending");
+          return;
+        }
+
+        // Admin rejected
+        if (user.approvalStatus === "REJECTED") {
+          router.replace("/profile");
+          return;
+        }
+
+        // Admin approved
+        if (user.approvalStatus === "APPROVED") {
+          router.replace("/astrologer/dashboard");
+          return;
+        }
+
+        // Safety fallback
+        router.replace("/astrologer/pending");
         return;
       }
 
-      router.replace(
-        `/profile?redirect=${encodeURIComponent(redirect)}`
-      );
+      // USER
+      if (userRole === "USER") {
+        if (user.profileCompleted === true) {
+          router.replace("/home");
+          return;
+        }
+
+        router.replace(
+          `/profile?redirect=${encodeURIComponent(
+            redirect
+          )}`
+        );
+
+        return;
+      }
+
+      // Unknown role
+      router.replace("/home");
     } catch (error) {
       console.error("VERIFY OTP ERROR:", error);
     }

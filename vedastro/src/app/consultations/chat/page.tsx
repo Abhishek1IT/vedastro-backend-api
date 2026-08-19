@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -24,53 +23,73 @@ export default function ConsultationsChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const user = useAuthStore((state: any) => state.user);
-  const isAuthenticated = useAuthStore((state: any) => state.isAuthenticated);
-  const isHydrated = useAuthStore((state: any) => state.isHydrated);
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore(
+    (state) => state.isAuthenticated
+  );
+  const isHydrated = useAuthStore(
+    (state) => state.isHydrated
+  );
+  const openLoginModal = useAuthStore(
+    (state) => state.openLoginModal
+  );
 
   const astroId = searchParams.get("astroId");
   const userId = searchParams.get("userId");
   const conversationId = searchParams.get("conversationId");
 
-  const [selectedChat, setSelectedChat] = useState<SelectedChatState>({
-    roomId: "",
-    receiverId: "",
-    receiverName: "",
-    isOnline: false,
-  });
+  const [selectedChat, setSelectedChat] =
+    useState<SelectedChatState>({
+      roomId: "",
+      receiverId: "",
+      receiverName: "",
+      isOnline: false,
+    });
 
-  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [loadingRooms, setLoadingRooms] =
+    useState(true);
 
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated || !user) {
-      const query = searchParams.toString();
-
-      router.replace(
-        `/login?redirect=${encodeURIComponent(
-          `/consultations/chat${query ? `?${query}` : ""}`,
-        )}`,
-      );
-
+      openLoginModal();
       return;
     }
 
     if (user.profileCompleted !== true) {
       const query = searchParams.toString();
 
+      const currentPath = `/consultations/chat${query ? `?${query}` : ""
+        }`;
+
       router.replace(
         `/profile?redirect=${encodeURIComponent(
-          `/consultations/chat${query ? `?${query}` : ""}`,
-        )}`,
+          currentPath
+        )}`
       );
+
+      return;
     }
-  }, [isHydrated, isAuthenticated, user, router, searchParams]);
+  }, [
+    isHydrated,
+    isAuthenticated,
+    user,
+    router,
+    searchParams,
+    openLoginModal,
+  ]);
 
   useEffect(() => {
     if (!isHydrated) return;
-    if (!isAuthenticated || !user?._id) return;
-    if (user.profileCompleted !== true) return;
+
+    if (!isAuthenticated || !user?._id) {
+      return;
+    }
+
+    if (user.profileCompleted !== true) {
+      return;
+    }
 
     if (!astroId && !userId && !conversationId) {
       setLoadingRooms(false);
@@ -89,35 +108,53 @@ export default function ConsultationsChatPage() {
               `/chat/conversations/${conversationId}`,
               {
                 signal: controller.signal,
-              },
+              }
             );
 
-            const conversation = response?.data?.data;
+            const conversation =
+              response?.data?.data;
 
-            const participants = conversation?.participants || [];
+            const participants =
+              conversation?.participants || [];
 
-            const otherUser = Array.isArray(participants)
-              ? participants.find((participant: any) => {
+            const otherUser = Array.isArray(
+              participants
+            )
+              ? participants.find(
+                (participant: any) => {
                   const participantId =
                     typeof participant === "object"
-                      ? participant?._id || participant?.id
+                      ? participant?._id ||
+                      participant?.id
                       : participant;
 
-                  return String(participantId) !== String(user._id);
-                })
+                  return (
+                    String(participantId) !==
+                    String(user._id)
+                  );
+                }
+              )
               : null;
 
-            const actualReceiverId = otherUser?._id || otherUser?.id || userId;
+            const actualReceiverId =
+              otherUser?._id ||
+              otherUser?.id ||
+              userId;
 
             const actualReceiverName =
               otherUser?.name ||
               otherUser?.fullName ||
-              (otherUser?.role === "ASTROLOGER" ? "Astrologer" : "User");
+              (otherUser?.role === "ASTROLOGER"
+                ? "Astrologer"
+                : "User");
 
-            const actualOnlineStatus = Boolean(otherUser?.isOnline);
+            const actualOnlineStatus =
+              Boolean(otherUser?.isOnline);
 
             if (!actualReceiverId) {
-              console.error("Receiver ID not found");
+              console.error(
+                "Receiver ID not found"
+              );
 
               setSelectedChat({
                 roomId: "",
@@ -131,15 +168,19 @@ export default function ConsultationsChatPage() {
 
             setSelectedChat({
               roomId: String(conversationId),
-              receiverId: String(actualReceiverId),
-              receiverName: actualReceiverName,
+              receiverId: String(
+                actualReceiverId
+              ),
+              receiverName:
+                actualReceiverName,
               isOnline: actualOnlineStatus,
             });
 
             return;
           } catch (error: any) {
             if (
-              error?.name === "CanceledError" ||
+              error?.name ===
+              "CanceledError" ||
               error?.code === "ERR_CANCELED"
             ) {
               return;
@@ -147,14 +188,15 @@ export default function ConsultationsChatPage() {
 
             console.error(
               "GET CONVERSATION ERROR:",
-              error?.response?.data || error,
+              error?.response?.data || error
             );
 
             return;
           }
         }
 
-        const receiverId = astroId || userId;
+        const receiverId =
+          astroId || userId;
 
         if (!receiverId) {
           setLoadingRooms(false);
@@ -168,13 +210,17 @@ export default function ConsultationsChatPage() {
           },
           {
             signal: controller.signal,
-          },
+          }
         );
 
-        const conversation = response?.data?.data;
+        const conversation =
+          response?.data?.data;
 
         if (!conversation?._id) {
-          console.error("Conversation not found:", response?.data);
+          console.error(
+            "Conversation not found:",
+            response?.data
+          );
 
           setSelectedChat({
             roomId: "",
@@ -186,20 +232,33 @@ export default function ConsultationsChatPage() {
           return;
         }
 
-        const participants = conversation?.participants || [];
+        const participants =
+          conversation?.participants || [];
 
-        const otherUser = Array.isArray(participants)
-          ? participants.find((participant: any) => {
+        const otherUser = Array.isArray(
+          participants
+        )
+          ? participants.find(
+            (participant: any) => {
               const participantId =
-                typeof participant === "object"
-                  ? participant?._id || participant?.id
+                typeof participant ===
+                  "object"
+                  ? participant?._id ||
+                  participant?.id
                   : participant;
 
-              return String(participantId) !== String(user._id);
-            })
+              return (
+                String(participantId) !==
+                String(user._id)
+              );
+            }
+          )
           : null;
 
-        const actualReceiverId = otherUser?._id || otherUser?.id || receiverId;
+        const actualReceiverId =
+          otherUser?._id ||
+          otherUser?.id ||
+          receiverId;
 
         const actualReceiverName =
           otherUser?.name ||
@@ -210,20 +269,32 @@ export default function ConsultationsChatPage() {
               ? "Astrologer"
               : "User");
 
-        const actualOnlineStatus = Boolean(otherUser?.isOnline);
+        const actualOnlineStatus =
+          Boolean(otherUser?.isOnline);
 
         setSelectedChat({
-          roomId: String(conversation._id),
-          receiverId: String(actualReceiverId),
-          receiverName: actualReceiverName,
+          roomId: String(
+            conversation._id
+          ),
+          receiverId: String(
+            actualReceiverId
+          ),
+          receiverName:
+            actualReceiverName,
           isOnline: actualOnlineStatus,
         });
       } catch (error: any) {
-        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+        if (
+          error?.name === "CanceledError" ||
+          error?.code === "ERR_CANCELED"
+        ) {
           return;
         }
 
-        console.error("ERROR OPENING CHAT:", error?.response?.data || error);
+        console.error(
+          "ERROR OPENING CHAT:",
+          error?.response?.data || error
+        );
 
         setSelectedChat({
           roomId: "",
@@ -261,41 +332,59 @@ export default function ConsultationsChatPage() {
     );
   }
 
-  if (!isAuthenticated || !user || user.profileCompleted !== true) {
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
+  if (user.profileCompleted !== true) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-[#0B0907] px-4 py-6 text-gray-200">
       <div className="mx-auto max-w-7xl">
+
         {/* BACK */}
         <Link
           href="/consultations"
           className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
+
           Back
         </Link>
 
         {/* CHAT */}
         <div className="flex h-[85vh] w-full overflow-hidden rounded-xl border border-[#23201C] bg-[#0E0C0A] text-gray-200 shadow-2xl sm:rounded-2xl">
+
           <div className="relative flex h-full flex-1 flex-col bg-[#0B0907]">
+
             {selectedChat.roomId ? (
               <ChatWindow
                 roomId={selectedChat.roomId}
-                receiverId={selectedChat.receiverId}
-                receiverName={selectedChat.receiverName}
-                isReceiverOnline={selectedChat.isOnline}
+                receiverId={
+                  selectedChat.receiverId
+                }
+                receiverName={
+                  selectedChat.receiverName
+                }
+                isReceiverOnline={
+                  selectedChat.isOnline
+                }
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center space-y-4 bg-[#0B0907] p-6 text-center text-gray-500">
+
                 <div className="rounded-full border border-[#23201C] bg-[#14110E] p-5 shadow-inner">
                   <MessageSquare className="h-10 w-10 text-gray-400" />
                 </div>
 
                 <div className="max-w-sm space-y-2">
+
                   <h2 className="text-xl font-light text-gray-200">
-                    {loadingRooms ? "Opening chat..." : "Unable to open chat"}
+                    {loadingRooms
+                      ? "Opening chat..."
+                      : "Unable to open chat"}
                   </h2>
 
                   <p className="text-sm leading-relaxed text-gray-500">
@@ -303,9 +392,11 @@ export default function ConsultationsChatPage() {
                       ? "Connecting you with the selected user..."
                       : "Please go back to consultations and select the user again."}
                   </p>
+
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </div>

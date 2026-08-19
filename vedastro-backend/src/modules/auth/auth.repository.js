@@ -11,7 +11,7 @@ class AuthRepository {
   // Find User By Id
   async findById(id) {
     return await User.findById(id).select(
-      "name email phone dob role profileCompleted createdAt"
+      "name email phone dob role profileCompleted approvalStatus rejectionReason avatar experience skills languages consultationPrice createdAt"
     );
   }
 

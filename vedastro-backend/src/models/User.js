@@ -101,7 +101,7 @@ const userSchema = new mongoose.Schema(
 
     languages: {
       type: [String],
-      default: ["English"],
+      default: ["English/Hindi"],
     },
 
     rating: {
@@ -122,6 +122,16 @@ const userSchema = new mongoose.Schema(
     badge: {
       type: String,
       enum: ["TOP CHOICE", "CELEBRITY", null],
+      default: null,
+    },
+
+    approvalStatus: {
+      type: String,
+      enum: ["NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"],
+      default: "NOT_REQUIRED",
+    },
+    rejectionReason: {
+      type: String,
       default: null,
     },
   },

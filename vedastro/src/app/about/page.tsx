@@ -1,14 +1,16 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import Container from "../../components/common/Container";
 import SectionHeading from "../../components/common/SectionHeading";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
+import { useAuthStore } from "../../store/authStore";
 
 export default function AboutPage() {
-  const router = useRouter();
+  const openLoginModal = useAuthStore(
+    (state) => state.openLoginModal
+  );
 
   const platformMetrics = [
     { value: "500+", title: "Verified Experts" },
@@ -109,7 +111,9 @@ export default function AboutPage() {
             Create your profile token configuration matrix to begin tracking
             indices.
           </p>
-          <button onClick={() => router.push("/login")}>Get Started</button>
+          <button onClick={openLoginModal}>
+            Get Started
+          </button>
         </div>
       </Container>
     </div>

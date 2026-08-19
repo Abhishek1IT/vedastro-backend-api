@@ -10,6 +10,30 @@ class AdminService {
     return await AdminRepository.getAllAstrologers();
   }
 
+  async getPendingAstrologers() {
+    return await AdminRepository.getPendingAstrologers();
+  }
+
+  async getAstrologer(id) {
+    return await AdminRepository.getAstrologerById(id);
+  }
+
+  async approveAstrologer(id, approvalStatus, rejectionReason) {
+    return await AdminRepository.updateAstrologerApproval(
+      id,
+      approvalStatus,
+      rejectionReason
+    );
+  }
+
+  async rejectAstrologer(id, rejectionReason) {
+    return await AdminRepository.updateAstrologerApproval(
+      id,
+      false,
+      rejectionReason
+    );
+  }
+
   async getChatUsers() {
     return await AdminRepository.getChatUsers();
   }

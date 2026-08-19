@@ -87,7 +87,7 @@ const DownloadApp = () => {
                       <span className="font-semibold text-sm">Astro Heena</span>
                       <span className="text-blue-500 text-[10px]">✔</span>
                     </div>
-                    <span className="text-[10px] text-gray-500">online · ₹18/min</span>
+                    <span className="text-[10px] text-gray-500">online</span>
                   </div>
                 </div>
                 <div className="w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center">

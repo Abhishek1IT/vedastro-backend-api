@@ -28,7 +28,6 @@ const orderItemSchema = new mongoose.Schema({
         required: true,
     },
 
-
 });
 
 

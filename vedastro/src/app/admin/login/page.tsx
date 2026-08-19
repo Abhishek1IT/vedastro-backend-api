@@ -32,7 +32,9 @@ export default function AdminLoginPage() {
 
     if (!otpSent) {
       if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-        setError("Provide a valid 10-digit mobile number starting with 6-9.");
+        setError(
+          "Provide a valid 10-digit mobile number starting with 6-9.",
+        );
         return;
       }
 
@@ -45,7 +47,11 @@ export default function AdminLoginPage() {
       } catch (err: any) {
         console.error("Admin send OTP error:", err);
 
-        setError(err?.response?.data?.message || "Unable to send OTP");
+        setError(
+          err?.response?.data?.message ||
+          err?.message ||
+          "Unable to send OTP",
+        );
       } finally {
         setLoading(false);
       }
@@ -63,15 +69,16 @@ export default function AdminLoginPage() {
     try {
       setLoading(true);
 
-      const result = await authService.verifyOtp(cleanPhone, cleanOtp, "ADMIN");
+      const user: AuthUser = await authService.verifyOtp(
+        cleanPhone,
+        cleanOtp,
+        "ADMIN",
+      );
 
-      console.log("ADMIN VERIFY RESPONSE:", result);
-
-      const user: AuthUser | undefined = result?.data?.user;
+      console.log("ADMIN VERIFY USER:", user);
 
       if (!user) {
         setError("User information not received.");
-        console.error("Admin verify OTP error: User information not received.");
         return;
       }
 
@@ -84,9 +91,16 @@ export default function AdminLoginPage() {
 
       router.replace("/admin");
     } catch (err: any) {
-      console.error("Admin verify OTP error:", err?.response?.data || err);
+      console.error(
+        "Admin verify OTP error:",
+        err?.response?.data || err,
+      );
 
-      setError(err?.response?.data?.message || "Invalid OTP");
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Invalid OTP",
+      );
     } finally {
       setLoading(false);
     }

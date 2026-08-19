@@ -155,11 +155,12 @@ export default function ShopPage() {
   }, [queryKey]);
 
   return (
-    <section className="container mx-auto px-4 py-10">
+    <section className="container mx-auto px-4 py-10 bg-(--background) transition-colors duration-200">
       <div className="mb-8 pt-20">
-        <h1 className="text-4xl font-black text-white">Cosmic Shop</h1>
+        <h1 className="text-4xl font-black text-(--text-primary)">Cosmic Shop</h1>
 
-        <p className="mt-2 text-slate-400">
+        {/* FIX: Swapped text-slate-400 for structural text token */}
+        <p className="mt-2 text-(--text-secondary)">
           Discover authentic gemstones, Rudraksha, bracelets and spiritual
           products.
         </p>
@@ -176,7 +177,7 @@ export default function ShopPage() {
       </div>
 
       {loading && (
-        <div className="py-20 text-center text-white">Loading Products...</div>
+        <div className="py-20 text-center text-(--text-primary)">Loading Products...</div>
       )}
 
       {!loading && error && (
@@ -188,13 +189,14 @@ export default function ShopPage() {
       )}
 
       {!loading && !error && products.length === 0 && (
-        <div className="flex h-64 items-center justify-center rounded-xl border border-slate-700 bg-slate-900">
+        <div className="flex h-64 items-center justify-center rounded-xl border border-(--border) bg-(--surface-secondary)">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold text-white">
+            {/* FIX: Dynamic title text colors */}
+            <h2 className="text-2xl font-semibold text-(--text-primary)">
               No Products Available
             </h2>
 
-            <p className="mt-2 text-slate-400">
+            <p className="mt-2 text-(--text-muted)">
               Products will appear here once the admin adds them.
             </p>
           </div>

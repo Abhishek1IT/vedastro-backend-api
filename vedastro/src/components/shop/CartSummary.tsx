@@ -19,33 +19,29 @@ export default function CartSummary({
   onCheckout,
 }: CartSummaryProps) {
   return (
-    <Card>
-      <h2 className="mb-6 text-xl font-black">Order Summary</h2>
+    <Card className="bg-(--surface-secondary) border border-(--border) p-6 rounded-xl text-(--text-primary) transition-colors duration-200">
+      <h2 className="mb-6 text-xl font-black text-(--text-primary)">Order Summary</h2>
 
       <div className="space-y-4">
-        <div className="flex justify-between">
+        <div className="flex justify-between text-(--text-secondary)">
           <span>Subtotal</span>
-
-          <span>₹{subtotal}</span>
+          <span className="font-semibold text-(--text-primary)">₹{subtotal}</span>
         </div>
 
-        <div className="flex justify-between">
-          <span>Shipping</span>
-
-          <span>₹{shipping}</span>
+        <div className="flex justify-between text-(--text-secondary)">
+          <span>Delivery charges</span>
+          <span className="font-semibold text-(--text-primary)">₹{shipping}</span>
         </div>
 
-        <div className="flex justify-between text-emerald-400">
+        <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
           <span>Discount</span>
-
           <span>-₹{discount}</span>
         </div>
 
-        <hr className="border-slate-800" />
+        <hr className="border-(--border)" />
 
-        <div className="flex justify-between text-2xl font-black">
+        <div className="flex justify-between text-2xl font-black text-(--text-primary)">
           <span>Total</span>
-
           <span>₹{total}</span>
         </div>
       </div>

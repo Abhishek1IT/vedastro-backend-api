@@ -37,9 +37,8 @@ export default function SearchBar({
 
   return (
     <div className="relative w-full">
-
       <Search
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted)"
         size={18}
       />
 
@@ -47,18 +46,17 @@ export default function SearchBar({
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-800 bg-slate-900/20 py-3 pl-11 pr-12 text-white outline-none transition focus:border-amber-500"
+        className="w-full rounded-xl border border-(--border) bg-(--surface-secondary) py-3 pl-11 pr-12 text-(--text-primary) placeholder-(--text-muted) outline-none transition focus:border-(--accent)"
       />
 
       {keyword && (
         <button
           onClick={() => setKeyword("")}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text-primary)"
         >
           <X size={18} />
         </button>
       )}
-
     </div>
   );
 }

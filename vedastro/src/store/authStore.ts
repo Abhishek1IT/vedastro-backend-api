@@ -3,15 +3,42 @@
 import { create } from "zustand";
 import api from "../lib/axios";
 
+export type UserRole = "USER" | "ASTROLOGER" | "ADMIN";
+
+export type ApprovalStatus =
+  | "NOT_REQUIRED"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED";
+
 export interface AuthUser {
   _id: string;
   id?: string;
+
   name?: string;
   email?: string;
   phone: string;
   dob?: string;
-  role?: "USER" | "ASTROLOGER" | "ADMIN";
+
+  role?: UserRole;
+
+  gender?: "MALE" | "FEMALE" | "OTHER" | string;
+  birthPlace?: string | null;
+  birthTime?: string | null;
+
   profileCompleted?: boolean;
+
+  approvalStatus?: ApprovalStatus;
+  rejectionReason?: string | null;
+
+  avatar?: string;
+
+  // Astrologer
+  experience?: number;
+  skills?: string[];
+  languages?: string[];
+  consultationPrice?: number;
+
   isOnline?: boolean;
 }
 
@@ -20,9 +47,14 @@ interface AuthState {
   isAuthenticated: boolean;
   isHydrated: boolean;
 
+  isLoginModalOpen: boolean;
+
   setUser: (user: AuthUser | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   hydrateStore: () => Promise<void>;
+
+  openLoginModal: () => void;
+  closeLoginModal: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -30,11 +62,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   isHydrated: false,
 
+  isLoginModalOpen: false,
+
   setUser: (user) => {
-    if (user) {
-      localStorage.setItem("hasSession", "true");
-    } else {
-      localStorage.removeItem("hasSession");
+    if (typeof window !== "undefined") {
+      if (user) {
+        localStorage.setItem("hasSession", "true");
+      } else {
+        localStorage.removeItem("hasSession");
+      }
     }
 
     set({
@@ -43,18 +79,39 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
-  logout: () => {
-    localStorage.removeItem("hasSession");
+  logout: async () => {
+    try {
+      await api.post(
+        "/auth/logout",
+        {},
+        {
+          withCredentials: true,
+        },
+      );
+    } catch (error: any) {
+      console.warn(
+        "Logout API skipped:",
+        error?.response?.data?.message || "Session already expired",
+      );
+    } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("hasSession");
+      }
 
-    set({
-      user: null,
-      isAuthenticated: false,
-      isHydrated: true,
-    });
+      set({
+        user: null,
+        isAuthenticated: false,
+        isHydrated: true,
+      });
+    }
   },
 
   hydrateStore: async () => {
     if (get().isHydrated) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -97,5 +154,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isHydrated: true,
       });
     }
+  },
+
+  openLoginModal: () => {
+    set({
+      isLoginModalOpen: true,
+    });
+  },
+
+  closeLoginModal: () => {
+    set({
+      isLoginModalOpen: false,
+    });
   },
 }));

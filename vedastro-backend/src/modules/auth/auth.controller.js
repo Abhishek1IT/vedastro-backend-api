@@ -21,7 +21,10 @@ class AuthController {
               email: user.email,
               phone: user.phone,
               dob: user.dob,
-            },
+              role: user.role,
+              profileCompleted: user.profileCompleted,
+              approvalStatus: user.approvalStatus,
+            }
           },
           "User registration successfully.",
         ),
@@ -109,6 +112,14 @@ class AuthController {
         dob: req.body.dob,
       };
 
+      if (req.user.role === "ASTROLOGER") {
+        updateData.experience = req.body.experience;
+        updateData.skills = req.body.skills;
+        updateData.languages = req.body.languages;
+        updateData.consultationPrice = req.body.consultationPrice;
+        updateData.bio = req.body.bio;
+      }
+
       const updatedUser = await AuthService.completeProfile(
         req.user.id,
         updateData,
@@ -189,25 +200,23 @@ class AuthController {
   // Logout
   async logout(req, res, next) {
     try {
-
-      await AuthService.logout(req.user._id);
-
-      const cookieOptions = {
+      res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        path: "/",
-      };
+        sameSite: "lax",
+      });
 
-      res.clearCookie("accessToken", cookieOptions);
-      res.clearCookie("refreshToken", cookieOptions);
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
 
       return res.status(200).json({
         success: true,
-        message: "Logout Successful",
+        message: "Logged out successfully",
       });
     } catch (error) {
-      console.error("LOGOUT ERROR:", error);
       next(error);
     }
   }

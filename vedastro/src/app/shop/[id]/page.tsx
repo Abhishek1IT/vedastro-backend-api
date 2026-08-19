@@ -119,16 +119,7 @@ export default function ProductDetailsPage() {
 
   return (
     <section className="container mx-auto px-4 py-10">
-      {/* BACK */}
-      <div className="mx-auto mb-6 max-w-7xl">
-        <Link
-          href="/shop"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
-        >
-          <ArrowLeft size={18} />
-          <span>Back</span>
-        </Link>
-      </div>
+      
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* PRODUCT IMAGE */}

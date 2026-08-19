@@ -13,7 +13,8 @@ const PROTECTED_ROUTE_PREFIXES = [
   "/profile",
   "/chat",
   "/call",
-  "/admin",
+  "/orders",
+  "/checkout",
 ];
 
 function isProtectedRoute(pathname: string) {
@@ -40,9 +41,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -65,13 +64,16 @@ api.interceptors.response.use(
 
     const pathname = window.location.pathname;
 
+    if (originalRequest.url?.includes("/auth/logout")) {
+      return Promise.reject(error);
+    }
+
     if (originalRequest.url?.includes("/auth/refresh-token")) {
       handleUnauthorized(pathname);
 
       return Promise.reject(error);
     }
 
-    // Already retried
     if (originalRequest._retry) {
       handleUnauthorized(pathname);
 
@@ -126,26 +128,22 @@ api.interceptors.response.use(
 );
 
 function handleUnauthorized(pathname: string) {
-  // Admin
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     console.warn("Admin session expired");
+
+    localStorage.removeItem("hasSession");
 
     window.location.href = "/admin/login";
 
     return;
   }
 
-  // User
-  if (
-    isProtectedRoute(pathname) &&
-    !pathname.startsWith("/admin") &&
-    pathname !== "/login"
-  ) {
+  if (isProtectedRoute(pathname) && !pathname.startsWith("/admin")) {
     console.warn("User session expired");
 
     localStorage.removeItem("hasSession");
 
-    window.location.href = "/";
+    window.location.href = "/home";
 
     return;
   }

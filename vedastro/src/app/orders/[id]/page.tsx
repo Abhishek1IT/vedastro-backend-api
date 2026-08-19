@@ -39,7 +39,7 @@ export default function OrderDetailsPage() {
 
   if (loading) {
     return (
-      <section className="container mx-auto py-10 text-white">
+      <section className="container mx-auto py-24 text-(--text-primary)">
         Loading order...
       </section>
     );
@@ -47,7 +47,7 @@ export default function OrderDetailsPage() {
 
   if (!order) {
     return (
-      <section className="container mx-auto py-10 text-white">
+      <section className="container mx-auto py-10 text-(--text-primary)">
         <p>Order not found.</p>
 
         <Button
@@ -62,7 +62,7 @@ export default function OrderDetailsPage() {
   }
 
   return (
-    <section className="container mx-auto px-4 py-10 text-white">
+    <section className="container mx-auto px-4 py-24 text-(--text-primary) transition-colors duration-200">
       <Button
         size="sm"
         onClick={() => router.push("/orders")}
@@ -70,14 +70,14 @@ export default function OrderDetailsPage() {
         ← Back to Orders
       </Button>
 
-      <Card className="mt-6">
+      <Card className="mt-6 bg-(--surface-secondary) border border-(--border) p-6 rounded-2xl transition-colors duration-200">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black">
+            <h1 className="text-2xl font-black text-(--text-primary)">
               Order #{order._id}
             </h1>
 
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-(--text-muted)">
               {new Date(order.createdAt).toLocaleString()}
             </p>
           </div>
@@ -92,27 +92,27 @@ export default function OrderDetailsPage() {
           {order.items?.map((item: any, index: number) => (
             <div
               key={`${item.product}-${index}`}
-              className="flex items-center justify-between border-b border-slate-800 pb-4"
+              className="flex items-center justify-between border-b border-(--border) pb-4"
             >
               <div>
-                <h3 className="font-bold">
+                <h3 className="font-bold text-(--text-primary)">
                   {item.name}
                 </h3>
 
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-(--text-muted)">
                   Quantity: {item.quantity}
                 </p>
               </div>
 
-              <p className="font-bold">
+              {/* FIX: Forced price label contrast state */}
+              <p className="font-bold text-(--text-primary)">
                 ₹{item.price * item.quantity}
               </p>
             </div>
           ))}
         </div>
 
-        {/* TOTAL */}
-        <div className="mt-6 flex justify-between border-t border-slate-700 pt-5 text-xl font-black">
+        <div className="mt-6 flex justify-between border-t border-(--border) pt-5 text-xl font-black text-(--text-primary)">
           <span>Total</span>
           <span>₹{order.total}</span>
         </div>
@@ -120,29 +120,29 @@ export default function OrderDetailsPage() {
         {/* ADDRESS */}
         {order.shippingAddress && (
           <div className="mt-8">
-            <h2 className="mb-3 text-lg font-bold">
+            <h2 className="mb-3 text-lg font-bold text-(--text-secondary)">
               Shipping Address
             </h2>
 
-            <div className="rounded-xl bg-slate-900 p-4 text-sm text-slate-300">
-              <p>
+            <div className="rounded-xl bg-(--surface-secondary) p-4 text-sm text-(--text-muted) border border-(--border) shadow-inner">
+              <p className="font-semibold text-(--text-primary) mb-1">
                 {order.shippingAddress.fullName}
               </p>
 
-              <p>
+              <p className="text-(--text-muted) mb-1">
                 {order.shippingAddress.phone}
               </p>
 
-              <p>
+              <p className="text-(--text-muted)">
                 {order.shippingAddress.address}
               </p>
 
-              <p>
+              <p className="text-(--text-muted)">
                 {order.shippingAddress.city},{" "}
                 {order.shippingAddress.state}
               </p>
 
-              <p>
+              <p className="text-(--text-muted) font-mono mt-1 text-xs">
                 {order.shippingAddress.pincode}
               </p>
             </div>

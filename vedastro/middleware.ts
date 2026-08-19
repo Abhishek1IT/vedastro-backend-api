@@ -1,11 +1,53 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
 
-  if (pathname === "/admin/login") {
+  const publicPaths = [
+    "/",
+    "/home",
+    "/shop",
+    "/cart",
+    "/login",
+    "/admin/login",
+  ];
+
+  if (publicPaths.includes(pathname)) {
     return NextResponse.next();
+  }
+
+  const accessToken = request.cookies.get("accessToken")?.value;
+
+  if (pathname.startsWith("/admin")) {
+    if (!accessToken) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/astrologer")) {
+    if (!accessToken) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  const protectedPaths = [
+    "/profile",
+    "/orders",
+    "/consultations",
+    "/chat",
+    "/call",
+  ];
+
+  const isProtectedRoute = protectedPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+
+  if (isProtectedRoute && !accessToken) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();

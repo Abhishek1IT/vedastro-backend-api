@@ -229,8 +229,8 @@ const TopAstrologers: React.FC = () => {
                 astro.languages?.length
                   ? astro.languages.join(" · ")
                   : astro.language === "en"
-                    ? "English"
-                    : astro.language || "English";
+                    ? "English/Hindi"
+                    : astro.language || "English/Hindi";
 
               const experience = astro.experience ?? 0;
               const rating = astro.rating ?? 5;

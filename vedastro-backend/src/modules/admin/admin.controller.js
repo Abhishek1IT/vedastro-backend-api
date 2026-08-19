@@ -27,6 +27,73 @@ class AdminController {
     }
   }
 
+  async getPendingAstrologers(req, res, next) {
+    try {
+      const pendingAstrologers = await AdminService.getPendingAstrologers();
+
+      res.status(200).json({
+        success: true,
+        data: pendingAstrologers,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAstrologer(req, res, next) {
+    try {
+      const astrologer = await AdminService.getAstrologer(req.params.id);
+
+      res.status(200).json({
+        success: true,
+        data: astrologer,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async approveAstrologer(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { approvalStatus, rejectionReason } = req.body;
+
+      const updatedAstrologer = await AdminService.approveAstrologer(
+        id,
+        approvalStatus,
+        rejectionReason,
+      );
+
+      res.status(200).json({
+        success: true,
+        data: updatedAstrologer,
+        message: "Astrologer approval status updated successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async rejectAstrologer(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { rejectionReason } = req.body;
+
+      const updatedAstrologer = await AdminService.rejectAstrologer(
+        id,
+        rejectionReason,
+      );
+
+      res.status(200).json({
+        success: true,
+        data: updatedAstrologer,
+        message: "Astrologer rejected successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getChatUsers(req, res, next) {
     try {
       const chatUsers = await AdminService.getChatUsers();

@@ -1,10 +1,24 @@
 import AuthRepository from "./auth.repository.js";
+import User from "../../models/User.js";
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 import ApiError from "../../utils/ApiError.js";
+import { ROLES } from "../../common/roles.js";
 
 class AuthService {
-  async completeProfile(userId, { name, email, dob }) {
-    const user = await AuthRepository.findById(userId);
+  async completeProfile(
+    userId,
+    {
+      name,
+      email,
+      dob,
+      avatar,
+      experience,
+      skills,
+      languages,
+      consultationPrice,
+    }
+  ) {
+    const user = await User.findById(userId);
 
     if (!user) {
       throw new ApiError(404, "User not found");
@@ -13,7 +27,31 @@ class AuthService {
     user.name = name;
     user.email = email;
     user.dob = dob;
-    user.profileCompleted = true;
+
+    if (avatar !== undefined) {
+      user.avatar = avatar;
+    }
+
+    if (user.role === ROLES.ASTROLOGER) {
+      user.experience = experience ?? 0;
+      user.skills = skills ?? ["Vedic Astrology",
+        "Kundli Reading",
+        "Kundli Matching",
+        "Marriage Compatibility",
+        "Career Astrology",
+        "Dosha Analysis",
+        "Gemstone Consultation"];
+
+      user.languages = languages ?? ["English/Hindi"];
+      user.consultationPrice = consultationPrice ?? 0;
+
+      user.profileCompleted = true;
+      user.approvalStatus = "PENDING";
+      user.rejectionReason = null;
+    } else {
+      user.profileCompleted = true;
+      user.approvalStatus = "NOT_REQUIRED";
+    }
 
     await user.save();
 
@@ -40,6 +78,10 @@ class AuthService {
         role: normalizedRole,
         profileCompleted: false,
         isVerified: false,
+        approvalStatus:
+          normalizedRole === "ASTROLOGER"
+            ? "PENDING"
+            : "NOT_REQUIRED",
       });
     }
 
@@ -116,6 +158,8 @@ class AuthService {
         dob: user.dob,
         role: user.role,
         profileCompleted: user.profileCompleted,
+        approvalStatus: user.approvalStatus,
+        rejectionReason: user.rejectionReason,
       },
     };
   }
