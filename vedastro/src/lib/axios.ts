@@ -8,7 +8,6 @@ const api = axios.create({
 
 const PROTECTED_ROUTE_PREFIXES = [
   "/home",
-  "/consultations",
   "/shop",
   "/profile",
   "/chat",
