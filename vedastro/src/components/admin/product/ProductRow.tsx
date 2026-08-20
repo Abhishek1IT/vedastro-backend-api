@@ -11,9 +11,13 @@ interface ProductRowProps {
   onDelete: (id: string) => void;
 }
 
-export default function ProductRow({ product, onDelete }: ProductRowProps) {
+export default function ProductRow({
+  product,
+  onDelete,
+}: ProductRowProps) {
   const BACKEND_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5000";
 
   const rawImage = product.images?.[0]?.url;
 
@@ -25,7 +29,6 @@ export default function ProductRow({ product, onDelete }: ProductRowProps) {
 
   return (
     <tr className="border-b border-slate-800 hover:bg-slate-900/40">
-      {/* IMAGE */}
       <td className="p-3">
         <img
           src={imageUrl}
@@ -36,35 +39,46 @@ export default function ProductRow({ product, onDelete }: ProductRowProps) {
           onError={(e) => {
             console.error("PRODUCT ROW IMAGE LOAD FAILED:", imageUrl);
 
-            if (!e.currentTarget.src.includes("product-placeholder.png")) {
-              e.currentTarget.src = "/images/product-placeholder.png";
+            if (
+              !e.currentTarget.src.includes(
+                "product-placeholder.png"
+              )
+            ) {
+              e.currentTarget.src =
+                "/images/product-placeholder.png";
             }
           }}
         />
       </td>
 
-      {/* NAME */}
-      <td className="p-3 font-medium text-white">{product.name}</td>
+      <td className="p-3 font-medium text-white">
+        {product.name}
+      </td>
 
-      {/* CATEGORY */}
-      <td className="p-3 text-slate-300">{product.category}</td>
+      <td className="p-3 text-slate-300">
+        {product.category}
+      </td>
 
-      {/* PRICE */}
-      <td className="p-3">₹{product.salePrice ?? product.price}</td>
+      <td className="p-3">
+        ₹{product.salePrice ?? product.price}
+      </td>
 
-      {/* STOCK */}
-      <td className="p-3">{product.stock}</td>
+      <td className="p-3">
+        {product.stock}
+      </td>
 
-      {/* STATUS */}
       <td className="p-3">
         {product.isActive ? (
-          <span className="rounded bg-green-600 px-2 py-1 text-xs">Active</span>
+          <span className="rounded bg-green-600 px-2 py-1 text-xs">
+            Active
+          </span>
         ) : (
-          <span className="rounded bg-red-600 px-2 py-1 text-xs">Inactive</span>
+          <span className="rounded bg-red-600 px-2 py-1 text-xs">
+            Inactive
+          </span>
         )}
       </td>
 
-      {/* ACTIONS */}
       <td className="p-3">
         <div className="flex gap-2">
           <Link href={`/admin/products/${product._id}/edit`}>
