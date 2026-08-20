@@ -12,7 +12,12 @@ const HIDDEN_LAYOUT_ROUTES = [
   /^\/register(?:\/|$)/,
 
   // Admin
-  /^\/admin(?:\/|$)/,
+  /^\/admin$/,
+  /^\/admin\/login$/,
+  /^\/admin\/products$/,
+  /^\/admin\/products\/create$/,
+  /^\/admin\/products\/[^/]+$/,
+  /^\/admin\/products\/[^/]+\/edit$/,
 
   // Chat / Call
   /^\/chat(?:\/|$)/,

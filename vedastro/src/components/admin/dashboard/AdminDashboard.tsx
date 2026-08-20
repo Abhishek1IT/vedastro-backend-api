@@ -365,12 +365,6 @@ export default function AdminDashboard() {
               Refresh Data
             </Button>
 
-            <Button
-              onClick={() => router.push("/admin/products")}
-            >
-              Manage Products
-            </Button>
-
             <button
               type="button"
               onClick={logout}
