@@ -17,24 +17,50 @@ interface ProductImageProps {
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-export default function ProductImage({ images, title }: ProductImageProps) {
+const PLACEHOLDER = "/images/product-placeholder.png";
+
+export default function ProductImage({
+  images,
+  title,
+}: ProductImageProps) {
   const [selected, setSelected] = useState(0);
 
-  const getImageUrl = (image?: ProductImageItem | string) => {
-    const url = typeof image === "string" ? image : image?.url;
+  const getImageUrl = (
+    image?: ProductImageItem | string
+  ): string => {
+    const url =
+      typeof image === "string"
+        ? image
+        : image?.url;
 
     if (!url) {
-      return "/images/product-placeholder.png";
+      return PLACEHOLDER;
     }
 
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    // Already a complete URL
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://")
+    ) {
       return url;
     }
 
-    return `${BACKEND_URL.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+    // Local/public frontend image
+    if (url.startsWith("/images/")) {
+      return url;
+    }
+
+    // Backend image
+    return `${BACKEND_URL.replace(/\/$/, "")}/${url.replace(
+      /^\//,
+      ""
+    )}`;
   };
 
-  const image = getImageUrl(images[selected]);
+  const image =
+    images.length > 0
+      ? getImageUrl(images[selected])
+      : PLACEHOLDER;
 
   return (
     <div className="space-y-4">
@@ -43,14 +69,15 @@ export default function ProductImage({ images, title }: ProductImageProps) {
         <img
           src={image}
           alt={title}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
           onError={(e) => {
-            console.error("PRODUCT IMAGE FAILED:", image);
+            console.error(
+              "PRODUCT IMAGE FAILED:",
+              image
+            );
 
-            if (
-              !e.currentTarget.src.includes("/images/product-placeholder.png")
-            ) {
-              e.currentTarget.src = "/images/product-placeholder.png";
+            if (e.currentTarget.src !== PLACEHOLDER) {
+              e.currentTarget.src = PLACEHOLDER;
             }
           }}
         />
@@ -67,27 +94,29 @@ export default function ProductImage({ images, title }: ProductImageProps) {
                 key={
                   typeof img === "string"
                     ? `${img}-${index}`
-                    : img.publicId || index
+                    : img.publicId || `${index}`
                 }
                 type="button"
                 onClick={() => setSelected(index)}
-                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border transition ${
-                  selected === index ? "border-amber-500" : "border-slate-800"
-                }`}
+                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border transition ${selected === index
+                    ? "border-amber-500"
+                    : "border-slate-800"
+                  }`}
               >
                 <img
                   src={imageUrl}
                   alt={`${title}-${index}`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                   onError={(e) => {
-                    console.error("THUMBNAIL IMAGE FAILED:", imageUrl);
+                    console.error(
+                      "THUMBNAIL IMAGE FAILED:",
+                      imageUrl
+                    );
 
                     if (
-                      !e.currentTarget.src.includes(
-                        "/images/product-placeholder.png",
-                      )
+                      e.currentTarget.src !== PLACEHOLDER
                     ) {
-                      e.currentTarget.src = "/images/product-placeholder.png";
+                      e.currentTarget.src = PLACEHOLDER;
                     }
                   }}
                 />

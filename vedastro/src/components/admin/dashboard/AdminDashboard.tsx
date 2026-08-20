@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 import Button from "../../common/Button";
 
@@ -18,6 +21,7 @@ import type {
 import type { Product } from "../../../store/productStore";
 
 import { formatDate } from "../../../utils/formatDate";
+import { useAuthStore } from "@/src/store/authStore";
 
 type DashboardState = {
   users: AdminUser[];
@@ -114,8 +118,8 @@ function SectionTable({
 }: {
   title: string;
   subtitle: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
+  action?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-5 shadow-2xl shadow-black/20 backdrop-blur">
@@ -140,8 +144,27 @@ function SectionTable({
   );
 }
 
+export function AdminSidebar() {
+  const logout = useAuthStore((state) => state.logout);
+
+  return (
+    <aside>
+      <button
+        type="button"
+        onClick={logout}
+        className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-red-500 hover:bg-red-50"
+      >
+        <LogOut className="h-5 w-5" />
+        Logout
+      </button>
+    </aside>
+  );
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
+
+  const logout = useAuthStore((state) => state.logout);
 
   const [state, setState] =
     useState<DashboardState>(initialState);
@@ -333,7 +356,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button
               onClick={loadDashboard}
               loading={loading}
@@ -343,12 +366,19 @@ export default function AdminDashboard() {
             </Button>
 
             <Button
-              onClick={() =>
-                router.push("/admin/products")
-              }
+              onClick={() => router.push("/admin/products")}
             >
               Manage Products
             </Button>
+
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 font-semibold text-white transition hover:bg-red-600"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
           </div>
         </div>
 

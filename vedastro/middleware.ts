@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     "/cart",
     "/login",
     "/admin/login",
-    "/consultations", 
+    "/consultations",
   ];
 
   if (publicPaths.includes(pathname)) {
@@ -20,10 +20,12 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value;
 
   if (pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/astrologer")) {
     if (!accessToken) {
-      return NextResponse.redirect(
-        new URL("/admin/login", request.url),
-      );
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
     return NextResponse.next();
@@ -31,9 +33,7 @@ export function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/astrologer")) {
     if (!accessToken) {
-      return NextResponse.redirect(
-        new URL("/login", request.url),
-      );
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
     return NextResponse.next();
@@ -50,15 +50,11 @@ export function middleware(request: NextRequest) {
   ];
 
   const isProtectedRoute = protectedPaths.some(
-    (path) =>
-      pathname === path ||
-      pathname.startsWith(`${path}/`),
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
   if (isProtectedRoute && !accessToken) {
-    return NextResponse.redirect(
-      new URL("/login", request.url),
-    );
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();

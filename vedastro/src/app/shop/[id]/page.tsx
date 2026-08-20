@@ -10,8 +10,6 @@ import Badge from "../../../components/ui/Badge";
 
 import { useProductStore } from "../../../store/productStore";
 import { useCartStore } from "../../../store/cartStore";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function ProductDetailsPage() {
   const router = useRouter();
@@ -118,18 +116,28 @@ export default function ProductDetailsPage() {
   };
 
   return (
-    <section className="container mx-auto px-4 py-10">
-      
+    <section className="container mx-auto px-4 py-24">
+      <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
 
-      <div className="grid gap-10 lg:grid-cols-2">
         {/* PRODUCT IMAGE */}
-        <ProductImage images={imageUrls} title={product.name} />
+        <div className="flex w-full justify-center">
+          <div className="h-105 w-full max-w-120 overflow-hidden rounded-2xl">
+            <ProductImage
+              images={imageUrls}
+              title={product.name}
+            />
+          </div>
+        </div>
 
         {/* PRODUCT DETAILS */}
         <div>
-          <h1 className="text-4xl font-black text-white">{product.name}</h1>
+          <h1 className="text-4xl font-black text-white">
+            {product.name}
+          </h1>
 
-          <p className="mt-2 text-slate-400">{product.category}</p>
+          <p className="mt-2 text-slate-400">
+            {product.category}
+          </p>
 
           {/* PRICE */}
           <div className="mt-6 flex items-end gap-3">
@@ -147,9 +155,13 @@ export default function ProductDetailsPage() {
           {/* STOCK */}
           <div className="mt-4">
             {product.stock > 0 ? (
-              <Badge variant="success">In Stock ({product.stock})</Badge>
+              <Badge variant="success">
+                In Stock ({product.stock})
+              </Badge>
             ) : (
-              <Badge variant="error">Out Of Stock</Badge>
+              <Badge variant="error">
+                Out Of Stock
+              </Badge>
             )}
           </div>
 
@@ -164,20 +176,26 @@ export default function ProductDetailsPage() {
 
           {/* ACTIONS */}
           <div className="mt-8 flex gap-4">
-            {/* ADD TO CART */}
             <Button
               variant="secondary"
               className="flex-1"
-              disabled={product.stock === 0 || addingToCart || buyingNow}
+              disabled={
+                product.stock === 0 ||
+                addingToCart ||
+                buyingNow
+              }
               onClick={handleAddToCart}
             >
               {addingToCart ? "Adding..." : "Add To Cart"}
             </Button>
 
-            {/* BUY NOW */}
             <Button
               className="flex-1"
-              disabled={product.stock === 0 || addingToCart || buyingNow}
+              disabled={
+                product.stock === 0 ||
+                addingToCart ||
+                buyingNow
+              }
               onClick={handleBuyNow}
             >
               {buyingNow ? "Processing..." : "Buy Now"}
@@ -186,9 +204,13 @@ export default function ProductDetailsPage() {
 
           {/* INFO */}
           <div className="mt-10 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-            <h2 className="mb-4 text-xl font-black text-white">Description</h2>
+            <h2 className="mb-4 text-xl font-black text-white">
+              Description
+            </h2>
 
-            <p className="leading-7 text-slate-400">{product.description}</p>
+            <p className="leading-7 text-slate-400">
+              {product.description}
+            </p>
           </div>
         </div>
       </div>

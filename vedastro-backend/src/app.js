@@ -26,7 +26,6 @@ const allowedOrigins = [
 
   "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
 
-  // Backend domains (if required)
   "https://vedastro-backend-api.vercel.app",
   "https://vedastro-backend-api-3hvy.vercel.app",
   "https://vedastro-backend-api-3hvy-bjix1dn53-abhishek1its-projects.vercel.app",

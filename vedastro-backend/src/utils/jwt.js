@@ -8,8 +8,8 @@ export const generateAccessToken = (user) => {
     {
       id: userId,
       _id: userId,
-      role: user?.role || "user",
-      version: user.sessionVersion,
+      role: String(user?.role || "USER").toUpperCase(),
+      version: user?.sessionVersion,
     },
     env.JWT_SECRET,
     {

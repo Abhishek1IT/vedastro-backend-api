@@ -32,7 +32,7 @@ export default function LayoutContent({
   const pathname = usePathname() || "";
 
   const hideLayout = HIDDEN_LAYOUT_ROUTES.some((regex) =>
-    regex.test(pathname),
+    regex.test(pathname)
   );
 
   return (

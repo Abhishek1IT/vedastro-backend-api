@@ -103,6 +103,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         isHydrated: true,
       });
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
     }
   },
 
