@@ -356,13 +356,13 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-3 pt-8">
             <Button
               onClick={loadDashboard}
               loading={loading}
               variant="secondary"
             >
-              Refresh Data
+              Refresh
             </Button>
 
             <button
@@ -371,7 +371,6 @@ export default function AdminDashboard() {
               className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 font-semibold text-white transition hover:bg-red-600"
             >
               <LogOut className="h-4 w-4" />
-              Logout
             </button>
           </div>
         </div>
