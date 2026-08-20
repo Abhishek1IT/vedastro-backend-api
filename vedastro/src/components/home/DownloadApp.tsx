@@ -11,7 +11,7 @@ const DownloadApp = () => {
         {/* Left Side: Text Content */}
         <div className="space-y-6 z-10">
           <span className="text-[#E2C388] text-xs font-semibold tracking-widest uppercase">
-            THE ASTROTALK APP
+            THE Vedastro APP
           </span>
 
           <h2 className="text-3xl md:text-5xl font-light leading-tight">
@@ -77,14 +77,14 @@ const DownloadApp = () => {
                   <div className="relative">
                     <img
                       src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80"
-                      alt="Astro Heena"
+                      alt="Astro Seema"
                       className="w-8 h-8 rounded-full object-cover"
                     />
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
                   </div>
                   <div>
                     <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-sm">Astro Heena</span>
+                      <span className="font-semibold text-sm">Astro Seema</span>
                       <span className="text-blue-500 text-[10px]">✔</span>
                     </div>
                     <span className="text-[10px] text-gray-500">online</span>
@@ -104,7 +104,7 @@ const DownloadApp = () => {
                 {/* Sent Message */}
                 <div className="flex justify-end">
                   <div className="bg-[#FFF5B8] p-3 rounded-2xl rounded-tr-none max-w-[80%] text-gray-800 shadow-sm">
-                    Heena ji, when will I get married? <br />
+                    Seema ji, when will I get married? <br />
                     My family is asking.
                   </div>
                 </div>

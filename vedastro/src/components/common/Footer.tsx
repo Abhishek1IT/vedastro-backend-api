@@ -12,10 +12,10 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-wrap gap-6 text-gray-400">
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           <Link href="/about" className="hover:text-white transition-colors">About System</Link>
-          <Link href="/support" className="hover:text-white transition-colors">Support Terminal</Link>
+          <Link href="/support-terminal" className="hover:text-white transition-colors">Support Terminal</Link>
         </div>
 
       </div>
