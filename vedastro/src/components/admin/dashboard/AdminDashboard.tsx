@@ -1089,16 +1089,6 @@ export default function AdminDashboard() {
             )}
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedAstrologer(null)
-                }
-                className="rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15"
-              >
-                Close
-              </button>
-
               {selectedAstrologer.approvalStatus !==
                 "APPROVED" && (
                   <button

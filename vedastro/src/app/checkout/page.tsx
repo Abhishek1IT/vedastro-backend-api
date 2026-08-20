@@ -8,12 +8,13 @@ import PaymentMethod from "../../components/shop/PaymentMethod";
 
 import { useCheckout } from "../../hooks/useCheckout";
 import { useAuthStore } from "../../store/authStore";
+import { useRouter } from "next/navigation";
 
 import Button from "@/src/components/common/Button";
-import router from "next/router";
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const { checkout, loading } = useCheckout();
 
@@ -32,9 +33,6 @@ export default function CheckoutPage() {
   const quantity =
     Number(searchParams.get("quantity")) || 1;
 
-  /*
-   * Open login modal when user is not logged in
-   */
   useEffect(() => {
     if (!isHydrated) return;
 

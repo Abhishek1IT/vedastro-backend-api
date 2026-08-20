@@ -75,7 +75,7 @@ export default function ProfileMenu({
 
   return (
     <div className="relative">
-      {/* Profile Button */}
+      {/* Profile Dropdown */}
       <button
         type="button"
         onClick={handleProfileClick}
@@ -159,10 +159,10 @@ export default function ProfileMenu({
               >
                 Application Status
               </button>
+
             )}
 
-          {/* ORDERS - USER ONLY */}
-          {role === "USER" && (
+          {/* ORDERS */}
             <button
               type="button"
               onClick={() => {
@@ -173,7 +173,6 @@ export default function ProfileMenu({
             >
               My Orders
             </button>
-          )}
 
           {/* PROFILE */}
           <button

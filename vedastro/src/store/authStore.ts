@@ -33,7 +33,6 @@ export interface AuthUser {
 
   avatar?: string;
 
-  // Astrologer
   experience?: number;
   skills?: string[];
   languages?: string[];
@@ -90,8 +89,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       );
     } catch (error: any) {
       console.warn(
-        "Logout API skipped:",
-        error?.response?.data?.message || "Session already expired",
+        "Logout API error:",
+        error?.response?.data?.message || error?.message,
       );
     } finally {
       if (typeof window !== "undefined") {
@@ -121,6 +120,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const hasSession = localStorage.getItem("hasSession");
 
+    // No previous login
     if (!hasSession) {
       set({
         user: null,
@@ -132,25 +132,81 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     try {
+      console.log("AUTH: Checking /auth/me");
+
       const response = await api.get("/auth/me", {
         withCredentials: true,
       });
 
       const user = response.data?.data?.user ?? response.data?.data;
 
+      if (!user) {
+        throw new Error("User not found in /auth/me response");
+      }
+
+      console.log("AUTH: Session restored");
+
       set({
-        user: user ?? null,
-        isAuthenticated: !!user,
+        user,
+        isAuthenticated: true,
         isHydrated: true,
       });
+
+      return;
     } catch (error: any) {
-      console.error(
-        "AUTH ME ERROR:",
+      console.warn(
+        "AUTH ME FAILED:",
         error?.response?.status,
         error?.response?.data,
       );
+    }
 
-      localStorage.removeItem("hasSession");
+    try {
+      console.log("AUTH: Trying refresh token");
+
+      const refreshResponse = await api.post(
+        "/auth/refresh-token",
+        {},
+        {
+          withCredentials: true,
+        },
+      );
+
+      console.log("AUTH: Refresh successful", refreshResponse.status);
+
+      const response = await api.get("/auth/me", {
+        withCredentials: true,
+      });
+
+      const user = response.data?.data?.user ?? response.data?.data;
+
+      if (!user) {
+        throw new Error("User not found after refresh");
+      }
+
+      console.log("AUTH: Session restored after refresh");
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("hasSession", "true");
+      }
+
+      set({
+        user,
+        isAuthenticated: true,
+        isHydrated: true,
+      });
+
+      return;
+    } catch (refreshError: any) {
+      console.error(
+        "AUTH REFRESH FAILED:",
+        refreshError?.response?.status,
+        refreshError?.response?.data,
+      );
+
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("hasSession");
+      }
 
       set({
         user: null,
