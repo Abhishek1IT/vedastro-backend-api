@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingCart } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 
 import DesktopMenu from "./DesktopMenu";
 import MobileMenu from "./MobileMenu";
@@ -60,16 +60,10 @@ export default function Navbar() {
       setIsScrolled(window.scrollY > 20);
     };
 
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-    );
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener(
-        "scroll",
-        handleScroll,
-      );
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -83,15 +77,14 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 w-full transition-all duration-300">
+      <header className="fixed left-0 right-0 top-0 z-50 w-full">
         <nav
-          className={`mx-auto flex items-center justify-between transition-all duration-300 backdrop-blur-md ${isScrolled
-              ? "mt-4 mx-4 max-w-5xl rounded-full border border-(--accent) bg-(--surface-secondary)/90 px-6 py-2.5 shadow-xl"
+          className={`mx-auto flex items-center justify-between backdrop-blur-md transition-all duration-300 ${isScrolled
+              ? "mx-4 mt-4 max-w-5xl rounded-full border border-(--accent) bg-(--surface-secondary)/90 px-6 py-2.5 shadow-xl"
               : "w-full border-b border-transparent bg-transparent px-6 py-5"
             }`}
         >
-
-
+          {/* LOGO */}
           <button
             type="button"
             onClick={() => router.push("/home")}
@@ -101,29 +94,58 @@ export default function Navbar() {
               ✨
             </span>
 
-            <h1 className="text-xl font-bold transition-colors duration-300">
-              <span className={isScrolled ? "text-black" : "text-amber-700/80"}>
+            <h1 className="text-xl font-bold">
+              <span
+                className={
+                  isScrolled
+                    ? "text-black"
+                    : "text-amber-700/80"
+                }
+              >
                 Ved
               </span>
+
               <span className="text-(--accent)">
                 Astro
               </span>
             </h1>
           </button>
 
+          {/* DESKTOP MENU */}
           <div className="hidden md:block">
             <DesktopMenu isScrolled={isScrolled} />
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* MOBILE MENU BUTTON */}
+            <button
+              type="button"
+              onClick={() =>
+                setIsMobileOpen((prev) => !prev)
+              }
+              className={`rounded-full p-2 transition hover:bg-(--surface-tertiary) md:hidden ${isScrolled
+                  ? "text-black"
+                  : "text-amber-700/80"
+                }`}
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileOpen}
+            >
+              {isMobileOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+
             {/* CART */}
             {user?.role !== "ADMIN" && (
               <button
                 type="button"
-                onClick={() =>
-                  router.push("/cart")
-                }
-                className={`relative rounded-full p-2 transition hover:bg-(--surface-tertiary) ${isScrolled ? "text-black" : "text-amber-700/80"
+                onClick={() => router.push("/cart")}
+                className={`relative rounded-full p-2 transition hover:bg-(--surface-tertiary) ${isScrolled
+                    ? "text-black"
+                    : "text-amber-700/80"
                   }`}
                 aria-label="Shopping cart"
               >
@@ -137,6 +159,7 @@ export default function Navbar() {
               </button>
             )}
 
+            {/* PROFILE / LOGIN */}
             {isAuthenticated && user ? (
               <ProfileMenu user={user} />
             ) : (
@@ -150,6 +173,7 @@ export default function Navbar() {
           </div>
         </nav>
 
+        {/* MOBILE MENU */}
         <MobileMenu
           isOpen={isMobileOpen}
           setIsOpen={setIsMobileOpen}
