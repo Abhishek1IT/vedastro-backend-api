@@ -119,8 +119,6 @@ const TopAstrologers: React.FC = () => {
 
         const result = await response.json();
 
-        console.log("ASTROLOGERS RESPONSE:", result);
-
         const data: Astrologer[] =
           result?.data?.data ||
           result?.data ||

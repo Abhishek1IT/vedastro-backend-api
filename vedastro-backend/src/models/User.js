@@ -130,6 +130,27 @@ const userSchema = new mongoose.Schema(
       enum: ["NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"],
       default: "NOT_REQUIRED",
     },
+
+    expertise: {
+      type: [
+        {
+          type: String,
+          enum: [
+            "Love",
+            "Marriage",
+            "Career",
+            "Finance",
+            "Business",
+            "Education",
+            "Vastu",
+            "Numerology",
+            "Kundli",
+          ],
+        },
+      ],
+      default: [],
+    },
+
     rejectionReason: {
       type: String,
       default: null,

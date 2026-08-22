@@ -31,14 +31,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/astrologer")) {
-    if (!accessToken) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    return NextResponse.next();
-  }
-
   const protectedPaths = [
     "/profile",
     "/orders",

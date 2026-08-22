@@ -1,4 +1,5 @@
 import User from "../../models/User.js";
+import Conversation from "../../models/Conversation.js";
 import { ROLES } from "../../common/roles.js";
 
 class UserRepository {
@@ -66,7 +67,7 @@ class UserRepository {
       role: ROLES.ASTROLOGER,
     }).select("-otp -otpExpiry -refreshToken");
   }
-  
+
   async updateProfile(userId, data) {
     return await User.findByIdAndUpdate(userId, data, {
       new: true,
@@ -94,7 +95,7 @@ class UserRepository {
 
   async getUsersForChat(currentUser) {
     const role = currentUser.role;
-    const userId = currentUser.id;
+    const userId = currentUser.id || currentUser._id;
 
     if (role === ROLES.ADMIN) {
       return await User.find({
@@ -108,13 +109,35 @@ class UserRepository {
     }
 
     if (role === ROLES.ASTROLOGER) {
+      const conversations = await Conversation.find({
+        participants: userId,
+      }).select("participants");
+
+      const userIds = conversations.flatMap((conversation) =>
+        conversation.participants
+          .filter(
+            (participantId) =>
+              participantId.toString() !== userId.toString()
+          )
+          .map((participantId) => participantId.toString())
+      );
+
+      const uniqueUserIds = [...new Set(userIds)];
+
+      if (uniqueUserIds.length === 0) {
+        return [];
+      }
+
       return await User.find({
+        _id: { $in: uniqueUserIds },
         role: ROLES.USER,
+        status: "ACTIVE",
       }).select("-otp -otpExpiry -refreshToken");
     }
 
     return await User.find({
       role: ROLES.ASTROLOGER,
+      status: "ACTIVE",
     }).select("-otp -otpExpiry -refreshToken");
   }
 }

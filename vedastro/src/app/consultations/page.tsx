@@ -1,651 +1,638 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @next/next/no-img-element */
-
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  MessageCircle,
-  Phone,
-  Star,
-  Briefcase,
-  Circle,
-  ChevronDown,
-} from "lucide-react";
+import axios from "axios";
+import { ChevronDown } from "lucide-react";
 
 import { consultationService } from "../../services/consultation.service";
 import { useAuthStore } from "../../store/authStore";
-import lib from "../../lib/axios";
+import { useConsultationStore } from "../../store/useConsultationStore";
+import { useDebounce } from "../../hooks/useDebounce";
+import {
+  Astrologer,
+  AstrologerExpertise,
+} from "../../types/consultation";
 
-interface ConsultationPerson {
-  _id: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  avatar?: string;
-  language?: string;
-  experience?: number;
-  role?: string;
-  isOnline?: boolean;
-  isVerified?: boolean;
+import { ConsultationHero } from "../../components/consultation/ConsultationHero";
+import { ConsultationTypeSelector } from "../../components/consultation/ConsultationTypeSelector";
+import { ConsultationCategories } from "../../components/consultation/ConsultationCategories";
+import { ConsultationToolbar } from "../../components/consultation/ConsultationToolbar";
+import { ConsultationFilters as FilterSidebar } from "../../components/consultation/ConsultationFilters";
+import { MobileFilterSheet } from "../../components/consultation/MobileFilterSheet";
+import { AstrologerCard } from "../../components/consultation/AstrologerCard";
+import { AstrologerCardSkeleton } from "../../components/consultation/AstrologerCardSkeleton";
+import { ConsultationEmptyState } from "../../components/consultation/ConsultationEmptyState";
+import { ConsultationErrorState } from "../../components/consultation/ConsultationErrorState";
 
-  conversationId?: string;
-  lastMessage?: string;
-  lastMessageAt?: string;
-}
+const ITEMS_PER_PAGE = 12;
 
-type AdminFilter = "USER" | "ASTROLOGER";
-
-export default function ConsultationPage() {
+export default function ConsultationsPage() {
   const router = useRouter();
 
-  const { user, isAuthenticated, isHydrated, openLoginModal } = useAuthStore();
+  const {
+    isAuthenticated,
+    user,
+  } = useAuthStore();
 
+  const isAstrologerView =
+    user?.role === "ASTROLOGER";
+
+  const {
+    searchQuery,
+    selectedConsultationType,
+    selectedCategory,
+    filters,
+    sortBy,
+  } = useConsultationStore();
+
+  const [astrologers, setAstrologers] = useState<Astrologer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [people, setPeople] = useState<ConsultationPerson[]>([]);
-  const [adminFilter, setAdminFilter] = useState<AdminFilter>("USER");
-  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [showDesktopFilters, setShowDesktopFilters] = useState(true);
 
-  const currentRole = String(user?.role || "").toUpperCase();
+  const debouncedSearch = useDebounce(searchQuery, 400);
 
-  const isAstrologer = currentRole === "ASTROLOGER";
-  const isNormalUser = currentRole === "USER";
-  const isAdmin = currentRole === "ADMIN";
+  useEffect(() => {
+    let cancelled = false;
 
-  // const isProfileComplete = user?.profileCompleted === true;
+    async function loadPeople() {
+      setLoading(true);
+      setError(null);
 
-  const mapPerson = (
-    person: any,
-    role: "USER" | "ASTROLOGER",
-  ): ConsultationPerson => {
-    return {
-      _id: String(person?._id || person?.id),
+      try {
+        let data: Astrologer[] = [];
 
-      name:
-        person?.name ||
-        person?.fullName ||
-        (role === "ASTROLOGER" ? "Astrologer" : "User"),
+        if (isAstrologerView) {
+          data =
+            await consultationService.getChatUsers();
+        } else {
+          data =
+            await consultationService.getAstrologers();
+        }
 
-      phone: person?.phone || "",
+        if (!cancelled) {
+          setAstrologers(
+            Array.isArray(data)
+              ? data
+              : [],
+          );
+        }
+      } catch (err) {
+        if (cancelled) return;
 
-      email: person?.email || "",
+        console.error(
+          "CONSULTATIONS LOAD ERROR:",
+          err,
+        );
 
-      avatar:
-        person?.avatar || person?.profileImage || person?.profilePicture || "",
-
-      language: person?.language || "en",
-
-      experience: Number(person?.experience || 0),
-
-      role,
-
-      isOnline: Boolean(person?.isOnline),
-
-      isVerified: Boolean(person?.isVerified),
-
-      conversationId: person?.conversationId
-        ? String(person.conversationId)
-        : undefined,
-
-      lastMessage: person?.lastMessage || "",
-
-      lastMessageAt: person?.lastMessageAt
-        ? String(person.lastMessageAt)
-        : undefined,
-    };
-  };
-
-  const uniquePeople = (list: ConsultationPerson[]): ConsultationPerson[] => {
-    return Array.from(
-      new Map(list.map((person) => [person._id, person])).values(),
-    );
-  };
-
-  const loadAstrologers = async () => {
-    try {
-      console.log("LOADING ASTROLOGERS...");
-
-      const data = await consultationService.getAstrologers();
-
-      console.log("ASTROLOGERS FROM SERVICE:", data);
-
-      if (!Array.isArray(data)) {
-        console.error("Astrologers data is not array:", data);
-        setPeople([]);
-        return;
+        if (axios.isAxiosError(err)) {
+          setError(
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to load users",
+          );
+        } else {
+          setError(
+            "Something went wrong. Please try again.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-
-      const currentUserId = String(user?._id || "");
-
-      const astrologers: ConsultationPerson[] = data
-        .filter((astro: any) => {
-          const astroId = String(astro?._id || astro?.id || "");
-
-          // Current logged-in user ko list se hatao
-          return astroId && astroId !== currentUserId;
-        })
-        .map((astro: any) => ({
-          _id: String(astro._id || astro.id),
-
-          name: astro.name || "Astrologer",
-
-          phone: astro.phone || "",
-
-          email: astro.email || "",
-
-          avatar: astro.avatar || "",
-
-          language: astro.language || "en",
-
-          experience: Number(astro.experience || 0),
-
-          role: "ASTROLOGER",
-
-          isOnline: Boolean(astro.isOnline),
-
-          isVerified: Boolean(astro.isVerified),
-
-          conversationId: undefined,
-
-          lastMessage: "",
-
-          lastMessageAt: undefined,
-        }));
-
-      console.log("FINAL ASTROLOGERS:", astrologers);
-
-      setPeople(uniquePeople(astrologers));
-    } catch (error) {
-      console.error("LOAD ASTROLOGERS ERROR:", error);
-      setPeople([]);
     }
-  };
 
-  const loadUsersForAdmin = async () => {
-    const response = await lib.get("/admin/users");
-
-    const usersData = response?.data?.data;
-
-    const users: ConsultationPerson[] = Array.isArray(usersData)
-      ? usersData
-        .filter((item: any) => {
-          return String(item?.role || "").toUpperCase() === "USER";
-        })
-        .map((item: any) => mapPerson(item, "USER"))
-      : [];
-
-    setPeople(uniquePeople(users));
-  };
-
-  const loadUsersForAstrologer = async () => {
-    const response = await lib.get("/chat/conversations");
-
-    const conversations = response?.data?.data || [];
-
-    if (!Array.isArray(conversations)) {
-      setPeople([]);
+    if (isAstrologerView && (!isAuthenticated || !user)) {
+      setLoading(false);
       return;
     }
 
-    const users: ConsultationPerson[] = conversations
-      .map((conversation: any): ConsultationPerson | null => {
-        const participants = conversation?.participants || [];
+    loadPeople();
 
-        if (!Array.isArray(participants)) {
-          return null;
-        }
-
-        const otherUser = participants.find((participant: any) => {
-          const participantId =
-            typeof participant === "object"
-              ? participant?._id || participant?.id
-              : participant;
-
-          return String(participantId) !== String(user?._id);
-        });
-
-        if (!otherUser) {
-          return null;
-        }
-
-        const otherUserId =
-          typeof otherUser === "object"
-            ? otherUser?._id || otherUser?.id
-            : otherUser;
-
-        if (!otherUserId) {
-          return null;
-        }
-
-        const otherRole =
-          typeof otherUser === "object"
-            ? String(otherUser?.role || "USER").toUpperCase()
-            : "USER";
-
-        if (otherRole !== "USER") {
-          return null;
-        }
-
-        return {
-          _id: String(otherUserId),
-
-          name:
-            typeof otherUser === "object"
-              ? otherUser?.name || otherUser?.fullName || "User"
-              : "User",
-
-          phone: typeof otherUser === "object" ? otherUser?.phone || "" : "",
-
-          email: typeof otherUser === "object" ? otherUser?.email || "" : "",
-
-          avatar:
-            typeof otherUser === "object"
-              ? otherUser?.avatar || otherUser?.profileImage || ""
-              : "",
-
-          language:
-            typeof otherUser === "object" ? otherUser?.language || "en" : "en",
-
-          experience:
-            typeof otherUser === "object"
-              ? Number(otherUser?.experience || 0)
-              : 0,
-
-          role: "USER",
-
-          isOnline:
-            typeof otherUser === "object"
-              ? Boolean(otherUser?.isOnline)
-              : false,
-
-          isVerified:
-            typeof otherUser === "object"
-              ? Boolean(otherUser?.isVerified)
-              : false,
-
-          conversationId: conversation?._id
-            ? String(conversation._id)
-            : undefined,
-
-          lastMessage: conversation?.lastMessage || "",
-
-          lastMessageAt: conversation?.lastMessageAt
-            ? String(conversation.lastMessageAt)
-            : undefined,
-        };
-      })
-      .filter((person): person is ConsultationPerson => person !== null);
-
-    setPeople(uniquePeople(users));
-  };
-
-  const loadConsultations = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      if (isAdmin) {
-        if (adminFilter === "USER") {
-          await loadUsersForAdmin();
-        } else {
-          await loadAstrologers();
-        }
-        return;
-      }
-
-      if (isAstrologer && isAuthenticated && user?._id) {
-        await loadUsersForAstrologer();
-        return;
-      }
-
-      await loadAstrologers();
-
-    } catch (error) {
-      console.error("Load consultations error:", error);
-      setPeople([]);
-    } finally {
-      setLoading(false);
-    }
+    return () => {
+      cancelled = true;
+    };
   }, [
-    isAdmin,
-    adminFilter,
-    isAstrologer,
     isAuthenticated,
+    isAstrologerView,
     user?._id,
   ]);
 
+  const filteredAstrologers = useMemo(() => {
+    let result = [...astrologers];
+
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase().trim();
+
+      result = result.filter((a) => {
+        const name = String(a.name || "").toLowerCase();
+
+        const expertise = Array.isArray(a.expertise)
+          ? a.expertise
+          : [];
+
+        const specializations = Array.isArray(
+          a.specializations,
+        )
+          ? a.specializations
+          : [];
+
+        return (
+          name.includes(q) ||
+          expertise.some((e) =>
+            String(e).toLowerCase().includes(q),
+          ) ||
+          specializations.some((s) =>
+            String(s).toLowerCase().includes(q),
+          )
+        );
+      });
+    }
+
+    if (
+      selectedCategory &&
+      selectedCategory !== "All"
+    ) {
+      result = result.filter(
+        (a) =>
+          a.specializations?.includes(
+            selectedCategory,
+          ) ||
+          a.expertise.includes(
+            selectedCategory as AstrologerExpertise,
+          ),
+      );
+    }
+
+    if (filters.expertise.length > 0) {
+      result = result.filter((a) =>
+        filters.expertise.some((exp) =>
+          a.expertise.includes(exp),
+        ),
+      );
+    }
+
+    if (filters.availability.length > 0) {
+      result = result.filter((a) =>
+        filters.availability.some((avail) => {
+          if (avail === "now") {
+            return (
+              Boolean(a.isOnline) &&
+              !Boolean(a.isBusy)
+            );
+          }
+
+          if (avail === "today") {
+            return (
+              Boolean(a.isOnline) ||
+              !Boolean(a.isBusy)
+            );
+          }
+
+          return true;
+        }),
+      );
+    }
+
+    if (filters.experience.length > 0) {
+      result = result.filter((a) =>
+        filters.experience.some((exp) => {
+          const experience =
+            Number(a.experience) || 0;
+
+          if (exp === "1-5") {
+            return (
+              experience >= 1 &&
+              experience <= 5
+            );
+          }
+
+          if (exp === "5-10") {
+            return (
+              experience > 5 &&
+              experience <= 10
+            );
+          }
+
+          if (exp === "10+") {
+            return experience > 10;
+          }
+
+          return false;
+        }),
+      );
+    }
+
+    if (filters.languages.length > 0) {
+      result = result.filter((a) => {
+        const languages = Array.isArray(
+          a.languages,
+        )
+          ? a.languages
+          : [];
+
+        return filters.languages.some((lang) =>
+          languages.includes(lang),
+        );
+      });
+    }
+
+    const [minPrice, maxPrice] =
+      filters.priceRange;
+
+    if (minPrice > 0 || maxPrice < 0) {
+      result = result.filter((a) => {
+        const price =
+          a.pricing?.[
+          selectedConsultationType
+          ];
+
+        if (
+          price === undefined ||
+          price === null
+        ) {
+          return true;
+        }
+
+        return (
+          price >= minPrice &&
+          price <= maxPrice
+        );
+      });
+    }
+
+    switch (sortBy) {
+      case "rating":
+        result.sort(
+          (a, b) =>
+            (b.rating || 0) -
+            (a.rating || 0),
+        );
+        break;
+
+      case "experience":
+        result.sort(
+          (a, b) =>
+            (b.experience || 0) -
+            (a.experience || 0),
+        );
+        break;
+
+      case "price-low":
+        result.sort((a, b) => {
+          const pa =
+            a.pricing?.[
+            selectedConsultationType
+            ] ?? Infinity;
+
+          const pb =
+            b.pricing?.[
+            selectedConsultationType
+            ] ?? Infinity;
+
+          return pa - pb;
+        });
+        break;
+
+      case "price-high":
+        result.sort((a, b) => {
+          const pa =
+            a.pricing?.[
+            selectedConsultationType
+            ] ?? -Infinity;
+
+          const pb =
+            b.pricing?.[
+            selectedConsultationType
+            ] ?? -Infinity;
+
+          return pb - pa;
+        });
+        break;
+
+      case "consulted":
+        result.sort(
+          (a, b) =>
+            (b.consultationCount || 0) -
+            (a.consultationCount || 0),
+        );
+        break;
+
+      case "recommended":
+      default:
+        result.sort((a, b) => {
+          const scoreA =
+            (a.rating || 0) * 0.4 +
+            (a.experience || 0) * 0.3 +
+            (a.consultationCount || 0) *
+            0.01 +
+            (a.isOnline ? 5 : 0);
+
+          const scoreB =
+            (b.rating || 0) * 0.4 +
+            (b.experience || 0) * 0.3 +
+            (b.consultationCount || 0) *
+            0.01 +
+            (b.isOnline ? 5 : 0);
+
+          return scoreB - scoreA;
+        });
+
+        break;
+    }
+
+    return result;
+  }, [
+    astrologers,
+    debouncedSearch,
+    selectedCategory,
+    selectedConsultationType,
+    filters,
+    sortBy,
+  ]);
+
+  const paginatedAstrologers = useMemo(() => {
+    return filteredAstrologers.slice(
+      0,
+      page * ITEMS_PER_PAGE,
+    );
+  }, [filteredAstrologers, page]);
+
+  const hasMore =
+    paginatedAstrologers.length <
+    filteredAstrologers.length;
+
+  const totalCount =
+    filteredAstrologers.length;
+
   useEffect(() => {
-    if (!isHydrated) {
-      return;
+    setPage(1);
+  }, [
+    debouncedSearch,
+    selectedCategory,
+    selectedConsultationType,
+    filters,
+    sortBy,
+  ]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      setPage((prev) => prev + 1);
     }
+  }, [loading, hasMore]);
 
-    loadConsultations();
-  }, [isHydrated, loadConsultations]);
-
-  const handleAction = (
-    type: "chat" | "call",
-    personId: string,
-    conversationId?: string,
-  ) => {
-    if (!isAuthenticated || !user) {
-      openLoginModal();
-      return;
-    }
-
-    if (!isAdmin && user.profileCompleted !== true) {
-      router.push(`/profile?redirect=${encodeURIComponent("/consultations")}`);
-
-      return;
-    }
-
-    if (isAstrologer) {
-      if (type === "chat") {
-        const params = new URLSearchParams();
-
-        params.set("userId", personId);
-
-        if (conversationId) {
-          params.set("conversationId", conversationId);
-        }
-
-        router.push(`/consultations/chat?${params.toString()}`);
-
-        return;
-      }
-
-      router.push(`/consultations/call?userId=${encodeURIComponent(personId)}`);
-
-      return;
-    }
-
-    if (isNormalUser) {
-      if (type === "chat") {
-        router.push(
-          `/consultations/chat?astroId=${encodeURIComponent(personId)}`,
+  const handleChat = useCallback(
+    (id: string) => {
+      if (!id) {
+        console.error(
+          "Astrologer ID missing for chat",
         );
-
         return;
       }
 
-      router.push(
-        `/consultations/call?astroId=${encodeURIComponent(personId)}`,
+      const url =
+        `/consultations/chat?astrologerId=${encodeURIComponent(id)}`;
+
+      if (!isAuthenticated) {
+        router.push(
+          `/login?redirect=${encodeURIComponent(url)}`,
+        );
+        return;
+      }
+
+      console.log(
+        "OPENING CHAT FOR ASTROLOGER:",
+        id,
       );
 
-      return;
-    }
+      router.push(url);
+    },
+    [isAuthenticated, router],
+  );
 
-    if (isAdmin) {
-      if (type === "chat") {
-        const params = new URLSearchParams();
-
-        if (adminFilter === "USER") {
-          params.set("userId", personId);
-        } else {
-          params.set("astroId", personId);
-        }
-
-        if (conversationId) {
-          params.set("conversationId", conversationId);
-        }
-
-        router.push(`/consultations/chat?${params.toString()}`);
-
+  const handleCall = useCallback(
+    (id: string) => {
+      if (!id) {
+        console.error(
+          "Chat person ID missing",
+        );
         return;
       }
 
-      if (adminFilter === "USER") {
+      const url = isAstrologerView
+        ? `/consultations/chat?userId=${encodeURIComponent(id)}`
+        : `/consultations/chat?astrologerId=${encodeURIComponent(id)}`;
+
+      if (!isAuthenticated) {
         router.push(
-          `/consultations/call?userId=${encodeURIComponent(personId)}`,
+          `/login?redirect=${encodeURIComponent(url)}`,
         );
-      } else {
-        router.push(
-          `/consultations/call?astroId=${encodeURIComponent(personId)}`,
-        );
+        return;
       }
-    }
-  };
 
-  if (!isHydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <p className="animate-pulse">Loading consultations...</p>
-      </div>
-    );
-  }
-
-  function ProfileAvatar({
-    person,
-  }: {
-    person: ConsultationPerson;
-  }) {
-    const [imageError, setImageError] = useState(false);
-
-    const name =
-      person.name ||
-      (person.role === "ASTROLOGER" ? "Astrologer" : "User");
-
-    const getInitials = (value: string) => {
-      return value
-        .split(" ")
-        .slice(0, 2)
-        .map((word) => word.charAt(0).toUpperCase())
-        .join("");
-    };
-
-    const avatar =
-      person.avatar &&
-        person.avatar !== "/images/default-avatar.png" &&
-        !person.avatar.includes("default-avatar.png")
-        ? person.avatar
-        : "";
-
-    if (!avatar || imageError) {
-      return (
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-lg font-bold text-amber-400">
-          {getInitials(name)}
-        </div>
+      console.log(
+        "OPEN CHAT:",
+        {
+          role: user?.role,
+          id,
+          url,
+        },
       );
-    }
 
-    return (
-      <img
-        src={avatar}
-        alt={name}
-        className="h-16 w-16 shrink-0 rounded-full border border-slate-700 object-cover"
-        onError={() => setImageError(true)}
-      />
-    );
-  }
+      router.push(url);
+    },
+    [
+      isAuthenticated,
+      isAstrologerView,
+      router,
+      user?.role,
+    ],
+  );
+
+  const handleVideoCall = useCallback(
+    (id: string) => {
+      if (!id) {
+        console.error(
+          "Video call person ID missing",
+        );
+        return;
+      }
+
+      const url = isAstrologerView
+        ? `/consultations/call?userId=${encodeURIComponent(id)}&type=video`
+        : `/consultations/call?astrologerId=${encodeURIComponent(id)}&type=video`;
+
+      if (!isAuthenticated) {
+        router.push(
+          `/login?redirect=${encodeURIComponent(url)}`,
+        );
+        return;
+      }
+
+      console.log(
+        "OPEN VIDEO CALL:",
+        {
+          role: user?.role,
+          id,
+          url,
+        },
+      );
+
+      router.push(url);
+    },
+    [
+      isAuthenticated,
+      isAstrologerView,
+      router,
+      user?.role,
+    ],
+  );
+
+  const handleProfile = useCallback(
+    (id: string) => {
+      if (!id) {
+        console.error(
+          "Profile person ID missing",
+        );
+        return;
+      }
+
+      const url = isAstrologerView
+        ? `/profile/${id}`
+        : `/astrologer/${id}`;
+
+      console.log(
+        "OPEN PROFILE:",
+        {
+          role: user?.role,
+          id,
+          url,
+        },
+      );
+
+      router.push(url);
+    },
+    [
+      isAstrologerView,
+      router,
+      user?.role,
+    ],
+  );
+
+  const handleRetry = useCallback(() => {
+    window.location.reload();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-24">
 
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">
-              {isAdmin
-                ? "Consultations"
-                : isAstrologer
-                  ? "Recent Consultations"
-                  : "Consult Astrologers"}
-            </h1>
+      <ConsultationHero />
 
-            <p className="mt-2 text-slate-400">
-              {isAdmin
-                ? "Manage users and astrologers."
-                : isAstrologer
-                  ? "Users who have messaged you."
-                  : "Choose an astrologer and start Chat or Call."}
-            </p>
-          </div>
+      <ConsultationTypeSelector />
 
-          {/* ADMIN DROPDOWN */}
-          {isAdmin && (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setAdminDropdownOpen((prev) => !prev)}
-                className="flex min-w-45 items-center justify-between gap-4 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:border-amber-500"
-              >
-                <span>{adminFilter === "USER" ? "Users" : "Astrologers"}</span>
+      <ConsultationCategories />
 
-                <ChevronDown
-                  size={18}
-                  className={adminDropdownOpen ? "rotate-180" : ""}
-                />
-              </button>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-              {adminDropdownOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-full min-w-45 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-xl">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdminFilter("USER");
-                      setAdminDropdownOpen(false);
-                    }}
-                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${adminFilter === "USER"
-                      ? "bg-slate-800 text-amber-400"
-                      : "text-white"
-                      }`}
-                  >
-                    Users
-                  </button>
+        <ConsultationToolbar
+          totalCount={totalCount}
+          onToggleFilters={() =>
+            setShowDesktopFilters(
+              (prev) => !prev,
+            )
+          }
+        />
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdminFilter("ASTROLOGER");
-                      setAdminDropdownOpen(false);
-                    }}
-                    className={`block w-full px-4 py-3 text-left text-sm transition hover:bg-slate-800 ${adminFilter === "ASTROLOGER"
-                      ? "bg-slate-800 text-amber-400"
-                      : "text-white"
-                      }`}
-                  >
-                    Astrologers
-                  </button>
-                </div>
-              )}
-            </div>
+        <div className="mt-6 flex gap-8">
+
+          {showDesktopFilters && (
+            <aside className="hidden w-72 shrink-0 lg:block">
+              <FilterSidebar />
+            </aside>
           )}
-        </div>
 
-        {/* Loading */}
-        {loading ? (
-          <div className="py-20 text-center text-slate-400">Loading...</div>
-        ) : people.length === 0 ? (
-          <div className="py-20 text-center text-slate-400">
-            {isAstrologer
-              ? "No users have messaged you yet."
-              : isAdmin
-                ? adminFilter === "USER"
-                  ? "No users available."
-                  : "No astrologers available."
-                : "No astrologers available."}
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {people.map((person) => (
-              <div
-                key={person.conversationId || person._id}
-                className="rounded-2xl border border-slate-800 bg-slate-900 p-4 transition hover:border-amber-500"
-              >
-                {/* Profile */}
-                <div className="flex items-center gap-4">
-                  <ProfileAvatar person={person} />
+          <main className="min-w-0 flex-1">
 
-                  <div className="min-w-0">
-                    <h2 className="truncate text-lg font-bold">
-                      {person.name ||
-                        (person.role === "ASTROLOGER" ? "Astrologer" : "User")}
-                    </h2>
+            {error ? (
+              <ConsultationErrorState
+                onRetry={handleRetry}
+              />
+            ) : paginatedAstrologers.length ===
+              0 &&
+              !loading ? (
+              <ConsultationEmptyState />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
 
-                    <p className="text-sm text-slate-400">
-                      {person.role === "ASTROLOGER" ? "Astrologer" : "User"}
-                    </p>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      <Circle
-                        size={10}
-                        fill={person.isOnline ? "#22c55e" : "#ef4444"}
-                        color={person.isOnline ? "#22c55e" : "#ef4444"}
+                  {paginatedAstrologers.map(
+                    (astrologer) => (
+                      <AstrologerCard
+                        key={astrologer._id}
+                        astrologer={astrologer}
+                        consultationType={
+                          selectedConsultationType
+                        }
+                        onChat={handleChat}
+                        onCall={handleCall}
+                        onVideoCall={handleVideoCall}
+                        isAstrologerView={
+                          isAstrologerView
+                        }
                       />
+                    ),
+                  )}
 
-                      <span className="text-xs">
-                        {person.isOnline ? "Online" : "Offline"}
-                      </span>
-                    </div>
-                  </div>
+                  {loading &&
+                    Array.from({
+                      length: 6,
+                    }).map((_, i) => (
+                      <AstrologerCardSkeleton
+                        key={`skeleton-${i}`}
+                      />
+                    ))}
                 </div>
 
-                {/* Details */}
-                <div className="mt-4 space-y-2">
-                  {person.role === "ASTROLOGER" ? (
-                    <>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Briefcase size={16} />
-                        {person.experience || 0} Years Experience
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <Star size={16} className="text-yellow-400" />
-
-                        {person.isVerified
-                          ? "Verified Astrologer"
-                          : "Astrologer"}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-slate-300">
-                      <MessageCircle size={16} />
-
-                      <span className="truncate">
-                        {person.lastMessage || "User"}
-                      </span>
+                {hasMore &&
+                  !loading &&
+                  paginatedAstrologers.length >
+                  0 && (
+                    <div className="mt-10 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={
+                          handleLoadMore
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50"
+                      >
+                        Load More Astrologers
+                        
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
                     </div>
                   )}
 
-                  {isAstrologer && person.lastMessageAt && (
-                    <div className="text-xs text-slate-500">
-                      Last message:{" "}
-                      {new Date(person.lastMessageAt).toLocaleString()}
-                    </div>
+                {!hasMore &&
+                  paginatedAstrologers.length >
+                  0 && (
+                    <p className="mt-10 text-center text-sm text-gray-500">
+                      You&apos;ve seen all{" "}
+                      {totalCount} astrologers
+                    </p>
                   )}
-                </div>
-
-                {/* Actions */}
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAction("chat", person._id, person.conversationId)
-                    }
-                    className="flex items-center justify-center gap-1.5 rounded-md bg-amber-500 px-2 py-1.5 text-xs font-semibold text-black transition hover:bg-amber-400"
-                  >
-                    <MessageCircle size={15} />
-                    Chat
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleAction("call", person._id, person.conversationId)
-                    }
-                    className="flex items-center justify-center gap-1.5 rounded-md bg-green-600 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-green-500"
-                  >
-                    <Phone size={15} />
-                    Call
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              </>
+            )}
+          </main>
+        </div>
       </div>
+
+      <MobileFilterSheet />
     </div>
   );
 }

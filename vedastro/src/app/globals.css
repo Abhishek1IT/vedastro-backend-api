@@ -122,9 +122,6 @@ textarea::placeholder {
 }
 
 .sticky-navbar-scrolled {
-  background-color: var(--surface-secondary);
-  
-  border: 1px solid var(--accent);
   
   box-shadow:
     0 10px 25px -5px rgba(245, 158, 11, 0.15),

@@ -9,7 +9,7 @@ const LiveAstrologers: React.FC = () => {
     <div className="w-full min-h-screen bg-[#0D0905] text-white flex flex-col justify-between font-sans relative overflow-hidden">
 
       {/* 2. Hero Content Section */}
-      <main className="max-w-7xl mx-auto px-6 md:px-12 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 relative z-10">
+      <main className="max-w-7xl mx-auto w-full min-w-0 px-4 sm:px-6 md:px-12 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center flex-1 relative z-10">
 
         {/* Left Column Text */}
         <div className="lg:col-span-6 space-y-6">
@@ -37,9 +37,9 @@ const LiveAstrologers: React.FC = () => {
         </div>
 
         {/* Right Column: Astrologer Portrait Cards */}
-        <div className="lg:col-span-6 flex items-center justify-center gap-4 py-8 overflow-x-auto">
+        <div className="lg:col-span-6 flex items-center justify-center gap-4 py-8 overflow-hidden">
           {/* Card 1 */}
-          <div className="w-32 h-52 md:w-40 md:h-64 rounded-full overflow-hidden border border-[#3A2A1A] relative shrink-0">
+          <div className="w-24 h-40 sm:w-32 sm:h-52 md:w-40 md:h-64 rounded-full overflow-hidden border border-[#3A2A1A] relative shrink-0">
             <img
               src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=500&auto=format&fit=crop&q=80"
               alt="Astrologer 1"
@@ -47,7 +47,8 @@ const LiveAstrologers: React.FC = () => {
             />
           </div>
 
-          <div className="w-44 h-72 md:w-56 md:h-96 rounded-full overflow-hidden border-2 border-[#EAD170] relative shrink-0 shadow-2xl shadow-yellow-600/20">
+          {/* Center Card */}
+          <div className="w-32 h-56 sm:w-44 sm:h-72 md:w-56 md:h-96 rounded-full overflow-hidden border-2 border-[#EAD170] relative shrink-0 shadow-2xl shadow-yellow-600/20">
             <img
               src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=80"
               alt="Astrologer Center"
@@ -56,7 +57,7 @@ const LiveAstrologers: React.FC = () => {
           </div>
 
           {/* Card 3 */}
-          <div className="w-32 h-52 md:w-40 md:h-64 rounded-full overflow-hidden border border-[#3A2A1A] relative shrink-0">
+          <div className="w-24 h-40 sm:w-32 sm:h-52 md:w-40 md:h-64 rounded-full overflow-hidden border border-[#3A2A1A] relative shrink-0">
             <img
               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&auto=format&fit=crop&q=80"
               alt="Astrologer 3"
@@ -68,22 +69,32 @@ const LiveAstrologers: React.FC = () => {
       </main>
 
       {/* 3. Live Activity Ticker Bar */}
-      <footer className="bg-[#080503] py-2.5 px-6 border-t border-white/5 text-xs text-gray-400 overflow-hidden relative z-20">
-        <div className="max-w-7xl mx-auto flex items-center justify-between whitespace-nowrap overflow-x-auto space-x-8 no-scrollbar">
-          <div className="flex items-center space-x-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-            <span>with <strong className="text-white">Acharya Prem</strong> · 2 min ago</span>
+      <footer className="bg-[#080503] py-3 px-4 sm:px-6 border-t border-white/5 text-xs text-gray-400 relative z-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-x-6">
+
+          <div className="flex items-center gap-2 min-w-0 max-w-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
+            <span className="truncate">
+              with <strong className="text-white">Acharya Prem</strong> · 2 min ago
+            </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-            <span><strong className="text-white">Rahul</strong> from Mumbai booked Saturn puja with <strong className="text-[#EAD170]">Pt. Ram Naresh</strong> · just now</span>
+          <div className="flex items-center gap-2 min-w-0 max-w-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
+            <span className="wrap-break-word">
+              <strong className="text-white">Rahul</strong> from Mumbai booked Saturn puja with{" "}
+              <strong className="text-[#EAD170]">Pt. Ram Naresh</strong> · just now
+            </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-            <span><strong className="text-white">Neha</strong> from Hyderabad got her Kundli read by <strong className="text-[#EAD170]">Saanvi Sharma</strong> · 4 min ago</span>
+          <div className="flex items-center gap-2 min-w-0 max-w-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
+            <span className="wrap-break-word">
+              <strong className="text-white">Neha</strong> from Hyderabad got her Kundli read by{" "}
+              <strong className="text-[#EAD170]">Saanvi Sharma</strong> · 4 min ago
+            </span>
           </div>
+
         </div>
       </footer>
 

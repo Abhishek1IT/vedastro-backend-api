@@ -167,11 +167,11 @@ export const HoroscopeSection: React.FC = () => {
           </div>
 
           {/* Horizontal Scrollable Cards */}
-          <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {servicesData.map((service) => (
               <div
                 key={service.id}
-                className="bg-[#140E0A] border border-[#261C14] hover:border-[#422F20] rounded-2xl p-5 min-w-52.5 max-w-52.5 flex flex-col justify-between h-36 shrink-0 transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
+                className="bg-[#140E0A] border border-[#261C14] hover:border-[#422F20] rounded-2xl p-5 flex flex-col justify-between h-36 transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
               >
                 {/* Icon Box */}
                 <div className="w-8 h-8 rounded-lg bg-[#211710] border border-[#3A291D] flex items-center justify-center text-[#D6923C] group-hover:text-yellow-400 transition-colors">
@@ -214,7 +214,6 @@ export const HoroscopeSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Integrated Zodiac Viewer */}
         <ZodiacHoroscopeView />
       </div>
     </section>
@@ -222,23 +221,21 @@ export const HoroscopeSection: React.FC = () => {
 };
 
 export const ZodiacHoroscopeView: React.FC = () => {
-  const [selectedZodiac, setSelectedZodiac] = useState<Zodiac>(zodiacs[3]); // Default Cancer
+  const [selectedZodiac, setSelectedZodiac] = useState<Zodiac>(zodiacs[3]); 
 
   return (
     <div className="bg-[#0B0805] text-white pt-4 font-sans space-y-8">
-      {/* 1. Zodiac Selection Horizontal List */}
-      <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3">
         {zodiacs.map((zodiac) => {
           const isSelected = selectedZodiac.id === zodiac.id;
           return (
             <button
               key={zodiac.id}
               onClick={() => setSelectedZodiac(zodiac)}
-              className={`flex flex-col items-center justify-center min-w-21.25 py-3.5 px-2 rounded-2xl border transition-all duration-300 shrink-0 ${
-                isSelected
+              className={`w-full flex flex-col items-center justify-center py-3.5 px-2 rounded-2xl border transition-all duration-300 ${isSelected
                   ? "bg-[#FFEFA3] text-black border-[#FFEFA3] shadow-lg shadow-yellow-500/10 scale-105 font-medium"
                   : "bg-[#140E0A] text-gray-300 border-[#261C14] hover:border-[#422F20]"
-              }`}
+                }`}
             >
               <img
                 src={zodiac.icon}
@@ -249,9 +246,8 @@ export const ZodiacHoroscopeView: React.FC = () => {
                 {zodiac.name}
               </span>
               <span
-                className={`text-[10px] ${
-                  isSelected ? "text-gray-700" : "text-gray-500"
-                }`}
+                className={`text-[10px] ${isSelected ? "text-gray-700" : "text-gray-500"
+                  }`}
               >
                 {zodiac.hindiName}
               </span>

@@ -22,14 +22,12 @@ export default function DashboardHomePage() {
 
   const { isAuthenticated, isHydrated } = useAuthStore();
 
-  // Redirect if not logged in
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
       router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 
-  // Loading state
   if (!isHydrated) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">

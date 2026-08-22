@@ -40,6 +40,7 @@ export interface AuthUser {
   rejectionReason?: string | null;
 
   avatar?: string;
+  updatedAt?: string;
 }
 
 export const authService = {

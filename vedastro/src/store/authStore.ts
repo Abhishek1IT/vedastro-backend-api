@@ -14,6 +14,7 @@ export type ApprovalStatus =
 export interface AuthUser {
   _id: string;
   id?: string;
+  profileImage?: string;
 
   name?: string;
   email?: string;
@@ -39,6 +40,9 @@ export interface AuthUser {
   consultationPrice?: number;
 
   isOnline?: boolean;
+  totalOrders?: number;
+
+  rating?: number;
 }
 
 interface AuthState {

@@ -41,6 +41,12 @@ export default function ProfilePage() {
   const isAstrologer = user?.role === "ASTROLOGER";
   const openLoginModal = useAuthStore((state) => state.openLoginModal);
 
+  const astrologerId = searchParams.get("astrologerId");
+  const profileUserId = searchParams.get("userId");
+
+  const isViewingOtherProfile =
+    Boolean(astrologerId || profileUserId);
+
   useEffect(() => {
     if (!isHydrated) return;
 
@@ -49,33 +55,48 @@ export default function ProfilePage() {
       return;
     }
 
+    // Kisi doosre person ka profile hai
+    if (isViewingOtherProfile) {
+      setLoading(false);
+      return;
+    }
+
+    // Apna profile
     if (user) {
       setName(user.name ?? "");
       setEmail(user.email ?? "");
       setDob(user.dob ? user.dob.split("T")[0] : "");
 
-      // User fields
       setGender(user.gender ?? "");
       setBirthPlace(user.birthPlace ?? "");
       setBirthTime(user.birthTime ?? "");
 
-      // Astrologer fields
       setExperience(
-        user.experience !== undefined && user.experience !== null
+        user.experience !== undefined &&
+          user.experience !== null
           ? String(user.experience)
           : ""
       );
+
       setSkills(user.skills?.join(", ") ?? "");
       setLanguages(user.languages?.join(", ") ?? "");
+
       setConsultationPrice(
-        user.consultationPrice !== undefined && user.consultationPrice !== null
+        user.consultationPrice !== undefined &&
+          user.consultationPrice !== null
           ? String(user.consultationPrice)
           : ""
       );
     }
 
     setLoading(false);
-  }, [user, isAuthenticated, isHydrated, openLoginModal]);
+  }, [
+    user,
+    isAuthenticated,
+    isHydrated,
+    openLoginModal,
+    isViewingOtherProfile,
+  ]);
 
   const handleSave = async () => {
     if (!name.trim()) return alert("Name is required");
@@ -104,22 +125,22 @@ export default function ProfilePage() {
         phone: user?.phone,
         ...(!isAstrologer
           ? {
-              gender,
-              birthPlace: birthPlace.trim(),
-              birthTime: birthTime || null,
-            }
+            gender,
+            birthPlace: birthPlace.trim(),
+            birthTime: birthTime || null,
+          }
           : {
-              experience: Number(experience),
-              skills: skills
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean),
-              languages: languages
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean),
-              consultationPrice: Number(consultationPrice),
-            }),
+            experience: Number(experience),
+            skills: skills
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean),
+            languages: languages
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean),
+            consultationPrice: Number(consultationPrice),
+          }),
       };
 
       const updatedUser = await authService.completeProfile(payload);
@@ -163,7 +184,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-(--background) px-4 py-24 text-(--text-primary) transition-colors duration-200">
       <div className="mx-auto max-w-5xl">
         <Card className="p-6 sm:p-8 bg-(--surface-secondary) border border-(--border) rounded-2xl shadow-xl transition-all duration-200">
-          
+
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-(--border) pb-6">
             <div>
@@ -378,8 +399,8 @@ export default function ProfilePage() {
               {saving
                 ? "Saving..."
                 : isAstrologer
-                ? "Submit for Approval"
-                : "Save Profile"}
+                  ? "Submit for Approval"
+                  : "Save Profile"}
             </Button>
           </div>
         </Card>

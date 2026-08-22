@@ -69,7 +69,7 @@ class ChatRepository {
     })
       .populate(
         "participants",
-        "_id name role phone avatar language experience isOnline isVerified lastSeen"
+        "_id name role phone avatar profileImage isOnline lastSeen"
       )
       .sort({ updatedAt: -1 });
 

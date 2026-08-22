@@ -34,9 +34,14 @@ export default function ConsultationsChatPage() {
     (state) => state.openLoginModal
   );
 
-  const astroId = searchParams.get("astroId");
-  const userId = searchParams.get("userId");
-  const conversationId = searchParams.get("conversationId");
+  const astrologerId =
+  searchParams.get("astrologerId");
+
+const userId =
+  searchParams.get("userId");
+
+const conversationId =
+  searchParams.get("conversationId");
 
   const [selectedChat, setSelectedChat] =
     useState<SelectedChatState>({
@@ -91,7 +96,7 @@ export default function ConsultationsChatPage() {
       return;
     }
 
-    if (!astroId && !userId && !conversationId) {
+    if (!astrologerId && !userId && !conversationId) {
       setLoadingRooms(false);
       return;
     }
@@ -196,7 +201,7 @@ export default function ConsultationsChatPage() {
         }
 
         const receiverId =
-          astroId || userId;
+          astrologerId || userId;
 
         if (!receiverId) {
           setLoadingRooms(false);
@@ -265,7 +270,7 @@ export default function ConsultationsChatPage() {
           otherUser?.fullName ||
           (otherUser?.role === "ASTROLOGER"
             ? "Astrologer"
-            : astroId
+            : astrologerId
               ? "Astrologer"
               : "User");
 
@@ -319,7 +324,7 @@ export default function ConsultationsChatPage() {
     isAuthenticated,
     user?._id,
     user?.profileCompleted,
-    astroId,
+    astrologerId,
     userId,
     conversationId,
   ]);

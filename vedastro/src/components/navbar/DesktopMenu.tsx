@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
@@ -16,7 +17,9 @@ type MenuItem = {
   path: string;
 };
 
-export default function DesktopMenu({ isScrolled = false }: DesktopMenuProps) {
+export default function DesktopMenu({
+  isScrolled = false,
+}: DesktopMenuProps) {
   const pathname = usePathname();
 
   const user = useAuthStore((state) => state.user);
@@ -32,16 +35,6 @@ export default function DesktopMenu({ isScrolled = false }: DesktopMenuProps) {
     },
   ];
 
-  if (
-    user?.role === "ASTROLOGER" &&
-    user?.approvalStatus === "APPROVED"
-  ) {
-    menuItems.push({
-      label: "Astrologer Dashboard",
-      path: "/astrologer/dashboard",
-    });
-  }
-
   return (
     <div className="flex items-center gap-6">
       {menuItems.map((item) => {
@@ -53,7 +46,6 @@ export default function DesktopMenu({ isScrolled = false }: DesktopMenuProps) {
           <Link
             key={item.path}
             href={item.path}
-      
             className={cn(
               "text-sm font-medium transition-colors hover:text-(--accent)",
               isScrolled
