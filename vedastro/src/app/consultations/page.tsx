@@ -35,6 +35,7 @@ export default function ConsultationsPage() {
 
   const {
     isAuthenticated,
+    isHydrated,
     user,
   } = useAuthStore();
 
@@ -399,7 +400,8 @@ export default function ConsultationsPage() {
       const url =
         `/consultations/chat?astrologerId=${encodeURIComponent(id)}`;
 
-      if (!isAuthenticated) {
+      // Wait for auth hydration to complete before treating isAuthenticated as reliable
+      if (!isHydrated || !isAuthenticated) {
         router.push(
           `/login?redirect=${encodeURIComponent(url)}`,
         );
@@ -413,7 +415,7 @@ export default function ConsultationsPage() {
 
       router.push(url);
     },
-    [isAuthenticated, router],
+    [isAuthenticated, isHydrated, router],
   );
 
   const handleCall = useCallback(
@@ -429,7 +431,7 @@ export default function ConsultationsPage() {
         ? `/consultations/chat?userId=${encodeURIComponent(id)}`
         : `/consultations/chat?astrologerId=${encodeURIComponent(id)}`;
 
-      if (!isAuthenticated) {
+      if (!isHydrated || !isAuthenticated) {
         router.push(
           `/login?redirect=${encodeURIComponent(url)}`,
         );
@@ -449,6 +451,7 @@ export default function ConsultationsPage() {
     },
     [
       isAuthenticated,
+      isHydrated,
       isAstrologerView,
       router,
       user?.role,
@@ -468,7 +471,7 @@ export default function ConsultationsPage() {
         ? `/consultations/call?userId=${encodeURIComponent(id)}&type=video`
         : `/consultations/call?astrologerId=${encodeURIComponent(id)}&type=video`;
 
-      if (!isAuthenticated) {
+      if (!isHydrated || !isAuthenticated) {
         router.push(
           `/login?redirect=${encodeURIComponent(url)}`,
         );
@@ -488,6 +491,7 @@ export default function ConsultationsPage() {
     },
     [
       isAuthenticated,
+      isHydrated,
       isAstrologerView,
       router,
       user?.role,
