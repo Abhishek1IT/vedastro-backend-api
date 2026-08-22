@@ -48,42 +48,42 @@ export default function DashboardHomePage() {
       </section>
 
       {/* Top Astrologers */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <TopAstrologers />
       </section>
 
       {/* Services */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <Services />
       </section>
 
       {/* Kundli */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <Kundli />
       </section>
 
       {/* Horoscope */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <Horoscope />
       </section>
 
       {/* Why Choose */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <WhyChooseUs />
       </section>
 
       {/* Testimonials */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <Testimonials />
       </section>
 
       {/* Download App */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <DownloadApp />
       </section>
 
       {/* FAQ */}
-      <section className="w-full px-4 sm:px-6">
+      <section className="w-full px-0">
         <FAQ />
       </section>
     </div>

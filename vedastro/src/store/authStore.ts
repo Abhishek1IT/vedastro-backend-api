@@ -75,11 +75,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem("hasSession");
       }
     }
-
+    console.log(user, get().isAuthenticated, "before")
     set({
       user,
-      isAuthenticated: !!user,
+      isAuthenticated: user ? true : false,
     });
+
+    console.log(user, get().isAuthenticated, "after")
   },
 
   logout: async () => {
