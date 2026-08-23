@@ -184,11 +184,6 @@ export default function CartPage() {
             <h1 className="mt-2 text-3xl font-black tracking-tight text-(--text-primary) sm:text-4xl">
               Shopping Cart
             </h1>
-            <p className="mt-1 text-sm text-(--text-muted)">
-              {totalItemsCount === 0
-                ? "Your sacred basket is empty"
-                : `You have ${totalItemsCount} item${totalItemsCount > 1 ? "s" : ""} in your sacred cart`}
-            </p>
           </div>
 
           {items.length > 0 && (

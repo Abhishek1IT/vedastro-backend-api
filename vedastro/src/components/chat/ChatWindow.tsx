@@ -11,6 +11,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   CheckCheck,
@@ -21,6 +22,7 @@ import {
   Smile,
   RefreshCw,
   ChevronDown,
+  ChevronLeft,
   Image as ImageIcon,
   FileText,
   UserRound,
@@ -44,6 +46,7 @@ export interface Message {
   conversation: string | { _id: string };
   createdAt?: string;
   updatedAt?: string;
+  isSeen?: boolean;
   status?: "sending" | "sent" | "failed";
 }
 
@@ -130,6 +133,7 @@ export default function ChatWindow({
   isReceiverOnline = false,
   receiverAvatar = "",
 }: ChatWindowProps) {
+  const router = useRouter();
   const { socket } = useSocket();
 
   const user = useAuthStore((state) => state.user);
@@ -741,7 +745,15 @@ export default function ChatWindow({
       <header className="z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#d1d7db] bg-[#f0f2f5] px-3 shadow-sm sm:px-4">
 
         {/* USER */}
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+
+          <button
+            onClick={() => router.back()}
+            className="flex shrink-0 items-center justify-center rounded-full p-2 text-[#54656f] transition hover:bg-[#d9dcdf]"
+            aria-label="Back"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
 
           {/* AVATAR */}
           <div className="relative shrink-0">
@@ -780,80 +792,7 @@ export default function ChatWindow({
 
         {/* ACTIONS */}
         <div className="flex shrink-0 items-center">
-
-          <button
-            type="button"
-            className="hidden rounded-full p-2.5 text-[#54656f] transition hover:bg-[#d9dcdf] sm:block"
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
-
-          <button
-            type="button"
-            className="hidden rounded-full p-2.5 text-[#54656f] transition hover:bg-[#d9dcdf] sm:block"
-            aria-label="Video call"
-          >
-            <Video className="h-5 w-5" />
-          </button>
-
-          <button
-            type="button"
-            className="hidden rounded-full p-2.5 text-[#54656f] transition hover:bg-[#d9dcdf] sm:block"
-            aria-label="Call"
-          >
-            <Phone className="h-5 w-5" />
-          </button>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() =>
-                setShowMenu(
-                  (prev) => !prev,
-                )
-              }
-              className="rounded-full p-2.5 text-[#54656f] transition hover:bg-[#d9dcdf]"
-              aria-label="More options"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-
-            {showMenu && (
-              <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-lg border border-[#d1d7db] bg-white py-1 shadow-xl">
-
-                <button
-                  type="button"
-                  className="w-full px-4 py-2.5 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                  onClick={() =>
-                    setShowMenu(false)
-                  }
-                >
-                  Contact info
-                </button>
-
-                <button
-                  type="button"
-                  className="w-full px-4 py-2.5 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                  onClick={() =>
-                    setShowMenu(false)
-                  }
-                >
-                  Clear messages
-                </button>
-
-                <button
-                  type="button"
-                  className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-[#f5f6f6]"
-                  onClick={() =>
-                    setShowMenu(false)
-                  }
-                >
-                  Delete chat
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Icons removed as per request */}
         </div>
       </header>
 
@@ -912,7 +851,7 @@ export default function ChatWindow({
             </div>
           ) : messages.length === 0 ? (
             /* EMPTY CHAT */
-            <div className="flex min-h-full items-center justify-center">              
+            <div className="flex min-h-full items-center justify-center">
             </div>
           ) : (
             <div className="space-y-1">
@@ -1022,7 +961,7 @@ export default function ChatWindow({
                                     Failed
                                   </span>
                                 ) : (
-                                  <CheckCheck className="h-3.5 w-3.5 text-[#53bdeb]" />
+                                  <CheckCheck className={`h-3.5 w-3.5 ${message.isSeen ? "text-[#53bdeb]" : "text-[#8696a0]"}`} />
                                 )}
                               </>
                             )}
