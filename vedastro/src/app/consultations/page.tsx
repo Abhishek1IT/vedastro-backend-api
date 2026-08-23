@@ -616,7 +616,7 @@ export default function ConsultationsPage() {
                         className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50"
                       >
                         Load More Astrologers
-                        
+
                         <ChevronDown className="h-4 w-4" />
                       </button>
                     </div>

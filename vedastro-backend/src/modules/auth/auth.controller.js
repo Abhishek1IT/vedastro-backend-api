@@ -75,8 +75,8 @@ class AuthController {
 
       const cookieOptions = {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        secure: true,
+        sameSite: "none",
         path: "/",
       };
 
@@ -146,8 +146,8 @@ class AuthController {
 
   //     const cookieOptions = {
   //       httpOnly: true,
-  //       secure: process.env.NODE_ENV === "production",
-  //       sameSite: "lax",
+  //       secure: true,
+  //       sameSite: "none",
   //       path: "/",
   //     };
 
@@ -202,14 +202,14 @@ class AuthController {
     try {
       res.clearCookie("accessToken", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
       });
 
       res.clearCookie("refreshToken", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
       });
 
       return res.status(200).json({
@@ -243,8 +243,8 @@ class AuthController {
 
       const cookieOptions = {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        secure: true,
+        sameSite: "none",
         path: "/",
       };
 
