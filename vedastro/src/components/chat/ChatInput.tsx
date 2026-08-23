@@ -59,7 +59,7 @@ export default function ChatInput({ onSendMessage, onTyping }: ChatInputProps) {
   };
 
   return (
-    <div className="flex gap-2 border-t border-slate-800 bg-slate-950 p-3">
+    <div className="flex gap-2 p-3">
       <input
         type="text"
         value={text}
@@ -67,14 +67,14 @@ export default function ChatInput({ onSendMessage, onTyping }: ChatInputProps) {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={sending ? "Sending..." : "Type your message..."}
-        className="flex-1 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-xs text-slate-100 focus:border-amber-500/50 focus:outline-none disabled:opacity-50"
+        className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none focus:border-amber-500 disabled:opacity-50"
       />
 
       <button
         type="button"
         disabled={sending || !text.trim()}
         onClick={() => void handleSend()}
-        className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-black disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-black disabled:cursor-not-allowed disabled:opacity-50"
       >
         {sending ? "Sending..." : "Send"}
       </button>

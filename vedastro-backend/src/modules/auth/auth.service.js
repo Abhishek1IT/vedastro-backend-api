@@ -11,6 +11,9 @@ class AuthService {
       name,
       email,
       dob,
+      gender,
+      birthPlace,
+      birthTime,
       avatar,
       experience,
       skills,
@@ -27,6 +30,10 @@ class AuthService {
     user.name = name;
     user.email = email;
     user.dob = dob;
+
+    if (gender) user.gender = gender;
+    if (birthPlace) user.birthPlace = birthPlace;
+    if (birthTime) user.birthTime = birthTime;
 
     if (avatar !== undefined) {
       user.avatar = avatar;

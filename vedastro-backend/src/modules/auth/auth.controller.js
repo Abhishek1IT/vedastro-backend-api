@@ -110,6 +110,9 @@ class AuthController {
         name: req.body.name,
         email: req.body.email,
         dob: req.body.dob,
+        gender: req.body.gender,
+        birthPlace: req.body.birthPlace,
+        birthTime: req.body.birthTime,
       };
 
       if (req.user.role === "ASTROLOGER") {

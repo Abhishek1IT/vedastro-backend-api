@@ -10,6 +10,7 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 
 import { useAuthStore } from "../../../store/authStore";
 import ChatWindow from "../../../components/chat/ChatWindow";
+import ChatSidebar from "../../../components/chat/ChatSidebar";
 import lib from "../../../lib/axios";
 
 interface SelectedChatState {
@@ -61,21 +62,6 @@ const conversationId =
       openLoginModal();
       return;
     }
-
-    if (user.profileCompleted !== true) {
-      const query = searchParams.toString();
-
-      const currentPath = `/consultations/chat${query ? `?${query}` : ""
-        }`;
-
-      router.replace(
-        `/profile?redirect=${encodeURIComponent(
-          currentPath
-        )}`
-      );
-
-      return;
-    }
   }, [
     isHydrated,
     isAuthenticated,
@@ -89,10 +75,6 @@ const conversationId =
     if (!isHydrated) return;
 
     if (!isAuthenticated || !user?._id) {
-      return;
-    }
-
-    if (user.profileCompleted !== true) {
       return;
     }
 
@@ -341,68 +323,54 @@ const conversationId =
     return null;
   }
 
-  if (user.profileCompleted !== true) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-[#0B0907] px-4 py-6 text-gray-200">
-      <div className="mx-auto max-w-7xl">
+    <div className="h-screen w-full flex flex-col bg-[#0B0907] text-gray-200 pt-16">
+      {/* FULL SCREEN CHAT LAYOUT */}
+      <div className="flex flex-1 w-full overflow-hidden">
+        
+        {/* SIDEBAR */}
+        <div className="hidden md:flex w-80 shrink-0 border-r border-[#23201C]">
+          <ChatSidebar 
+            activeRoomId={selectedChat.roomId || selectedChat.receiverId}
+            selectedAstroId={astrologerId || undefined}
+            onSelectRoom={(id, metadata) => {
+              if (metadata?.conversationId) {
+                router.push(`/consultations/chat?conversationId=${metadata.conversationId}`);
+              } else {
+                router.push(`/consultations/chat?astrologerId=${id}`);
+              }
+            }}
+          />
+        </div>
 
-        {/* BACK */}
-        <Link
-          href="/consultations"
-          className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-white"
-        >
-          <ArrowLeft className="h-4 w-4" />
-
-          Back
-        </Link>
-
-        {/* CHAT */}
-        <div className="flex h-[85vh] w-full overflow-hidden rounded-xl border border-[#23201C] bg-[#0E0C0A] text-gray-200 shadow-2xl sm:rounded-2xl">
-
-          <div className="relative flex h-full flex-1 flex-col bg-[#0B0907]">
-
-            {selectedChat.roomId ? (
-              <ChatWindow
-                roomId={selectedChat.roomId}
-                receiverId={
-                  selectedChat.receiverId
-                }
-                receiverName={
-                  selectedChat.receiverName
-                }
-                isReceiverOnline={
-                  selectedChat.isOnline
-                }
-              />
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center space-y-4 bg-[#0B0907] p-6 text-center text-gray-500">
-
-                <div className="rounded-full border border-[#23201C] bg-[#14110E] p-5 shadow-inner">
-                  <MessageSquare className="h-10 w-10 text-gray-400" />
-                </div>
-
-                <div className="max-w-sm space-y-2">
-
-                  <h2 className="text-xl font-light text-gray-200">
-                    {loadingRooms
-                      ? "Opening chat..."
-                      : "Unable to open chat"}
-                  </h2>
-
-                  <p className="text-sm leading-relaxed text-gray-500">
-                    {loadingRooms
-                      ? "Connecting you with the selected user..."
-                      : "Please go back to consultations and select the user again."}
-                  </p>
-
-                </div>
+        {/* MAIN CHAT WINDOW */}
+        <div className="relative flex flex-1 flex-col bg-[#0B0907]">
+          {selectedChat.roomId ? (
+            <ChatWindow
+              roomId={selectedChat.roomId}
+              receiverId={selectedChat.receiverId}
+              receiverName={selectedChat.receiverName}
+              isReceiverOnline={selectedChat.isOnline}
+            />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center space-y-4 bg-[#0B0907] p-6 text-center text-gray-500">
+              <div className="rounded-full border border-[#23201C] bg-[#14110E] p-5 shadow-inner">
+                <MessageSquare className="h-10 w-10 text-gray-400" />
               </div>
-            )}
 
-          </div>
+              <div className="max-w-sm space-y-2">
+                <h2 className="text-xl font-light text-gray-200">
+                  {loadingRooms ? "Opening chat..." : "Select a conversation"}
+                </h2>
+
+                <p className="text-sm leading-relaxed text-gray-500">
+                  {loadingRooms
+                    ? "Connecting you with the selected user..."
+                    : "Choose a conversation from the sidebar to start chatting."}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
