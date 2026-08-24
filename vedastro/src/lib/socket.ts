@@ -6,7 +6,7 @@ const SOCKET_URL =
 export const initSocket = () => {
   return io(SOCKET_URL, {
     autoConnect: false,
-    transports: ["websocket", "polling"],
+    transports: ["polling", "websocket"],
     withCredentials: true,
 
     reconnection: true,
