@@ -22,7 +22,7 @@ export const SocketContext = createContext<SocketContextType | null>(null);
 let socketInstance: Socket | null = null;
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, accessToken } = useAuthStore();
 
   const setUserOnline = useChatStore((state) => state.setUserOnline);
 
@@ -44,7 +44,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     }
 
     if (!socketInstance) {
-      socketInstance = initSocket();
+      socketInstance = initSocket(accessToken);
 
       socketInstance.on("user:online", ({ userId }) => {
         setUserOnline(userId, true);
@@ -88,7 +88,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     return () => {
       console.log("SocketProvider Cleanup");
     };
-  }, [isAuthenticated, user?._id, setUserOnline]);
+  }, [isAuthenticated, user?._id, setUserOnline, accessToken]);
 
   const emitEvent = (event: string, data?: any) => {
     if (socketInstance && socketInstance.connected) {

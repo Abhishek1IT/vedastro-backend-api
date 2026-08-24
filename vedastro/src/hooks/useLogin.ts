@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { authService } from "../services/auth.service";
 
-type LoginRole = "USER" | "ASTROLOGER";
+type LoginRole = "USER" | "ASTROLOGER" | "ADMIN";
 
 export const useLogin = () => {
   const setUser = useAuthStore((state: { setUser: any }) => state.setUser);
@@ -39,11 +39,11 @@ export const useLogin = () => {
       setLoading(true);
       setError("");
 
-      // Verify OTP
-      await authService.verifyOtp(formatPhone(phone), otp, role);
-
-      // Get fresh user from backend
-      const currentUser = await authService.getCurrentUser();
+      // Verify OTP and get user data
+      const authData = await authService.verifyOtp(formatPhone(phone), otp, role);
+      
+      const currentUser = authData.user;
+      const accessToken = authData.accessToken;
 
       console.log("========== LOGIN DEBUG ==========");
       console.log("CURRENT USER:", currentUser);
@@ -55,7 +55,7 @@ export const useLogin = () => {
         throw new Error("User data not received");
       }
 
-      setUser(currentUser);
+      setUser(currentUser, accessToken);
 
       return currentUser;
     } catch (err: any) {

@@ -192,8 +192,13 @@ class AuthController {
     try {
       const user = await AuthService.me(req.user._id);
 
+      const responseData = {
+        user,
+        accessToken: req.cookies?.accessToken || null,
+      };
+
       return res.status(200).json(
-        new ApiResponse(200, user, "User Found")
+        new ApiResponse(200, responseData, "User Found")
       );
     } catch (error) {
       next(error);

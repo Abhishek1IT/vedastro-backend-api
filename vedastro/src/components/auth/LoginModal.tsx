@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
 import { authService } from "../../services/auth.service";
+import { useLogin } from "../../hooks/useLogin";
 import {
     X,
     User as UserIcon,
@@ -35,6 +36,8 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
+    
+    const { sendOtp, verifyOtp, loading: authLoading } = useLogin();
 
     // Shared Profile State
     const [name, setName] = useState("");
@@ -127,16 +130,13 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         }
 
         try {
-            setLoading(true);
-            await authService.sendOtp(cleanPhone, role);
+            await sendOtp(cleanPhone, role);
             setPhone(cleanPhone);
             setOtp("");
             setStep("OTP");
         } catch (error) {
             console.error("SEND OTP ERROR:", error);
             alert("Unable to send OTP");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -147,15 +147,12 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         }
 
         try {
-            setLoading(true);
-            const user = await authService.verifyOtp(phone, otp, role);
+            const user = await verifyOtp(phone, otp, role);
 
             if (!user) {
-                alert("User data not received");
+                // error is handled inside useLogin and logged
                 return;
             }
-
-            setUser(user);
 
             if (user.role) {
                 setRole(user.role as Role);
@@ -172,9 +169,6 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             handleRoleRedirect(user);
         } catch (error) {
             console.error("VERIFY OTP ERROR:", error);
-            alert("Invalid OTP");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -297,10 +291,10 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                         <button
                             type="button"
                             onClick={handleSendOtp}
-                            disabled={loading}
+                            disabled={authLoading}
                             className="mt-5 w-full rounded-xl bg-[#837025] hover:bg-[#96812b] p-3.5 font-semibold text-white shadow-lg transition active:scale-[0.99] disabled:opacity-50"
                         >
-                            {loading ? "Sending..." : "Send OTP"}
+                            {authLoading ? "Sending..." : "Send OTP"}
                         </button>
 
                         <button
@@ -336,10 +330,10 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                         <button
                             type="button"
                             onClick={handleVerifyOtp}
-                            disabled={loading}
+                            disabled={authLoading}
                             className="mt-5 w-full rounded-xl bg-[#837025] hover:bg-[#96812b] p-3.5 font-semibold text-white transition active:scale-[0.99] disabled:opacity-50"
                         >
-                            {loading ? "Verifying..." : "Verify OTP"}
+                            {authLoading ? "Verifying..." : "Verify OTP"}
                         </button>
 
                         <button

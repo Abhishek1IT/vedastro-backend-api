@@ -7,107 +7,68 @@ import { useRouter } from "next/navigation";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/common/Button";
 
-import { authService, type AuthUser } from "../../../services/auth.service";
-
-import { useAuthStore } from "../../../store/authStore";
+import { useLogin } from "../../../hooks/useLogin";
 
 export default function AdminLoginPage() {
   const router = useRouter();
 
-  const setUser = useAuthStore((state) => state.setUser);
+  const { sendOtp, verifyOtp, loading, error, otpSent } = useLogin();
+  const [localError, setLocalError] = useState("");
 
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
 
-  const [otpSent, setOtpSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Use either the hook's error or the local validation error
+  const displayError = error || localError;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    setError("");
+    setLocalError("");
 
     const cleanPhone = phone.replace(/\D/g, "");
 
     if (!otpSent) {
       if (cleanPhone.length > 0 && parseInt(cleanPhone.charAt(0)) < 5) {
-        alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
-        setError("Provide a valid 10-digit mobile number.");
+        setLocalError("Provide a valid 10-digit mobile number.");
         return;
       }
       if (!/^[5-9]\d{9}$/.test(cleanPhone)) {
-        setError(
+        setLocalError(
           "Provide a valid 10-digit mobile number starting with 5-9.",
         );
         return;
       }
 
       try {
-        setLoading(true);
-
-        await authService.sendOtp(cleanPhone, "ADMIN");
-
-        setOtpSent(true);
+        await sendOtp(cleanPhone, "ADMIN");
       } catch (err: any) {
         console.error("Admin send OTP error:", err);
-
-        setError(
-          err?.response?.data?.message ||
-          err?.message ||
-          "Unable to send OTP",
-        );
-      } finally {
-        setLoading(false);
       }
-
       return;
     }
 
     const cleanOtp = otp.replace(/\D/g, "");
 
     if (!/^\d{6}$/.test(cleanOtp)) {
-      setError("OTP must be exactly 6 digits.");
+      setLocalError("OTP must be exactly 6 digits.");
       return;
     }
 
     try {
-      setLoading(true);
-
-      const user: AuthUser = await authService.verifyOtp(
-        cleanPhone,
-        cleanOtp,
-        "ADMIN",
-      );
-
-      console.log("ADMIN VERIFY USER:", user);
+      const user = await verifyOtp(cleanPhone, cleanOtp, "ADMIN");
 
       if (!user) {
-        setError("User information not received.");
         return;
       }
 
       if (user.role !== "ADMIN") {
-        setError("You are not authorized as an admin.");
+        setLocalError("You are not authorized as an admin.");
         return;
       }
 
-      setUser(user);
-
       router.replace("/admin");
     } catch (err: any) {
-      console.error(
-        "Admin verify OTP error:",
-        err?.response?.data || err,
-      );
-
-      setError(
-        err?.response?.data?.message ||
-        err?.message ||
-        "Invalid OTP",
-      );
-    } finally {
-      setLoading(false);
+      console.error("Admin verify OTP error:", err);
     }
   };
 
@@ -120,9 +81,9 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Error */}
-        {error && (
+        {displayError && (
           <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-xs font-semibold text-red-400">
-            {error}
+            {displayError}
           </div>
         )}
 

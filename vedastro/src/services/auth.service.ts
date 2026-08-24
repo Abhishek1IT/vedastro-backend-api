@@ -43,6 +43,11 @@ export interface AuthUser {
   updatedAt?: string;
 }
 
+export interface AuthResponse {
+  user: AuthUser;
+  accessToken: string | null;
+}
+
 export const authService = {
   // Send OTP
   async sendOtp(
@@ -68,7 +73,7 @@ export const authService = {
     phone: string,
     otp: string,
     role: "USER" | "ASTROLOGER" | "ADMIN",
-  ) {
+  ): Promise<AuthResponse> {
     const response = await api.post(
       "/auth/verify-otp",
       {
@@ -87,7 +92,10 @@ export const authService = {
       throw new Error("User data not received after OTP verification");
     }
 
-    return data.user;
+    return {
+      user: data.user,
+      accessToken: data.accessToken ?? null,
+    };
   },
 
   // Complete Profile
@@ -104,12 +112,15 @@ export const authService = {
   },
 
   // Current User
-  async getCurrentUser() {
+  async getCurrentUser(): Promise<AuthResponse> {
     const response = await api.get(API_ENDPOINTS.AUTH.ME, {
       withCredentials: true,
     });
 
-    return response.data?.data?.user ?? response.data?.data;
+    return {
+      user: response.data?.data?.user ?? response.data?.data,
+      accessToken: response.data?.data?.accessToken ?? null,
+    };
   },
 
   // Logout

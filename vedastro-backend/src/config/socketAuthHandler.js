@@ -42,7 +42,7 @@ export const socketAuth = (io) => {
       );
 
 
-      const token = cookies.accessToken;
+      const token = socket.handshake.auth?.token || cookies.accessToken;
 
 
       if (!token) {

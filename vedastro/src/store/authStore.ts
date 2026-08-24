@@ -47,12 +47,13 @@ export interface AuthUser {
 
 interface AuthState {
   user: AuthUser | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
 
   isLoginModalOpen: boolean;
 
-  setUser: (user: AuthUser | null) => void;
+  setUser: (user: AuthUser | null, accessToken?: string | null) => void;
   logout: () => Promise<void>;
   hydrateStore: () => Promise<void>;
 
@@ -62,12 +63,13 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  accessToken: null,
   isAuthenticated: false,
   isHydrated: false,
 
   isLoginModalOpen: false,
 
-  setUser: (user) => {
+  setUser: (user, newAccessToken?: string | null) => {
     if (typeof window !== "undefined") {
       if (user) {
         localStorage.setItem("hasSession", "true");
@@ -75,13 +77,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem("hasSession");
       }
     }
-    console.log(user, get().isAuthenticated, "before")
-    set({
+    
+    set((state) => ({
       user,
+      accessToken: newAccessToken !== undefined ? newAccessToken : state.accessToken,
       isAuthenticated: user ? true : false,
-    });
-
-    console.log(user, get().isAuthenticated, "after")
+    }));
   },
 
   logout: async () => {
@@ -105,6 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         user: null,
+        accessToken: null,
         isAuthenticated: false,
         isHydrated: true,
       });
@@ -130,6 +132,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!hasSession) {
       set({
         user: null,
+        accessToken: null,
         isAuthenticated: false,
         isHydrated: true,
       });
@@ -145,6 +148,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       const user = response.data?.data?.user ?? response.data?.data;
+      const accessToken = response.data?.data?.accessToken ?? null;
 
       if (!user) {
         throw new Error("User not found in /auth/me response");
@@ -154,6 +158,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         user,
+        accessToken,
         isAuthenticated: true,
         isHydrated: true,
       });
@@ -185,6 +190,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       const user = response.data?.data?.user ?? response.data?.data;
+      const accessToken = response.data?.data?.accessToken ?? null;
 
       if (!user) {
         throw new Error("User not found after refresh");
@@ -198,6 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         user,
+        accessToken,
         isAuthenticated: true,
         isHydrated: true,
       });
@@ -216,6 +223,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         user: null,
+        accessToken: null,
         isAuthenticated: false,
         isHydrated: true,
       });
