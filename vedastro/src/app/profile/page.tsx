@@ -101,6 +101,8 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!name.trim()) return alert("Name is required");
     if (!email.trim()) return alert("Email is required");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) return alert("Please enter a valid email address.");
     if (!dob) return alert("Date of birth is required");
 
     if (!isAstrologer) {

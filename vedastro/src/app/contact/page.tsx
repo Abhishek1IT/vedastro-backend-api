@@ -17,6 +17,12 @@ export default function ContactPage() {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
     
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setStatus({ type: "error", text: "Please enter a valid email address." });
+      return;
+    }
+    
     setLoading(true);
     setStatus({ type: "", text: "" });
 

@@ -105,7 +105,12 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     const handleSendOtp = async () => {
         const cleanPhone = phone.replace(/\D/g, "");
 
-        if (!/^[1-9]\d{9}$/.test(cleanPhone)) {
+        if (cleanPhone.length > 0 && parseInt(cleanPhone.charAt(0)) < 5) {
+            alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
+            return;
+        }
+
+        if (!/^[5-9]\d{9}$/.test(cleanPhone)) {
             alert("Enter valid 10 digit mobile number");
             return;
         }
@@ -165,6 +170,8 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     const handleCompleteProfile = async () => {
         if (!name.trim()) return alert("Full Name is required");
         if (!email.trim()) return alert("Email is required");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) return alert("Please enter a valid email address.");
         if (!dob) return alert("Date of Birth is required");
 
         if (role === "USER") {

@@ -37,7 +37,13 @@ export default function LoginPage() {
 
     const cleanPhone = phone.replace(/\D/g, "").trim();
 
-    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    if (cleanPhone.length > 0 && parseInt(cleanPhone.charAt(0)) < 5) {
+      alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
+      setLocalValidationError("Invalid mobile number.");
+      return;
+    }
+
+    if (!/^[5-9]\d{9}$/.test(cleanPhone)) {
       setLocalValidationError(
         "mobile number.",
       );

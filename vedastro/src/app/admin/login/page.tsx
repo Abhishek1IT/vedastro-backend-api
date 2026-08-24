@@ -31,9 +31,14 @@ export default function AdminLoginPage() {
     const cleanPhone = phone.replace(/\D/g, "");
 
     if (!otpSent) {
-      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      if (cleanPhone.length > 0 && parseInt(cleanPhone.charAt(0)) < 5) {
+        alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
+        setError("Provide a valid 10-digit mobile number.");
+        return;
+      }
+      if (!/^[5-9]\d{9}$/.test(cleanPhone)) {
         setError(
-          "Provide a valid 10-digit mobile number starting with 6-9.",
+          "Provide a valid 10-digit mobile number starting with 5-9.",
         );
         return;
       }

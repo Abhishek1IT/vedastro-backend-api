@@ -61,6 +61,9 @@ export default function CheckoutForm({
       newErrors.phone = "Phone number is required";
     } else if (cleanPhone.length < 10) {
       newErrors.phone = "Enter a valid 10-digit mobile number";
+    } else if (parseInt(cleanPhone.charAt(0)) < 5) {
+      alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
+      newErrors.phone = "Mobile number cannot start with a digit less than 5";
     }
 
     if (!form.address.trim()) {
