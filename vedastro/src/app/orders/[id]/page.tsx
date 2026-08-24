@@ -12,15 +12,17 @@ import {
   Clock,
   Copy,
   Check,
-  CreditCard,
   MapPin,
-  MessageSquare,
   Printer,
-  ShieldCheck,
-  Sparkles,
   Truck,
   Phone,
   XCircle,
+  PackageCheck,
+  Home,
+  ShieldCheck,
+  Sparkles,
+  CreditCard,
+  MessageSquare,
 } from "lucide-react";
 
 import orderService from "../../../services/order.service";
@@ -108,22 +110,28 @@ export default function OrderDetailsPage() {
   // TIMELINE STEPS
   const timelineSteps = [
     {
-      key: "PENDING",
+      key: "ORDER_PLACED",
       title: "Order Placed",
-      desc: "Order confirmed & sent to sanctification team",
+      desc: "Order confirmed & sent to the team",
       icon: Clock,
     },
     {
-      key: "PROCESSING",
-      title: "Pran Pratishtha",
-      desc: "Energized by Vedic Gurus with sacred mantras",
-      icon: Sparkles,
+      key: "PACKED",
+      title: "Product Packed",
+      desc: "Product is packed for shipping",
+      icon: PackageCheck,
     },
     {
       key: "SHIPPED",
-      title: "Dispatched",
-      desc: "Handed over to courier with tracking",
+      title: "In Transit",
+      desc: "Handed over to courier partner with live tracking",
       icon: Truck,
+    },
+    {
+      key: "OUT_FOR_DELIVERY",
+      title: "Out for Delivery",
+      desc: "Courier partner is arriving at your doorstep today",
+      icon: Home,
     },
     {
       key: "DELIVERED",
@@ -216,13 +224,12 @@ export default function OrderDetailsPage() {
                 Current Status
               </span>
               <p
-                className={`mt-0.5 inline-block rounded-full border px-3.5 py-1 text-xs font-bold ${
-                  status === "DELIVERED"
-                    ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                    : status === "CANCELLED"
+                className={`mt-0.5 inline-block rounded-full border px-3.5 py-1 text-xs font-bold ${status === "DELIVERED"
+                  ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  : status === "CANCELLED"
                     ? "border-red-500/30 bg-red-500/15 text-red-600 dark:text-red-400"
                     : "border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                }`}
+                  }`}
               >
                 {status === "CANCELLED" ? "Order Cancelled" : status}
               </p>
@@ -245,19 +252,17 @@ export default function OrderDetailsPage() {
                   return (
                     <div
                       key={step.key}
-                      className={`relative flex flex-col rounded-2xl border p-4 transition-all ${
-                        isCompleted
-                          ? "border-amber-500/40 bg-amber-500/10"
-                          : "border-(--border) bg-(--surface) opacity-60"
-                      }`}
+                      className={`relative flex flex-col rounded-2xl border p-4 transition-all ${isCompleted
+                        ? "border-amber-500/40 bg-amber-500/10"
+                        : "border-(--border) bg-(--surface) opacity-60"
+                        }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${
-                            isCompleted
-                              ? "bg-amber-500 text-black shadow-sm"
-                              : "border border-(--border) bg-(--surface-tertiary) text-(--text-muted)"
-                          }`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${isCompleted
+                            ? "bg-amber-500 text-black shadow-sm"
+                            : "border border-(--border) bg-(--surface-tertiary) text-(--text-muted)"
+                            }`}
                         >
                           <StepIcon className="h-3.5 w-3.5" />
                         </div>

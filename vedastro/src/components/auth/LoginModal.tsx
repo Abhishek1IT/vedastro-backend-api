@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/authStore";
 import { authService } from "../../services/auth.service";
@@ -53,6 +53,17 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     const [consultationPrice, setConsultationPrice] = useState("");
 
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [open]);
 
     if (!open) return null;
 
