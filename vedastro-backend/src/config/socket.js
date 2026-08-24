@@ -9,11 +9,16 @@ export const initSocket = (server) => {
   io = new Server(server, {
 
     cors: {
-      origin: [
-        "https://vedastro-backend-api-3hvy.vercel.app",
-        "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
-        "http://localhost:3000"
-      ],
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          origin.startsWith("http://localhost:") ||
+          origin.endsWith(".vercel.app")
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, false);
+      },
       credentials: true,
       methods: ["GET", "POST"]
     },

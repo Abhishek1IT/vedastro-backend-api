@@ -16,21 +16,15 @@ export default function ContactPage() {
   const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setStatus({ type: "error", text: "Please enter a valid email address." });
-      return;
-    }
-    
+
     setLoading(true);
     setStatus({ type: "", text: "" });
 
     try {
       await new Promise((res) => setTimeout(res, 1200));
-      setStatus({ 
-        type: "success", 
-        text: "Support request dispatched cleanly. Code token: VA-TKT-" + Math.floor(Math.random() * 9000) 
+      setStatus({
+        type: "success",
+        text: "Support request dispatched cleanly. Code token: VA-TKT-" + Math.floor(Math.random() * 9000)
       });
       setFormData({ name: "", email: "", message: "" });
     } catch {
@@ -43,13 +37,13 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-white dark:text-white light:text-slate-900 pt-24 pb-12 select-none">
       <Container>
-        <SectionHeading 
-          title="Support Terminal" 
-          subtitle="Encountered integration anomalies? Open an immediate communication pipe with our infrastructure engineers." 
+        <SectionHeading
+          title="Support Terminal"
+          subtitle="Encountered integration anomalies? Open an immediate communication pipe with our infrastructure engineers."
         />
 
         <Card hoverEffect={false} className="max-w-md mx-auto bg-slate-900/10 backdrop-blur-md shadow-2xl p-6 rounded-2xl border border-slate-900 dark:border-slate-900 light:border-slate-200">
-          
+
           {status.text && (
             <div className="mb-4 w-full text-center">
               <Badge variant={status.type === "success" ? "success" : "error"} className="w-full justify-center py-2 rounded-xl text-[10px] lowercase first-letter:uppercase">
@@ -59,28 +53,28 @@ export default function ContactPage() {
           )}
 
           <form onSubmit={handleSubmitTicket} className="space-y-4">
-            <Input 
-              label="Your Identity" 
-              placeholder="Enter Your Name" 
-              value={formData.name} 
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })} 
-              required 
+            <Input
+              label="Your Identity"
+              placeholder="Enter Your Name"
+              value={formData.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
+              required
             />
-            
-            <Input 
-              label="Communication Email Address" 
-              type="email" 
-              placeholder="Enter E-mail" 
-              value={formData.email} 
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })} 
-              required 
+
+            <Input
+              label="Communication Email Address"
+              type="email"
+              placeholder="Enter E-mail"
+              value={formData.email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
+              required
             />
-            
+
             <div>
               <label className="block text-[10px] uppercase font-black text-slate-500 dark:text-slate-500 light:text-slate-600 tracking-wider mb-1.5">
                 Elaborate Context
               </label>
-              <textarea 
+              <textarea
                 rows={4}
                 placeholder="Describe your active transaction or socket stream mismatch..."
                 value={formData.message}
@@ -91,7 +85,7 @@ export default function ContactPage() {
             </div>
 
             <Button type="submit" variant="primary" className="w-full text-[10px] py-3 uppercase tracking-widest font-black" loading={loading}>
-              Submit 
+              Submit
             </Button>
           </form>
         </Card>

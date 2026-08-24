@@ -106,7 +106,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         const cleanPhone = phone.replace(/\D/g, "");
 
         if (cleanPhone.length > 0 && parseInt(cleanPhone.charAt(0)) < 5) {
-            alert("Invalid mobile number format. Number cannot start with a digit less than 5.");
+            alert("Number cannot start with a digit less than 5.");
             return;
         }
 
@@ -170,8 +170,6 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     const handleCompleteProfile = async () => {
         if (!name.trim()) return alert("Full Name is required");
         if (!email.trim()) return alert("Email is required");
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.trim())) return alert("Please enter a valid email address.");
         if (!dob) return alert("Date of Birth is required");
 
         if (role === "USER") {
@@ -214,7 +212,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             handleRoleRedirect(updatedUser);
         } catch (error) {
             console.error("COMPLETE PROFILE ERROR:", error);
-            alert("Unable to complete profile");
+            alert("Account already exists with this email.");
         } finally {
             setLoading(false);
         }

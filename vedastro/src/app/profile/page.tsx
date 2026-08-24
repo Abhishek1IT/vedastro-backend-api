@@ -38,7 +38,7 @@ export default function ProfilePage() {
   const [consultationPrice, setConsultationPrice] = useState("");
 
   const redirect = searchParams.get("redirect") || "/home";
-  const isAstrologer = user?.role === "ASTROLOGER";
+  const isAstrologer = user?.role?.toUpperCase() === "ASTROLOGER";
   const openLoginModal = useAuthStore((state) => state.openLoginModal);
 
   const astrologerId = searchParams.get("astrologerId");
