@@ -8,25 +8,26 @@ import Footer from "../components/common/Footer";
 
 const HIDDEN_LAYOUT_ROUTES = [
   // Auth
-  /^\/login(?:\/|$)/,
-  /^\/register(?:\/|$)/,
+  /^\/login(?:\/|$)/i,
+  /^\/register(?:\/|$)/i,
 
   // Admin
-  /^\/admin$/,
-  /^\/admin\/login$/,
-  /^\/admin\/products$/,
-  /^\/admin\/products\/create$/,
-  /^\/admin\/products\/[^/]+$/,
-  /^\/admin\/products\/[^/]+\/edit$/,
+  /^\/admin$/i,
+  /^\/admin\/login$/i,
+  /^\/admin\/products$/i,
+  /^\/admin\/products\/create$/i,
+  /^\/admin\/products\/[^/]+$/i,
+  /^\/admin\/products\/[^/]+\/edit$/i,
 
   // Chat / Call
-  /^\/chat(?:\/|$)/,
-  /^\/call(?:\/|$)/,
-  /^\/consultations\/(?:chat|call)(?:\/|$)/,
+  /^\/chat(?:\/|$)/i,
+  /^\/call(?:\/|$)/i,
+  /^\/consultations\/(?:chat|call)(?:\/|$)/i,
+  /^\/astrologer\/messages(?:\/|$)/i,
 
   // Checkout / Payment
-  /^\/checkout(?:\/|$)/,
-  /^\/payment(?:\/|$)/,
+  /^\/checkout(?:\/|$)/i,
+  /^\/payment(?:\/|$)/i,
 ];
 
 export default function LayoutContent({
