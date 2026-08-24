@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Home } from "lucide-react";
 
 import Button from "../../common/Button";
 
@@ -357,6 +357,15 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-3 pt-8">
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 font-semibold text-white transition hover:bg-slate-700 border border-slate-700"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
+            </button>
+
             <Button
               onClick={loadDashboard}
               loading={loading}
