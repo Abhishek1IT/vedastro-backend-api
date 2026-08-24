@@ -527,34 +527,6 @@ export function AstrologerCard({
                             </>
                         )}
                     </button>
-
-                    {/* PROFILE */}
-                    <button
-                        type="button"
-                        onClick={
-                            handleViewProfile
-                        }
-                        disabled={!personId}
-                        className="
-              rounded-xl
-              border
-              border-slate-200
-              bg-white
-              px-3
-              py-2.5
-              text-sm
-              font-semibold
-              text-slate-700
-              transition
-              hover:border-amber-300
-              hover:bg-amber-50
-              hover:text-amber-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
-                    >
-                        View Profile
-                    </button>
                 </div>
             </div>
         </article>
