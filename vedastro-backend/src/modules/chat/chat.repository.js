@@ -3,8 +3,14 @@ import Message from "../../models/Message.js";
 
 class ChatRepository {
   async findConversation(user1, user2) {
+    const mongoose = (await import("mongoose")).default;
+    const u1 = typeof user1 === "string" ? new mongoose.Types.ObjectId(user1) : user1;
+    const u2 = typeof user2 === "string" ? new mongoose.Types.ObjectId(user2) : user2;
+
     return await Conversation.findOne({
-      participants: { $all: [user1, user2] },
+      participants: { 
+        $all: [u1, u2] 
+      },
       $expr: {
         $eq: [{ $size: "$participants" }, 2],
       },

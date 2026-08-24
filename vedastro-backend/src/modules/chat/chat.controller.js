@@ -108,9 +108,9 @@ class ChatController {
       const io = req.app.get("io");
 
       const conversationId =
-        typeof message.conversation === "object"
-          ? message.conversation._id
-          : message.conversation;
+        message.conversation && message.conversation._id
+          ? message.conversation._id.toString()
+          : message.conversation?.toString();
 
       io.to(`conversation:${conversationId}`).emit("message:new", message);
 
