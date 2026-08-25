@@ -323,11 +323,9 @@ const TopAstrologers: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        router.push(
-                          `/consultations/chat?astroId=${encodeURIComponent(astro._id)}`
-                        );
+                        router.push(`/consultations/chat?astrologerId=${encodeURIComponent(astro._id)}`);
                       }}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 px-4 font-semibold text-black transition hover:bg-amber-400"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 px-4 font-semibold text-black transition hover:bg-amber-400 cursor-pointer"
                     >
                       <MessageCircle size={18} />
                       Free Chat
