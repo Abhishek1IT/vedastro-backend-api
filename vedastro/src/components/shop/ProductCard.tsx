@@ -229,13 +229,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="flex gap-3 border-t border-(--border) bg-(--surface-secondary) p-5">
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
-                className="flex-1 rounded-xl border border-(--border) bg-(--surface-tertiary) py-3 text-sm font-bold text-(--text-primary) hover:bg-(--surface-secondary) transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
                 onClick={handleConfirmAddToCart}
                 disabled={addingToCart}
                 className="flex-1 rounded-xl bg-amber-500 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-400 disabled:opacity-50"
