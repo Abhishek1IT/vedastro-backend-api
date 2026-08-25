@@ -46,13 +46,6 @@ export default function ChatSidebar({
 
     let list = Array.isArray(data) ? data : [];
 
-    // Consultation page se specific astrologer select hua hai
-    if (selectedAstroId) {
-      list = list.filter(
-        (astro: any) => String(astro._id) === String(selectedAstroId),
-      );
-    }
-
     setAstrologers(list);
   };
 
@@ -250,11 +243,10 @@ export default function ChatSidebar({
                     console.error("Conversation create error:", error);
                   }
                 }}
-                className={`flex items-center gap-3 p-3.5 cursor-pointer transition-colors ${
-                  isActive
+                className={`flex items-center gap-3 p-3.5 cursor-pointer transition-colors ${isActive
                     ? "bg-[#251D16] border-l-4 border-amber-500"
                     : "hover:bg-[#1A1612]"
-                }`}
+                  }`}
               >
                 {/* AVATAR */}
                 <div className="relative shrink-0">
