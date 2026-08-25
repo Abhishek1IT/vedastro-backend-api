@@ -200,19 +200,6 @@ export default function CartSummary({
         <span>Proceed To Secure Checkout</span>
         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
       </button>
-
-      {/* TRUST & SECURITY BADGES */}
-      <div className="mt-5 flex items-center justify-center gap-4 text-center text-[11px] text-(--text-muted)">
-        <span className="flex items-center gap-1">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-          100% Buyer Protection
-        </span>
-        <span>•</span>
-        <span className="flex items-center gap-1">
-          <Lock className="h-3.5 w-3.5 text-amber-500" />
-          256-Bit SSL Encrypted
-        </span>
-      </div>
     </div>
   );
 }

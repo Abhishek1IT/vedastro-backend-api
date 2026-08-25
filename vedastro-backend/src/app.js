@@ -23,9 +23,12 @@ const uploadsPath = path.join(__dirname, "../uploads");
 console.log("Uploads Path:", uploadsPath);
 
 const allowedOrigins = [
+
+  //Local
   "http://localhost:3000",
 
-  "https://vedastro-backend-api-3hvy.vercel.app"
+  //Vercel
+  "https://vedastro-backend-api-3hvy.vercel.app",
 ];
 
 const corsOptions = {
