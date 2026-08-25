@@ -85,7 +85,7 @@ export function ConsultationFilters() {
         filters.languages.length > 0 ||
         filters.expertise.length > 0 ||
         filters.priceRange[0] > 0 ||
-        filters.priceRange[1] < 500;
+        filters.priceRange[1] < 0;
 
     return (
         <aside className="w-full shrink-0 lg:w-64">
@@ -199,8 +199,8 @@ export function ConsultationFilters() {
                                         })
                                     }
                                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${isActive
-                                            ? "bg-amber-100 text-amber-800 ring-1 ring-amber-200"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        ? "bg-amber-100 text-amber-800 ring-1 ring-amber-200"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                         }`}
                                 >
                                     {ex}
