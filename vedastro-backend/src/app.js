@@ -24,14 +24,8 @@ console.log("Uploads Path:", uploadsPath);
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:3001",
 
-  "https://ved-astro-1uq2-lgf7tlssp-abhishek1its-projects.vercel.app",
-
-  "https://vedastro-backend-api.vercel.app",
-  "https://vedastro-backend-api-3hvy.vercel.app",
-  "https://vedastro-backend-api-3hvy-bjix1dn53-abhishek1its-projects.vercel.app",
-  "https://vedastro-backend-api-3hvy-3qwj7xlnk-abhishek1its-projects.vercel.app",
+  "https://vedastro-backend-api-3hvy.vercel.app"
 ];
 
 const corsOptions = {
