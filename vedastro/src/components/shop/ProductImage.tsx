@@ -37,7 +37,6 @@ export default function ProductImage({
       return PLACEHOLDER;
     }
 
-    // Already a complete URL
     if (
       url.startsWith("http://") ||
       url.startsWith("https://")
@@ -45,12 +44,10 @@ export default function ProductImage({
       return url;
     }
 
-    // Local/public frontend image
     if (url.startsWith("/images/")) {
       return url;
     }
 
-    // Backend image
     return `${BACKEND_URL.replace(/\/$/, "")}/${url.replace(
       /^\//,
       ""
@@ -65,11 +62,11 @@ export default function ProductImage({
   return (
     <div className="space-y-4">
       {/* MAIN IMAGE */}
-      <div className="relative aspect-square overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20">
+      <div className="relative aspect-square overflow-hidden rounded-2xl border border-(--border) bg-(--surface-secondary) transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
         <img
           src={image}
           alt={title}
-          className="h-full w-full object-contain"
+          className="h-full w-full object-contain p-4 transition-transform duration-500 hover:scale-105"
           onError={(e) => {
             console.error(
               "PRODUCT IMAGE FAILED:",
@@ -85,7 +82,7 @@ export default function ProductImage({
 
       {/* THUMBNAILS */}
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {images.map((img, index) => {
             const imageUrl = getImageUrl(img);
 
@@ -98,9 +95,9 @@ export default function ProductImage({
                 }
                 type="button"
                 onClick={() => setSelected(index)}
-                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border transition ${selected === index
-                    ? "border-amber-500"
-                    : "border-slate-800"
+                className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-(--surface-tertiary) transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${selected === index
+                  ? "border-amber-500 ring-2 ring-amber-500/20"
+                  : "border-(--border) hover:border-(--border-hover)"
                   }`}
               >
                 <img

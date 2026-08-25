@@ -144,6 +144,12 @@ export default function ProductForm({
           <option value="Yantras">Yantras</option>
 
           <option value="Pyramids">Pyramids</option>
+
+          <option value="Puja Samagri">Puja Samagri</option>
+
+          <option value="Herbal Remedies">Herbal Remedies</option>
+
+          <option value="Books / Astrology Books">Books / Astrology Books</option>
         </select>
 
         <input

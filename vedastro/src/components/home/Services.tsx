@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  Heart, 
-  Infinity as LoopIcon, 
-  Briefcase, 
-  User, 
-  TrendingUp, 
+import {
+  Heart,
+  Infinity as LoopIcon,
+  Briefcase,
+  User,
+  TrendingUp,
   HeartHandshake,
   ArrowUpRight
 } from 'lucide-react';
@@ -87,7 +87,7 @@ export const Services: React.FC = () => {
   return (
     <section className="bg-[#0B0805] text-white py-16 px-6 md:px-12 font-sans border-t border-[#1C1610] relative overflow-hidden">
       <div className="max-w-7xl mx-auto space-y-10">
-        
+
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">

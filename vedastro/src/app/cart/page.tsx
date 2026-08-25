@@ -262,7 +262,7 @@ export default function CartPage() {
             </div>
 
             {/* QUICK CATEGORY SHORTCUTS */}
-            <div className="mt-12 border-t border-(--border) pt-8">
+<div className="mt-12 border-t border-(--border) pt-8">
               <p className="text-xs font-semibold uppercase tracking-wider text-(--text-muted)">
                 Popular Categories
               </p>
@@ -273,6 +273,8 @@ export default function CartPage() {
                   "Yantras",
                   "Bracelets",
                   "Pyramids",
+                  "Puja Samagri",
+                  "Herbal Remedies",
                 ].map((cat) => (
                   <Link
                     key={cat}

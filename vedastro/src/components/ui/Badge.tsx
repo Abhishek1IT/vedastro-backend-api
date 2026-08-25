@@ -5,14 +5,14 @@ import React from "react";
 interface BadgeProps {
   children: React.ReactNode;
   variant?:
-    | "success"
-    | "warning"
-    | "error"
-    | "slate"
-    | "amber"
-    | "ghost"
-    | "primary"
-    | "secondary";
+  | "success"
+  | "warning"
+  | "error"
+  | "slate"
+  | "amber"
+  | "ghost"
+  | "primary"
+  | "secondary";
   className?: string;
 }
 
@@ -23,11 +23,11 @@ export default function Badge({
 }: BadgeProps) {
   const styles = {
     success:
-      "bg-emerald-500/10 dark:bg-emerald-500/10 light:bg-emerald-100 border-emerald-500/20 text-emerald-400 dark:text-emerald-400 light:text-emerald-700",
+      "bg-(--success) text-black",
     warning:
-      "bg-amber-500/10 dark:bg-amber-500/10 light:bg-amber-100 border-amber-500/20 text-amber-400 dark:text-amber-400 light:text-amber-700",
+      "bg-(--warning) text-amber-400",
     error:
-      "bg-red-500/10 dark:bg-red-500/10 light:bg-red-100 border-red-500/20 text-red-400 dark:text-red-400 light:text-red-700",
+      "bg-(--error) text-amber-400",
     slate:
       "bg-slate-900 dark:bg-slate-900 light:bg-slate-100 border-slate-800 dark:border-slate-800 light:border-slate-300 text-slate-400 dark:text-slate-400 light:text-slate-600",
     amber:

@@ -18,6 +18,8 @@ const categories = [
   "Bracelets",
   "Yantras",
   "Pyramids",
+  "Puja Samagri",
+  "Herbal Remedies",
 ];
 
 type SortType =
