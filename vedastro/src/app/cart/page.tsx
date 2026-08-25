@@ -121,6 +121,13 @@ export default function CartPage() {
         </div>
 
         {/* TRUST BANNER STRIP */}
+        <Link
+          href="/shop"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 transition-colors hover:text-amber-400"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back to Vedic Store</span>
+        </Link>
         <div className="mb-8 grid grid-cols-2 gap-3 rounded-2xl border border-(--border) bg-(--surface-secondary) p-3 sm:grid-cols-4 sm:gap-4 sm:p-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500">
@@ -174,13 +181,6 @@ export default function CartPage() {
         {/* PAGE HEADER */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-500 transition-colors hover:text-amber-400"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to Vedic Store</span>
-            </Link>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-(--text-primary) sm:text-4xl">
               Shopping Cart
             </h1>
@@ -240,11 +240,6 @@ export default function CartPage() {
               Your Cart is Empty
             </h2>
 
-            <p className="mx-auto mt-2 max-w-md text-sm text-(--text-muted)">
-              Explore our spiritually energized Rudraksha, Lab-Certified
-              Gemstones, Yantras, and Vedic Puja Samagri to enrich your life.
-            </p>
-
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 href="/shop"
@@ -262,7 +257,7 @@ export default function CartPage() {
             </div>
 
             {/* QUICK CATEGORY SHORTCUTS */}
-<div className="mt-12 border-t border-(--border) pt-8">
+            <div className="mt-12 border-t border-(--border) pt-8">
               <p className="text-xs font-semibold uppercase tracking-wider text-(--text-muted)">
                 Popular Categories
               </p>
@@ -275,6 +270,7 @@ export default function CartPage() {
                   "Pyramids",
                   "Puja Samagri",
                   "Herbal Remedies",
+                  "Books / Astrology Books",
                 ].map((cat) => (
                   <Link
                     key={cat}
